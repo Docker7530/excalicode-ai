@@ -29,8 +29,8 @@
           </div>
           <div class="notice-content">
             <p class="notice-text">
-              因下游 API
-              厂商近期不稳定，接口限流等问题可能导致分析失败，已将系统提示词补充到下方文档中，可自行参考使用。
+              部分功能已适配 deepseek-chat（DeepSeek-V3.2-Exp
+              非思考模式）可在首页后台管理/功能-模型映射管理中查看相关配置。
             </p>
             <div class="notice-links">
               <span class="links-label">📚 参考文档:</span>
@@ -44,7 +44,7 @@
               </a>
               <span class="link-divider">|</span>
               <a
-                href="https://www.kdocs.cn/l/cs8p4y5xWHj8"
+                href="https://github.com/Docker7530/excalicode-ai/tree/main/common/src/main/resources/prompts"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="doc-link"
