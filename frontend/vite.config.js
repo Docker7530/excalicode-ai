@@ -90,7 +90,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vue-vendor': ['vue', 'vue-router'],
-          'element-plus': ['element-plus'],
           utils: ['axios'],
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -112,13 +111,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: [
-      'vue',
-      'vue-router',
-      'element-plus/es',
-      '@element-plus/icons-vue',
-      'axios',
-    ],
+    include: ['vue', 'vue-router', '@element-plus/icons-vue', 'axios'],
     exclude: [],
   },
 

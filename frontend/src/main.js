@@ -2,10 +2,8 @@ import App from '@/App.vue';
 import router from '@/router';
 import '@/styles/main.scss';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css';
 
-const plugins = [ElementPlus, router];
+const plugins = [router];
 
 /**
  * 全局注册 Element Plus 图标，保持组件可直接按名称使用
