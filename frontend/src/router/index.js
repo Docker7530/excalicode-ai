@@ -51,15 +51,6 @@ const routes = [
     },
   },
   {
-    path: '/ai-function-mapping',
-    name: 'AiFunctionMapping',
-    component: () => import('@/views/AiFunctionMappingManagePage.vue'),
-    meta: {
-      title: 'AI功能-模型映射管理 - EXCALICODE AI',
-      requiresAuth: true,
-    },
-  },
-  {
     path: '/prompt-template-manage',
     name: 'PromptTemplateManage',
     component: () => import('@/views/PromptTemplateManagePage.vue'),
@@ -69,11 +60,11 @@ const routes = [
     },
   },
   {
-    path: '/function-prompt-mapping',
-    name: 'FunctionPromptMapping',
-    component: () => import('@/views/FunctionPromptMappingManagePage.vue'),
+    path: '/function-configuration',
+    name: 'FunctionConfigurationManage',
+    component: () => import('@/views/FunctionConfigurationManagePage.vue'),
     meta: {
-      title: '功能-提示词映射管理 - EXCALICODE AI',
+      title: '功能配置管理 - EXCALICODE AI',
       requiresAuth: true,
     },
   },

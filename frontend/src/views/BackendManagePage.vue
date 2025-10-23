@@ -32,13 +32,6 @@
           <h2 class="card-title">AI 模型厂商管理</h2>
         </div>
 
-        <div class="module-card mapping-card" @click="navigateToMapping">
-          <div class="card-icon">
-            <ElIcon :size="72"><Connection /></ElIcon>
-          </div>
-          <h2 class="card-title">功能-模型映射管理</h2>
-        </div>
-
         <div class="module-card prompt-card" @click="navigateToPromptTemplate">
           <div class="card-icon">
             <ElIcon :size="72"><Document /></ElIcon>
@@ -47,13 +40,13 @@
         </div>
 
         <div
-          class="module-card prompt-mapping-card"
-          @click="navigateToPromptMapping"
+          class="module-card configuration-card"
+          @click="navigateToFunctionConfiguration"
         >
           <div class="card-icon">
-            <ElIcon :size="72"><Link /></ElIcon>
+            <ElIcon :size="72"><Connection /></ElIcon>
           </div>
-          <h2 class="card-title">功能-提示词映射管理</h2>
+          <h2 class="card-title">功能配置管理</h2>
         </div>
       </div>
     </div>
@@ -68,9 +61,8 @@
             <p>
               先在 <strong>AI 模型厂商管理</strong> 中配置厂商和模型，在
               <strong>提示词模板管理</strong> 中编辑提示词内容。然后在
-              <strong>功能-模型映射管理</strong> 和
-              <strong>功能-提示词映射管理</strong>
-              中为每个功能指定使用的模型和提示词。未配置的功能将自动使用默认配置。
+              <strong>功能配置管理</strong>
+              中为每个功能一次性指定使用的模型和提示词。未配置的功能将自动使用默认配置。
             </p>
           </div>
         </div>
@@ -85,7 +77,6 @@ import {
   Connection,
   Document,
   InfoFilled,
-  Link,
   OfficeBuilding,
   Setting,
 } from '@element-plus/icons-vue';
@@ -100,16 +91,12 @@ const navigateToProvider = () => {
   router.push('/ai-provider-manage');
 };
 
-const navigateToMapping = () => {
-  router.push('/ai-function-mapping');
-};
-
 const navigateToPromptTemplate = () => {
   router.push('/prompt-template-manage');
 };
 
-const navigateToPromptMapping = () => {
-  router.push('/function-prompt-mapping');
+const navigateToFunctionConfiguration = () => {
+  router.push('/function-configuration');
 };
 </script>
 
@@ -293,16 +280,12 @@ const navigateToPromptMapping = () => {
   background: linear-gradient(90deg, #409eff, #5cacee);
 }
 
-.mapping-card::before {
-  background: linear-gradient(90deg, #67c23a, #85ce61);
-}
-
 .prompt-card::before {
   background: linear-gradient(90deg, #e6a23c, #f0c78a);
 }
 
-.prompt-mapping-card::before {
-  background: linear-gradient(90deg, #909399, #a6a9ad);
+.configuration-card::before {
+  background: linear-gradient(90deg, #67c23a, #85ce61);
 }
 
 .card-icon {
@@ -318,16 +301,12 @@ const navigateToPromptMapping = () => {
   margin-bottom: 24px;
 }
 
-.mapping-card .card-icon {
-  color: #67c23a;
-}
-
 .prompt-card .card-icon {
   color: #e6a23c;
 }
 
-.prompt-mapping-card .card-icon {
-  color: #909399;
+.configuration-card .card-icon {
+  color: #67c23a;
 }
 
 .card-title {

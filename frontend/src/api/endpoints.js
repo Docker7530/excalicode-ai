@@ -73,6 +73,10 @@ export const ENDPOINTS = Object.freeze({
       `/api/function-prompts/${functionCode}/${promptCode}`,
     CLEAR_CACHE: '/api/function-prompts/clear-cache',
   },
+
+  FUNCTION_CONFIGURATION: {
+    LIST: '/api/function-configuration',
+  },
 });
 
 export default ENDPOINTS;
