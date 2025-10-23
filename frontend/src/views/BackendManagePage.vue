@@ -18,9 +18,6 @@
             <ElIcon class="title-icon"><Setting /></ElIcon>
             后台管理中心
           </h1>
-          <p class="hero-subtitle">
-            管理 AI 模型配置，实现智能化的功能级别模型切换
-          </p>
         </div>
       </div>
     </div>
@@ -29,85 +26,34 @@
     <div class="modules-section">
       <div class="modules-container">
         <div class="module-card provider-card" @click="navigateToProvider">
-          <div class="card-glow"></div>
-          <div class="card-content">
-            <div class="card-icon-wrapper">
-              <div class="card-icon">
-                <ElIcon :size="64"><OfficeBuilding /></ElIcon>
-              </div>
-              <div class="icon-badge">厂商管理</div>
-            </div>
-            <h2 class="card-title">AI 模型厂商管理</h2>
-            <p class="card-description">
-              配置和管理所有 AI 厂商信息，包括 API 地址、密钥等核心配置
-            </p>
-            <ul class="card-features">
-              <li>
-                <ElIcon><Check /></ElIcon>
-                <span>多厂商统一管理</span>
-              </li>
-              <li>
-                <ElIcon><Check /></ElIcon>
-                <span>API 密钥安全存储</span>
-              </li>
-              <li>
-                <ElIcon><Check /></ElIcon>
-                <span>模型快速配置</span>
-              </li>
-            </ul>
-            <div class="card-action">
-              <ElButton type="primary" size="large" round class="action-btn">
-                <span>进入管理</span>
-                <ElIcon class="btn-icon"><ArrowRight /></ElIcon>
-              </ElButton>
-            </div>
+          <div class="card-icon">
+            <ElIcon :size="72"><OfficeBuilding /></ElIcon>
           </div>
-          <div class="card-decoration">
-            <div class="decoration-circle"></div>
-            <div class="decoration-circle"></div>
-            <div class="decoration-circle"></div>
-          </div>
+          <h2 class="card-title">AI 模型厂商管理</h2>
         </div>
 
         <div class="module-card mapping-card" @click="navigateToMapping">
-          <div class="card-glow"></div>
-          <div class="card-content">
-            <div class="card-icon-wrapper">
-              <div class="card-icon">
-                <ElIcon :size="64"><Connection /></ElIcon>
-              </div>
-              <div class="icon-badge">映射管理</div>
-            </div>
-            <h2 class="card-title">功能-模型映射管理</h2>
-            <p class="card-description">
-              为每个功能独立配置 AI 模型，实现智能化的模型分配和切换
-            </p>
-            <ul class="card-features">
-              <li>
-                <ElIcon><Check /></ElIcon>
-                <span>功能级别模型配置</span>
-              </li>
-              <li>
-                <ElIcon><Check /></ElIcon>
-                <span>智能故障降级</span>
-              </li>
-              <li>
-                <ElIcon><Check /></ElIcon>
-                <span>实时配置生效</span>
-              </li>
-            </ul>
-            <div class="card-action">
-              <ElButton type="success" size="large" round class="action-btn">
-                <span>进入管理</span>
-                <ElIcon class="btn-icon"><ArrowRight /></ElIcon>
-              </ElButton>
-            </div>
+          <div class="card-icon">
+            <ElIcon :size="72"><Connection /></ElIcon>
           </div>
-          <div class="card-decoration">
-            <div class="decoration-circle"></div>
-            <div class="decoration-circle"></div>
-            <div class="decoration-circle"></div>
+          <h2 class="card-title">功能-模型映射管理</h2>
+        </div>
+
+        <div class="module-card prompt-card" @click="navigateToPromptTemplate">
+          <div class="card-icon">
+            <ElIcon :size="72"><Document /></ElIcon>
           </div>
+          <h2 class="card-title">提示词模板管理</h2>
+        </div>
+
+        <div
+          class="module-card prompt-mapping-card"
+          @click="navigateToPromptMapping"
+        >
+          <div class="card-icon">
+            <ElIcon :size="72"><Link /></ElIcon>
+          </div>
+          <h2 class="card-title">功能-提示词映射管理</h2>
         </div>
       </div>
     </div>
@@ -120,9 +66,11 @@
           <div class="info-content">
             <h3>配置说明</h3>
             <p>
-              先在 <strong>AI 模型厂商管理</strong> 中配置厂商和模型，然后在
-              <strong>功能-模型映射管理</strong>
-              中为每个功能指定使用的模型。未配置的功能将自动使用默认模型。
+              先在 <strong>AI 模型厂商管理</strong> 中配置厂商和模型，在
+              <strong>提示词模板管理</strong> 中编辑提示词内容。然后在
+              <strong>功能-模型映射管理</strong> 和
+              <strong>功能-提示词映射管理</strong>
+              中为每个功能指定使用的模型和提示词。未配置的功能将自动使用默认配置。
             </p>
           </div>
         </div>
@@ -134,10 +82,10 @@
 <script setup>
 import {
   ArrowLeft,
-  ArrowRight,
-  Check,
   Connection,
+  Document,
   InfoFilled,
+  Link,
   OfficeBuilding,
   Setting,
 } from '@element-plus/icons-vue';
@@ -154,6 +102,14 @@ const navigateToProvider = () => {
 
 const navigateToMapping = () => {
   router.push('/ai-function-mapping');
+};
+
+const navigateToPromptTemplate = () => {
+  router.push('/prompt-template-manage');
+};
+
+const navigateToPromptMapping = () => {
+  router.push('/function-prompt-mapping');
 };
 </script>
 
@@ -266,17 +222,6 @@ const navigateToMapping = () => {
   }
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-  font-weight: 400;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-}
-
 // 模块卡片区域
 .modules-section {
   padding: 40px 24px 80px;
@@ -285,27 +230,38 @@ const navigateToMapping = () => {
 }
 
 .modules-container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
 .module-card {
   background: white;
-  border-radius: 32px;
-  padding: 48px 40px;
+  border-radius: 24px;
+  padding: 48px 32px;
   position: relative;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 240px;
 
   &::before {
     content: '';
@@ -313,35 +269,22 @@ const navigateToMapping = () => {
     top: 0;
     left: 0;
     right: 0;
-    height: 6px;
+    height: 4px;
     background: linear-gradient(90deg, #409eff, #67c23a);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   &:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
 
     &::before {
-      transform: scaleX(1);
-    }
-
-    .card-glow {
       opacity: 1;
     }
 
     .card-icon {
-      transform: scale(1.1) rotate(5deg);
-    }
-
-    .decoration-circle {
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .action-btn {
-      transform: translateX(8px);
+      transform: scale(1.05);
     }
   }
 }
@@ -354,156 +297,48 @@ const navigateToMapping = () => {
   background: linear-gradient(90deg, #67c23a, #85ce61);
 }
 
-.card-glow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(64, 158, 255, 0.1) 0%,
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
+.prompt-card::before {
+  background: linear-gradient(90deg, #e6a23c, #f0c78a);
 }
 
-.mapping-card .card-glow {
-  background: radial-gradient(
-    circle,
-    rgba(103, 194, 58, 0.1) 0%,
-    transparent 70%
-  );
-}
-
-.card-content {
-  position: relative;
-  z-index: 2;
-}
-
-.card-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
+.prompt-mapping-card::before {
+  background: linear-gradient(90deg, #909399, #a6a9ad);
 }
 
 .card-icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 24px;
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #f8fafc, #e2e8f0);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #409eff;
   transition: all 0.3s ease;
+  margin-bottom: 24px;
 }
 
 .mapping-card .card-icon {
   color: #67c23a;
 }
 
-.icon-badge {
-  background: linear-gradient(135deg, #409eff, #5cacee);
-  color: white;
-  padding: 8px 20px;
-  border-radius: 24px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+.prompt-card .card-icon {
+  color: #e6a23c;
 }
 
-.mapping-card .icon-badge {
-  background: linear-gradient(135deg, #67c23a, #85ce61);
-  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
+.prompt-mapping-card .card-icon {
+  color: #909399;
 }
 
 .card-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #1e293b;
-  margin: 0 0 16px 0;
+  margin: 0;
+  line-height: 1.5;
 
   @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
-}
-
-.card-description {
-  font-size: 1rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin: 0 0 32px 0;
-}
-
-.card-features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 32px 0;
-
-  li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    font-size: 0.95rem;
-    color: #475569;
-
-    .el-icon {
-      color: #67c23a;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-  }
-}
-
-.card-action {
-  margin-top: auto;
-}
-
-.action-btn {
-  width: 100%;
-  height: 56px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-
-  .btn-icon {
-    transition: transform 0.3s ease;
-  }
-}
-
-.card-decoration {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  gap: 8px;
-  opacity: 0.1;
-  pointer-events: none;
-}
-
-.decoration-circle {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #409eff, #67c23a);
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
+    font-size: 1.125rem;
   }
 }
 

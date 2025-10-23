@@ -24,7 +24,6 @@
             <ElIcon class="title-icon"><OfficeBuilding /></ElIcon>
             AI 模型厂商管理
           </h1>
-          <p class="page-desc">统一管理所有 AI 厂商及其模型配置</p>
         </div>
       </div>
     </div>
@@ -40,9 +39,6 @@
             <div class="stat-value">{{ providers.length }}</div>
             <div class="stat-label">AI 厂商</div>
           </div>
-          <div class="stat-trend">
-            <ElIcon class="trend-icon"><TrendCharts /></ElIcon>
-          </div>
         </div>
 
         <div class="stat-card">
@@ -53,9 +49,6 @@
             <div class="stat-value">{{ totalModels }}</div>
             <div class="stat-label">AI 模型</div>
           </div>
-          <div class="stat-trend">
-            <ElIcon class="trend-icon"><DataLine /></ElIcon>
-          </div>
         </div>
 
         <div class="stat-card">
@@ -65,9 +58,6 @@
           <div class="stat-info">
             <div class="stat-value">{{ providers.length }}</div>
             <div class="stat-label">API 配置</div>
-          </div>
-          <div class="stat-trend">
-            <ElIcon class="trend-icon"><CircleCheck /></ElIcon>
           </div>
         </div>
       </div>
@@ -340,10 +330,8 @@ import {
 } from '@/api/aiProvider';
 import {
   ArrowLeft,
-  CircleCheck,
   Clock,
   Close,
-  DataLine,
   Delete,
   Edit,
   Grid,
@@ -351,7 +339,6 @@ import {
   Link,
   OfficeBuilding,
   Plus,
-  TrendCharts,
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -674,7 +661,7 @@ onMounted(() => {
   font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 12px 0;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -683,12 +670,6 @@ onMounted(() => {
   .title-icon {
     font-size: 2.5rem;
   }
-}
-
-.page-desc {
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
 }
 
 // 统计卡片
@@ -786,11 +767,6 @@ onMounted(() => {
   font-size: 0.9375rem;
   color: #909399;
   font-weight: 500;
-}
-
-.stat-trend {
-  font-size: 24px;
-  color: #67c23a;
 }
 
 // 操作栏

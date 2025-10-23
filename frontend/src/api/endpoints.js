@@ -54,6 +54,25 @@ export const ENDPOINTS = Object.freeze({
     GENERATE_DOCUMENT: '/api/cosmic/documents/preview',
     EXPORT_DOCUMENT: '/api/cosmic/documents/export',
   },
+
+  PROMPT_TEMPLATE: {
+    LIST: '/api/prompt-templates',
+    SEARCH: '/api/prompt-templates/search',
+    DETAIL: (id) => `/api/prompt-templates/${id}`,
+    BY_CODE: (code) => `/api/prompt-templates/code/${code}`,
+    CREATE: '/api/prompt-templates',
+    UPDATE: (id) => `/api/prompt-templates/${id}`,
+  },
+
+  FUNCTION_PROMPT: {
+    FUNCTION_TYPES: '/api/function-prompts/function-types',
+    LIST: '/api/function-prompts',
+    DETAIL: (functionCode) => `/api/function-prompts/${functionCode}`,
+    SET: '/api/function-prompts',
+    DELETE: (functionCode, promptCode) =>
+      `/api/function-prompts/${functionCode}/${promptCode}`,
+    CLEAR_CACHE: '/api/function-prompts/clear-cache',
+  },
 });
 
 export default ENDPOINTS;

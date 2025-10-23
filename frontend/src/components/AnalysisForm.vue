@@ -42,15 +42,6 @@
               >
                 提示词教程
               </a>
-              <span class="link-divider">|</span>
-              <a
-                href="https://github.com/Docker7530/excalicode-ai/tree/main/common/src/main/resources/prompts"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="doc-link"
-              >
-                系统提示词
-              </a>
             </div>
           </div>
         </div>

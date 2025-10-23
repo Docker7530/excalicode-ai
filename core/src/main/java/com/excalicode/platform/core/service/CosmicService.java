@@ -26,10 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import com.excalicode.platform.common.constant.PromptConstants;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.common.service.PromptService;
 import com.excalicode.platform.core.config.CosmicProcessingConfig;
 import com.excalicode.platform.core.dto.AnalysisResultDto;
 import com.excalicode.platform.core.dto.CosmicAnalysisRequestDto;
@@ -105,7 +103,7 @@ public class CosmicService {
         if (!StringUtils.hasText(originalRequirement)) {
             return Flux.error(new BusinessException("原始需求描述不能为空"));
         }
-        String enhancePrompt = promptService.loadPrompt(PromptConstants.REQUIREMENT_ENHANCE);
+        String enhancePrompt = promptService.getPrompt(AiFunctionType.REQUIREMENT_ENHANCE);
         SystemMessage systemMessage = new SystemMessage(enhancePrompt);
         UserMessage userMessage = new UserMessage(originalRequirement.trim());
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
@@ -138,7 +136,7 @@ public class CosmicService {
         String jsonSchema = outputConverter.getJsonSchema();
 
         String systemPromptText =
-                promptService.loadPrompt(PromptConstants.COSMIC_FUNCTIONAL_PROCESS);
+                promptService.getPrompt(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN);
         SystemMessage systemMessage = new SystemMessage(systemPromptText);
         String userPromptText = buildFunctionalProcessUserPrompt(
                 request.getRequirementDescription(), request.getExpectedProcessCount());
@@ -440,7 +438,7 @@ public class CosmicService {
         BeanOutputConverter<CosmicProcessesResponse> outputConverter =
                 new BeanOutputConverter<>(CosmicProcessesResponse.class);
         String jsonSchema = outputConverter.getJsonSchema();
-        String cosmicPrompt = promptService.loadPrompt(PromptConstants.COSMIC_SUBPROCEDURE);
+        String cosmicPrompt = promptService.getPrompt(AiFunctionType.COSMIC_ANALYSIS_V1);
         SystemMessage systemMessage = new SystemMessage(cosmicPrompt);
 
         String userPromptText = buildCosmicUserPrompt(request.getFunctionalProcesses());
@@ -510,7 +508,7 @@ public class CosmicService {
                 new BeanOutputConverter<>(CosmicProcessBaseResponse.class);
         String jsonSchema = outputConverter.getJsonSchema();
 
-        String systemPrompt = promptService.loadPrompt(PromptConstants.COSMIC_SUBPROCEDURE_PHASE1);
+        String systemPrompt = promptService.getPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE1);
         SystemMessage systemMessage = new SystemMessage(systemPrompt);
 
         String userPromptText = buildCosmicUserPrompt(functionalProcesses);
@@ -604,7 +602,7 @@ public class CosmicService {
                 new BeanOutputConverter<>(DataGroupAttributeResponse.class);
         String jsonSchema = outputConverter.getJsonSchema();
 
-        String systemPrompt = promptService.loadPrompt(PromptConstants.COSMIC_SUBPROCEDURE_PHASE2);
+        String systemPrompt = promptService.getPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE2);
         SystemMessage systemMessage = new SystemMessage(systemPrompt);
 
         String userPromptText =
@@ -779,7 +777,7 @@ public class CosmicService {
                 new BeanOutputConverter<>(FixDuplicateResponse.class);
         String jsonSchema = outputConverter.getJsonSchema();
 
-        String systemPrompt = promptService.loadPrompt(PromptConstants.COSMIC_FIX_DUPLICATES);
+        String systemPrompt = promptService.getPrompt(AiFunctionType.COSMIC_FIX_DUPLICATES);
         SystemMessage systemMessage = new SystemMessage(systemPrompt);
         UserMessage userMessage = new UserMessage(userPrompt);
 
@@ -834,7 +832,7 @@ public class CosmicService {
         if (!StringUtils.hasText(requirementName)) {
             throw new BusinessException("需求名称不能为空");
         }
-        String prdPrompt = promptService.loadPrompt(PromptConstants.COSMIC_PRD);
+        String prdPrompt = promptService.getPrompt(AiFunctionType.PRD_GENERATION);
         String userInput =
                 String.format("需求名称：%s\n功能过程或子过程描述：%s", requirementName.trim(), processDescription);
         Prompt prompt = new Prompt(prdPrompt + "\n\n" + userInput);

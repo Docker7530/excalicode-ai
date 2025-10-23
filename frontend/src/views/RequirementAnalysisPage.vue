@@ -195,7 +195,6 @@ const serializeFunctionalProcesses = (items = []) =>
 // 步骤面包屑配置：根据状态决定可达性与完成态
 const stepConfigs = computed(() => {
   const hasFunctional = state.functionalProcesses.length > 0;
-  const hasCosmic = state.cosmicProcesses.length > 0;
   const hasDocument = !!state.documentPreview;
 
   return WORKFLOW_CONFIG.STEPS.map((stepMeta) => {

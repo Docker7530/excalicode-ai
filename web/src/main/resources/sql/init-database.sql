@@ -65,3 +65,35 @@ CREATE TABLE IF NOT EXISTS sys_user (
 -- 插入默认管理员用户 (密码: admin123, 已使用BCrypt加密)
 INSERT INTO sys_user (username, password, role) VALUES
 ('admin', '$2a$10$jEwInnHpUIdwychSmhY5qeRNiXb/9x64fwCxreTLzM5ipn1MWKVh.', 'ADMIN');
+
+-- 提示词模板表
+CREATE TABLE IF NOT EXISTS prompt_template (
+    id BIGINT AUTO_INCREMENT COMMENT '主键ID',
+    code VARCHAR(100) NOT NULL COMMENT '提示词唯一标识(如: REQUIREMENT_DOC_GENERATOR)',
+    name VARCHAR(200) NOT NULL COMMENT '提示词显示名称',
+    content TEXT NOT NULL COMMENT 'Markdown 格式的提示词内容',
+    description VARCHAR(500) COMMENT '提示词说明',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_code (code, deleted) COMMENT '提示词代码唯一索引',
+    INDEX idx_name (name),
+    INDEX idx_deleted (deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='提示词模板表';
+
+-- 功能-提示词映射表
+CREATE TABLE IF NOT EXISTS function_prompt_mapping (
+    id BIGINT AUTO_INCREMENT COMMENT '主键ID',
+    function_code VARCHAR(100) NOT NULL COMMENT '功能标识(对应 AiFunctionType.code)',
+    prompt_code VARCHAR(100) NOT NULL COMMENT '提示词代码(对应 prompt_template.code)',
+    priority INT NOT NULL DEFAULT 0 COMMENT '优先级(数字越大优先级越高)',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_function_prompt (function_code, prompt_code, deleted) COMMENT '功能-提示词唯一索引',
+    INDEX idx_function_code (function_code),
+    INDEX idx_prompt_code (prompt_code),
+    INDEX idx_deleted (deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='功能-提示词映射表';

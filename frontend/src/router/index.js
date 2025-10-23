@@ -60,6 +60,24 @@ const routes = [
     },
   },
   {
+    path: '/prompt-template-manage',
+    name: 'PromptTemplateManage',
+    component: () => import('@/views/PromptTemplateManagePage.vue'),
+    meta: {
+      title: '提示词模板管理 - EXCALICODE AI',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/function-prompt-mapping',
+    name: 'FunctionPromptMapping',
+    component: () => import('@/views/FunctionPromptMappingManagePage.vue'),
+    meta: {
+      title: '功能-提示词映射管理 - EXCALICODE AI',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/backend-manage',
     name: 'BackendManage',
     component: () => import('@/views/BackendManagePage.vue'),

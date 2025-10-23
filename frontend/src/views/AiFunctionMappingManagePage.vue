@@ -2,9 +2,7 @@
   <div class="ai-function-mapping-page">
     <!-- 渐变头部区域 -->
     <div class="page-header">
-      <div class="header-background">
-        <div class="animated-gradient"></div>
-      </div>
+      <div class="header-background"></div>
       <div class="header-content">
         <div class="header-top">
           <ElButton
@@ -16,19 +14,17 @@
           />
           <ElBreadcrumb separator="/" class="breadcrumb">
             <ElBreadcrumbItem :to="{ path: '/backend-manage' }">
-              <ElIcon><Setting /></ElIcon>
               后台管理
             </ElBreadcrumbItem>
             <ElBreadcrumbItem>功能-模型映射管理</ElBreadcrumbItem>
           </ElBreadcrumb>
         </div>
-        <h1 class="page-title">
-          <ElIcon class="title-icon"><Connection /></ElIcon>
-          AI 功能-模型映射管理
-        </h1>
-        <p class="page-subtitle">
-          为每个功能独立配置 AI 厂商和模型，实现功能级别的智能模型切换
-        </p>
+        <div class="header-info">
+          <h1 class="page-title">
+            <ElIcon class="title-icon"><Connection /></ElIcon>
+            功能-模型映射管理
+          </h1>
+        </div>
       </div>
     </div>
 
@@ -36,68 +32,47 @@
     <div class="stats-section">
       <div class="stat-card total-card">
         <div class="stat-icon-wrapper">
-          <div class="stat-icon">
-            <ElIcon :size="36"><Grid /></ElIcon>
-          </div>
+          <ElIcon><Grid /></ElIcon>
         </div>
         <div class="stat-content">
           <div class="stat-value">{{ functionTypes.length }}</div>
-          <div class="stat-label">功能类型总数</div>
-        </div>
-        <div class="stat-decoration">
-          <div class="decoration-line"></div>
+          <div class="stat-label">功能类型</div>
         </div>
       </div>
 
       <div class="stat-card configured-card">
         <div class="stat-icon-wrapper">
-          <div class="stat-icon">
-            <ElIcon :size="36"><CircleCheck /></ElIcon>
-          </div>
+          <ElIcon><CircleCheck /></ElIcon>
         </div>
         <div class="stat-content">
           <div class="stat-value">{{ mappings.length }}</div>
-          <div class="stat-label">已配置映射</div>
-        </div>
-        <div class="stat-decoration">
-          <div class="decoration-line"></div>
+          <div class="stat-label">已配置</div>
         </div>
       </div>
 
       <div class="stat-card unconfigured-card">
         <div class="stat-icon-wrapper">
-          <div class="stat-icon">
-            <ElIcon :size="36"><WarningFilled /></ElIcon>
-          </div>
+          <ElIcon><WarningFilled /></ElIcon>
         </div>
         <div class="stat-content">
           <div class="stat-value">{{ unmappedCount }}</div>
-          <div class="stat-label">未配置功能</div>
-        </div>
-        <div class="stat-decoration">
-          <div class="decoration-line"></div>
+          <div class="stat-label">未配置</div>
         </div>
       </div>
     </div>
 
     <!-- 操作工具栏 -->
     <div class="toolbar-section">
-      <div class="toolbar-left">
-        <h2 class="section-title">功能映射配置</h2>
-        <p class="section-desc">
-          点击功能卡片进行配置，未配置的功能将使用默认模型
-        </p>
-      </div>
-      <div class="toolbar-right">
+      <div class="toolbar-container">
         <ElButton
           type="success"
           :icon="Setting"
-          round
+          size="large"
           @click="handleAddMapping"
         >
           快速配置
         </ElButton>
-        <ElButton :icon="RefreshRight" round @click="handleClearCache">
+        <ElButton :icon="RefreshRight" size="large" @click="handleClearCache">
           清除缓存
         </ElButton>
       </div>
@@ -529,14 +504,9 @@ onMounted(() => {
 .page-header {
   position: relative;
   background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
-  padding: 60px 40px 80px;
-  margin-bottom: 40px;
+  padding: 40px 32px;
+  margin-bottom: 32px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(103, 194, 58, 0.2);
-
-  @media (max-width: 768px) {
-    padding: 40px 24px 60px;
-  }
 }
 
 .header-background {
@@ -545,50 +515,24 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.3;
-  overflow: hidden;
-}
-
-.animated-gradient {
-  position: absolute;
-  width: 200%;
-  height: 200%;
+  opacity: 0.1;
   background:
-    radial-gradient(
-      circle at 20% 50%,
-      rgba(255, 255, 255, 0.3) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 50%,
-      rgba(255, 255, 255, 0.2) 0%,
-      transparent 50%
-    );
-  animation: gradientMove 15s ease infinite;
-}
-
-@keyframes gradientMove {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(-50px, -50px);
-  }
+    radial-gradient(circle at 20% 50%, white 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, white 0%, transparent 50%);
 }
 
 .header-content {
-  position: relative;
-  z-index: 2;
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .header-top {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .back-button {
@@ -596,23 +540,24 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  transition: all 0.3s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.3);
-    transform: translateX(-4px);
   }
 }
 
 .breadcrumb {
-  :deep(.el-breadcrumb__inner) {
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  :deep(.el-breadcrumb__item) {
+    .el-breadcrumb__inner {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
 
-    &.is-link:hover {
+      &:hover {
+        color: white;
+      }
+    }
+
+    &:last-child .el-breadcrumb__inner {
       color: white;
     }
   }
@@ -622,201 +567,132 @@ onMounted(() => {
   }
 }
 
+.header-info {
+  text-align: center;
+}
+
 .page-title {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 16px 0;
+  margin: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   .title-icon {
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-.page-subtitle {
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0;
-  font-weight: 400;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
+    font-size: 2.5rem;
   }
 }
 
 // ========== 统计卡片区域 ==========
 .stats-section {
   max-width: 1400px;
-  margin: -60px auto 40px;
-  padding: 0 40px;
+  margin: 0 auto 32px;
+  padding: 0 32px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
-  position: relative;
-  z-index: 3;
-
-  @media (max-width: 768px) {
-    padding: 0 24px;
-    margin-top: -40px;
-  }
 }
 
 .stat-card {
   background: white;
   border-radius: 20px;
-  padding: 32px;
+  padding: 28px 32px;
   display: flex;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #409eff, #67c23a);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
   }
 
-  .stat-decoration {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 100px;
-    height: 100px;
-    opacity: 0.05;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 
-    .decoration-line {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, transparent 50%, currentColor 50%);
+    &::before {
+      transform: scaleX(1);
+    }
+
+    .stat-icon-wrapper {
+      transform: scale(1.1);
     }
   }
 }
 
-.total-card {
-  .stat-icon-wrapper {
-    background: linear-gradient(135deg, #409eff, #66b1ff);
-  }
-
-  .decoration-line {
-    color: #409eff;
-  }
-}
-
-.configured-card {
-  .stat-icon-wrapper {
-    background: linear-gradient(135deg, #67c23a, #85ce61);
-  }
-
-  .decoration-line {
-    color: #67c23a;
-  }
-}
-
-.unconfigured-card {
-  .stat-icon-wrapper {
-    background: linear-gradient(135deg, #e6a23c, #f0c78a);
-  }
-
-  .decoration-line {
-    color: #e6a23c;
-  }
-}
-
 .stat-icon-wrapper {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.total-card .stat-icon-wrapper {
+  background: linear-gradient(135deg, #409eff, #5cacee);
+}
+
+.configured-card .stat-icon-wrapper {
+  background: linear-gradient(135deg, #67c23a, #85ce61);
+}
+
+.unconfigured-card .stat-icon-wrapper {
+  background: linear-gradient(135deg, #e6a23c, #f0c78a);
 }
 
 .stat-content {
   flex: 1;
-  position: relative;
-  z-index: 1;
+}
 
-  .stat-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1e293b;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #303133;
+  line-height: 1;
+  margin-bottom: 8px;
+}
 
-  .stat-label {
-    font-size: 0.875rem;
-    color: #64748b;
-    font-weight: 500;
-  }
+.stat-label {
+  font-size: 0.9375rem;
+  color: #909399;
+  font-weight: 500;
 }
 
 // ========== 工具栏区域 ==========
 .toolbar-section {
   max-width: 1400px;
-  margin: 0 auto 32px;
-  padding: 0 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-
-  @media (max-width: 768px) {
-    padding: 0 24px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  margin: 0 auto 24px;
+  padding: 0 32px;
 }
 
-.toolbar-left {
-  flex: 1;
-
-  .section-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 8px 0;
-  }
-
-  .section-desc {
-    font-size: 0.95rem;
-    color: #64748b;
-    margin: 0;
-  }
-}
-
-.toolbar-right {
+.toolbar-container {
   display: flex;
   gap: 12px;
 
-  @media (max-width: 768px) {
-    width: 100%;
-
-    .el-button {
-      flex: 1;
-    }
+  .el-button {
+    height: 48px;
+    padding: 0 32px;
+    font-size: 1rem;
+    font-weight: 600;
   }
 }
 

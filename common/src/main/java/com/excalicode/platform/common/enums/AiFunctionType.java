@@ -43,7 +43,12 @@ public enum AiFunctionType {
     /**
      * PRD 文档生成
      */
-    PRD_GENERATION("PRD_GENERATION", "PRD文档生成");
+    PRD_GENERATION("PRD_GENERATION", "PRD文档生成"),
+
+    /**
+     * 勤时数据处理 - 备注修正
+     */
+    QINSHI_DATA_PROCESSING("QINSHI_DATA_PROCESSING", "勤时数据处理");
 
     /**
      * 功能类型代码 (存储在数据库中)

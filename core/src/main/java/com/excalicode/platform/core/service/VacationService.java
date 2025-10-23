@@ -29,9 +29,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.multipart.MultipartFile;
-import com.excalicode.platform.common.constant.PromptConstants;
+import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.common.service.PromptService;
 import com.excalicode.platform.core.dto.VacationDetailItem;
 import com.excalicode.platform.core.dto.VacationDetailRecordDto;
 import com.excalicode.platform.core.dto.VacationRecordDto;
@@ -350,7 +349,7 @@ public class VacationService {
     }
 
     private String invokeAiCorrection(String remark) {
-        String systemPrompt = promptService.loadPrompt(PromptConstants.QINSHI_DATA_PROCESSING);
+        String systemPrompt = promptService.getPrompt(AiFunctionType.QINSHI_DATA_PROCESSING);
         SystemMessage systemMessage = new SystemMessage(systemPrompt);
         UserMessage userMessage = new UserMessage(remark);
 
