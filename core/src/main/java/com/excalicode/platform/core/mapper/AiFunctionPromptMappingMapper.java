@@ -2,7 +2,7 @@ package com.excalicode.platform.core.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.excalicode.platform.core.entity.FunctionPromptMapping;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 
 /**
  * 功能-提示词映射 Mapper 接口
@@ -10,5 +10,5 @@ import com.excalicode.platform.core.entity.FunctionPromptMapping;
  * 继承 BaseMapper 即可获得基础 CRUD 能力
  */
 @Mapper
-public interface FunctionPromptMappingMapper extends BaseMapper<FunctionPromptMapping> {
+public interface AiFunctionPromptMappingMapper extends BaseMapper<AiFunctionPromptMapping> {
 }

@@ -1,7 +1,7 @@
 package com.excalicode.platform.core.dto;
 
 import com.excalicode.platform.core.entity.AiFunctionModelMapping;
-import com.excalicode.platform.core.entity.FunctionPromptMapping;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import lombok.Data;
 
 /**
@@ -30,6 +30,6 @@ public class FunctionConfigurationItemDto {
     /**
      * 绑定的提示词映射信息，可能为空。
      */
-    private FunctionPromptMapping promptMapping;
+    private AiFunctionPromptMapping promptMapping;
 }
 

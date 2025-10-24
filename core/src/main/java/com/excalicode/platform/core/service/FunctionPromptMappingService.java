@@ -2,12 +2,12 @@ package com.excalicode.platform.core.service;
 
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.excalicode.platform.core.entity.FunctionPromptMapping;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 
 /**
  * 功能-提示词映射 Service 接口
  */
-public interface FunctionPromptMappingService extends IService<FunctionPromptMapping> {
+public interface FunctionPromptMappingService extends IService<AiFunctionPromptMapping> {
 
     /**
      * 根据功能代码查询提示词代码
@@ -31,7 +31,7 @@ public interface FunctionPromptMappingService extends IService<FunctionPromptMap
      *
      * @return 所有映射列表
      */
-    List<FunctionPromptMapping> listAllMappingsWithPrompt();
+    List<AiFunctionPromptMapping> listAllMappingsWithPrompt();
 
     /**
      * 删除功能的提示词映射

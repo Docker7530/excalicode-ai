@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.excalicode.platform.core.dto.SetFunctionPromptMappingRequest;
-import com.excalicode.platform.core.entity.FunctionPromptMapping;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import com.excalicode.platform.core.service.FunctionPromptMappingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,8 @@ public class FunctionPromptMappingController {
      * 获取所有映射关系 (包含提示词模板信息)
      */
     @GetMapping
-    public ResponseEntity<List<FunctionPromptMapping>> list() {
-        List<FunctionPromptMapping> mappings = mappingService.listAllMappingsWithPrompt();
+    public ResponseEntity<List<AiFunctionPromptMapping>> list() {
+        List<AiFunctionPromptMapping> mappings = mappingService.listAllMappingsWithPrompt();
         return ResponseEntity.ok(mappings);
     }
 

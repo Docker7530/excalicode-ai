@@ -10,13 +10,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
- * 功能-提示词映射实体
+ * 提示词模板实体
  *
- * 存储功能与提示词模板的绑定关系，实现功能级别的提示词切换
+ * 存储 Markdown 格式的提示词模板，用于替代原来的 resources/prompts/ 静态文件
  */
 @Data
-@TableName("function_prompt_mapping")
-public class FunctionPromptMapping {
+@TableName("ai_prompt_template")
+public class AiPromptTemplate {
 
     /**
      * 主键ID, 数据库自动生成
@@ -25,16 +25,28 @@ public class FunctionPromptMapping {
     private Long id;
 
     /**
-     * 功能标识（对应 AiFunctionType 枚举的 code）
+     * 提示词唯一标识代码（如 "REQUIREMENT_DOC_GENERATOR"） 用于代码中引用，保持人类可读性和配置可移植性
      */
-    @TableField("function_code")
-    private String functionCode;
+    @TableField("code")
+    private String code;
 
     /**
-     * 提示词代码（对应 prompt_template 表的 code 字段）
+     * 提示词显示名称
      */
-    @TableField("prompt_code")
-    private String promptCode;
+    @TableField("name")
+    private String name;
+
+    /**
+     * Markdown 格式的提示词内容 使用 TEXT 类型存储，支持长文本
+     */
+    @TableField("content")
+    private String content;
+
+    /**
+     * 提示词说明
+     */
+    @TableField("description")
+    private String description;
 
     /**
      * 创建时间, 插入时自动填充
@@ -54,10 +66,4 @@ public class FunctionPromptMapping {
     @TableLogic
     @TableField("deleted")
     private Integer deleted;
-
-    /**
-     * 关联的提示词模板信息 (不存储在数据库, 用于关联查询)
-     */
-    @TableField(exist = false)
-    private PromptTemplate promptTemplate;
 }

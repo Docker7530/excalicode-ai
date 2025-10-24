@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.config.CacheConfig;
-import com.excalicode.platform.core.entity.FunctionPromptMapping;
-import com.excalicode.platform.core.entity.PromptTemplate;
-import com.excalicode.platform.core.mapper.FunctionPromptMappingMapper;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
+import com.excalicode.platform.core.entity.AiPromptTemplate;
+import com.excalicode.platform.core.mapper.AiFunctionPromptMappingMapper;
 import com.excalicode.platform.core.service.FunctionPromptMappingService;
 import com.excalicode.platform.core.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class FunctionPromptMappingServiceImpl
-        extends ServiceImpl<FunctionPromptMappingMapper, FunctionPromptMapping>
+        extends ServiceImpl<AiFunctionPromptMappingMapper, AiFunctionPromptMapping>
         implements FunctionPromptMappingService {
 
     private final PromptTemplateService promptTemplateService;
@@ -30,9 +30,10 @@ public class FunctionPromptMappingServiceImpl
             return null;
         }
 
-        FunctionPromptMapping mapping = this.getOne(new LambdaQueryWrapper<FunctionPromptMapping>()
-                .eq(FunctionPromptMapping::getFunctionCode, functionCode)
-                .last("LIMIT 1"));
+        AiFunctionPromptMapping mapping =
+                this.getOne(new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                        .eq(AiFunctionPromptMapping::getFunctionCode, functionCode)
+                        .last("LIMIT 1"));
 
         return mapping != null ? mapping.getPromptCode() : null;
     }
@@ -45,9 +46,9 @@ public class FunctionPromptMappingServiceImpl
             return false;
         }
 
-        FunctionPromptMapping existingMapping = this.getOne(
-                new LambdaQueryWrapper<FunctionPromptMapping>()
-                        .eq(FunctionPromptMapping::getFunctionCode, functionCode)
+        AiFunctionPromptMapping existingMapping =
+                this.getOne(new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                        .eq(AiFunctionPromptMapping::getFunctionCode, functionCode)
                         .last("LIMIT 1"));
 
         if (existingMapping != null) {
@@ -55,21 +56,21 @@ public class FunctionPromptMappingServiceImpl
             return this.updateById(existingMapping);
         }
 
-        FunctionPromptMapping newMapping = new FunctionPromptMapping();
+        AiFunctionPromptMapping newMapping = new AiFunctionPromptMapping();
         newMapping.setFunctionCode(functionCode);
         newMapping.setPromptCode(promptCode);
         return this.save(newMapping);
     }
 
     @Override
-    public List<FunctionPromptMapping> listAllMappingsWithPrompt() {
-        List<FunctionPromptMapping> mappings = this
-                .list(new LambdaQueryWrapper<FunctionPromptMapping>()
-                        .orderByAsc(FunctionPromptMapping::getFunctionCode));
+    public List<AiFunctionPromptMapping> listAllMappingsWithPrompt() {
+        List<AiFunctionPromptMapping> mappings =
+                this.list(new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                        .orderByAsc(AiFunctionPromptMapping::getFunctionCode));
 
         // 填充提示词模板信息
-        for (FunctionPromptMapping mapping : mappings) {
-            PromptTemplate promptTemplate =
+        for (AiFunctionPromptMapping mapping : mappings) {
+            AiPromptTemplate promptTemplate =
                     promptTemplateService.getByCode(mapping.getPromptCode());
             mapping.setPromptTemplate(promptTemplate);
         }
@@ -85,8 +86,8 @@ public class FunctionPromptMappingServiceImpl
             return false;
         }
 
-        return this.remove(new LambdaQueryWrapper<FunctionPromptMapping>()
-                .eq(FunctionPromptMapping::getFunctionCode, functionCode)
-                .eq(FunctionPromptMapping::getPromptCode, promptCode));
+        return this.remove(new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                .eq(AiFunctionPromptMapping::getFunctionCode, functionCode)
+                .eq(AiFunctionPromptMapping::getPromptCode, promptCode));
     }
 }

@@ -1,8 +1,8 @@
 package com.excalicode.platform.core.dto;
 
 import java.util.List;
+import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.entity.AiProvider;
-import com.excalicode.platform.core.entity.PromptTemplate;
 import lombok.Data;
 
 /**
@@ -26,6 +26,6 @@ public class FunctionConfigurationResponse {
     /**
      * 可用的提示词模板列表。
      */
-    private List<PromptTemplate> promptTemplates;
+    private List<AiPromptTemplate> promptTemplates;
 }
 

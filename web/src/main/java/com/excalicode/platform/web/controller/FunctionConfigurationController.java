@@ -13,7 +13,7 @@ import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.core.dto.FunctionConfigurationItemDto;
 import com.excalicode.platform.core.dto.FunctionConfigurationResponse;
 import com.excalicode.platform.core.entity.AiFunctionModelMapping;
-import com.excalicode.platform.core.entity.FunctionPromptMapping;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import com.excalicode.platform.core.service.AiFunctionModelMappingService;
 import com.excalicode.platform.core.service.AiProviderService;
 import com.excalicode.platform.core.service.FunctionPromptMappingService;
@@ -45,7 +45,7 @@ public class FunctionConfigurationController {
         log.info("查询功能配置聚合数据");
 
         Map<String, AiFunctionModelMapping> modelMappingMap = buildModelMappingMap();
-        Map<String, FunctionPromptMapping> promptMappingMap = buildPromptMappingMap();
+        Map<String, AiFunctionPromptMapping> promptMappingMap = buildPromptMappingMap();
         List<FunctionConfigurationItemDto> functions =
                 buildFunctionConfigurationItems(modelMappingMap, promptMappingMap);
 
@@ -67,11 +67,11 @@ public class FunctionConfigurationController {
         return result;
     }
 
-    private Map<String, FunctionPromptMapping> buildPromptMappingMap() {
-        List<FunctionPromptMapping> promptMappings =
+    private Map<String, AiFunctionPromptMapping> buildPromptMappingMap() {
+        List<AiFunctionPromptMapping> promptMappings =
                 functionPromptMappingService.listAllMappingsWithPrompt();
-        Map<String, FunctionPromptMapping> result = new LinkedHashMap<>();
-        for (FunctionPromptMapping mapping : promptMappings) {
+        Map<String, AiFunctionPromptMapping> result = new LinkedHashMap<>();
+        for (AiFunctionPromptMapping mapping : promptMappings) {
             result.put(mapping.getFunctionCode(), mapping);
         }
         return result;
@@ -79,7 +79,7 @@ public class FunctionConfigurationController {
 
     private List<FunctionConfigurationItemDto> buildFunctionConfigurationItems(
             Map<String, AiFunctionModelMapping> modelMappingMap,
-            Map<String, FunctionPromptMapping> promptMappingMap) {
+            Map<String, AiFunctionPromptMapping> promptMappingMap) {
         List<FunctionConfigurationItemDto> items = new ArrayList<>();
         Arrays.stream(AiFunctionType.values()).forEach(type -> {
             FunctionConfigurationItemDto item = new FunctionConfigurationItemDto();

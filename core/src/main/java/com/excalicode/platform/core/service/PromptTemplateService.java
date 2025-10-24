@@ -2,12 +2,12 @@ package com.excalicode.platform.core.service;
 
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.excalicode.platform.core.entity.PromptTemplate;
+import com.excalicode.platform.core.entity.AiPromptTemplate;
 
 /**
  * 提示词模板 Service 接口
  */
-public interface PromptTemplateService extends IService<PromptTemplate> {
+public interface PromptTemplateService extends IService<AiPromptTemplate> {
 
     /**
      * 根据提示词代码查询模板
@@ -15,7 +15,7 @@ public interface PromptTemplateService extends IService<PromptTemplate> {
      * @param code 提示词代码
      * @return 提示词模板, 如果不存在则返回 null
      */
-    PromptTemplate getByCode(String code);
+    AiPromptTemplate getByCode(String code);
 
     /**
      * 搜索提示词模板（根据名称或描述）
@@ -23,7 +23,7 @@ public interface PromptTemplateService extends IService<PromptTemplate> {
      * @param keyword 搜索关键词
      * @return 匹配的提示词列表
      */
-    List<PromptTemplate> search(String keyword);
+    List<AiPromptTemplate> search(String keyword);
 
     /**
      * 创建或更新提示词模板
@@ -31,5 +31,5 @@ public interface PromptTemplateService extends IService<PromptTemplate> {
      * @param promptTemplate 提示词模板
      * @return 是否成功
      */
-    boolean saveOrUpdatePrompt(PromptTemplate promptTemplate);
+    boolean saveOrUpdatePrompt(AiPromptTemplate promptTemplate);
 }

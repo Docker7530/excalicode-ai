@@ -12,8 +12,8 @@ import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
 import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.AiModel;
+import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.entity.AiProvider;
-import com.excalicode.platform.core.entity.PromptTemplate;
 import com.excalicode.platform.core.service.AiFunctionModelMappingService;
 import com.excalicode.platform.core.service.AiModelService;
 import com.excalicode.platform.core.service.AiProviderService;
@@ -50,7 +50,7 @@ public class AiFunctionConfigurationService {
                     String.format("功能 [%s] 未配置提示词映射", functionType.getDescription()));
         }
 
-        PromptTemplate promptTemplate = promptTemplateService.getByCode(promptCode);
+        AiPromptTemplate promptTemplate = promptTemplateService.getByCode(promptCode);
         if (promptTemplate == null) {
             throw new BusinessException(String.format("提示词模板 [%s] 不存在", promptCode));
         }
