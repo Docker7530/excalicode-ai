@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS excalicode_ai DEFAULT CHARACTER SET utf8mb4 COLLAT
 
 USE excalicode_ai;
 
--- AI 厂商表
+-- 厂商表
 CREATE TABLE IF NOT EXISTS ai_provider (
     id BIGINT AUTO_INCREMENT COMMENT '主键ID',
     provider_name VARCHAR(100) NOT NULL COMMENT '厂商名称',
@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS ai_provider (
     PRIMARY KEY (id),
     INDEX idx_provider_name (provider_name),
     INDEX idx_deleted (deleted)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI厂商表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='厂商表';
 
--- AI 模型表
+-- 模型表
 CREATE TABLE IF NOT EXISTS ai_model (
     id BIGINT AUTO_INCREMENT COMMENT '主键ID',
     provider_id BIGINT NOT NULL COMMENT '厂商ID',
@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS ai_model (
     INDEX idx_model_name (model_name),
     INDEX idx_deleted (deleted),
     CONSTRAINT fk_model_provider FOREIGN KEY (provider_id) REFERENCES ai_provider(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI模型表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型表';
 
--- AI 功能-模型映射表
+-- 功能-模型映射表
 CREATE TABLE IF NOT EXISTS ai_function_model_mapping (
     id BIGINT AUTO_INCREMENT COMMENT '主键ID',
     function_type VARCHAR(50) NOT NULL COMMENT '功能类型代码(对应 AiFunctionType 枚举)',
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS ai_function_model_mapping (
     INDEX idx_model_id (model_id),
     INDEX idx_deleted (deleted),
     CONSTRAINT fk_mapping_model FOREIGN KEY (model_id) REFERENCES ai_model(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI功能-模型映射表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='功能-模型映射表';
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS sys_user (
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
 INSERT INTO sys_user (username, password, role) VALUES
 ('admin', '$2a$10$jEwInnHpUIdwychSmhY5qeRNiXb/9x64fwCxreTLzM5ipn1MWKVh.', 'ADMIN');
 
--- AI 提示词模板表
+-- 提示词模板表
 CREATE TABLE IF NOT EXISTS ai_prompt_template (
     id BIGINT AUTO_INCREMENT COMMENT '主键ID',
     code VARCHAR(100) NOT NULL COMMENT '提示词唯一标识(如: REQUIREMENT_DOC_GENERATOR)',
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS ai_prompt_template (
     UNIQUE KEY uk_code (code, deleted) COMMENT '提示词代码唯一索引',
     INDEX idx_name (name),
     INDEX idx_deleted (deleted)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI 提示词模板表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='提示词模板表';
 
 -- 功能-提示词映射表
 CREATE TABLE IF NOT EXISTS ai_function_prompt_mapping (
