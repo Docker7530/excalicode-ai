@@ -24,14 +24,4 @@ public class AnalysisResultDto {
     @Valid
     private List<CosmicProcessDto> processes;
 
-    /**
-     * 生成版本标识 用于区分是V1还是V2方法生成的
-     * <ul>
-     * <li>v1: 一次性生成(稳定版本)</li>
-     * <li>v2: 两阶段方法(Alpha版本)</li>
-     * </ul>
-     */
-    @Builder.Default
-    private String version = "v1";
-
 }

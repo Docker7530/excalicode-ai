@@ -281,7 +281,7 @@ public class CosmicService {
             if (processes.isEmpty()) {
                 throw new BusinessException("Excel file does not contain valid COSMIC processes");
             }
-            return AnalysisResultDto.builder().processes(processes).version("import").build();
+            return AnalysisResultDto.builder().processes(processes).build();
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
@@ -387,7 +387,7 @@ public class CosmicService {
             throw new BusinessException("AI 分析未能生成有效的 COSMIC 过程");
         }
         List<CosmicProcessDto> processes = result.getProcesses();
-        return AnalysisResultDto.builder().processes(processes).version("v1").build();
+        return AnalysisResultDto.builder().processes(processes).build();
     }
 
     private String buildCosmicUserPrompt(List<FunctionalProcessDto> functionalProcesses) {
@@ -426,7 +426,7 @@ public class CosmicService {
         checkAndFixDuplicates(processes1);
         log.info("阶段3复检完成");
         List<CosmicProcessDto> processes = processes1;
-        return AnalysisResultDto.builder().processes(processes).version("v2").build();
+        return AnalysisResultDto.builder().processes(processes).build();
     }
 
     private List<CosmicProcessBaseDto> analyzeCosmicProcessesPhase1(
