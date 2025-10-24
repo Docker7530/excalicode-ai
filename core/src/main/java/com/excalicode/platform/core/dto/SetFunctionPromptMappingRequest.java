@@ -18,8 +18,4 @@ public class SetFunctionPromptMappingRequest {
      */
     private String promptCode;
 
-    /**
-     * 优先级（默认为 0）
-     */
-    private Integer priority;
 }

@@ -32,51 +32,40 @@ public class FunctionPromptMappingServiceImpl
 
         FunctionPromptMapping mapping = this.getOne(new LambdaQueryWrapper<FunctionPromptMapping>()
                 .eq(FunctionPromptMapping::getFunctionCode, functionCode)
-                .orderByDesc(FunctionPromptMapping::getPriority).last("LIMIT 1"));
+                .last("LIMIT 1"));
 
         return mapping != null ? mapping.getPromptCode() : null;
     }
 
     @Override
     @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
-    public boolean setFunctionPromptMapping(String functionCode, String promptCode,
-            Integer priority) {
+    public boolean setFunctionPromptMapping(String functionCode, String promptCode) {
         if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null
                 || promptCode.trim().isEmpty()) {
             return false;
         }
 
-        // 默认优先级为 0
-        if (priority == null) {
-            priority = 0;
-        }
-
-        // 查找现有映射
-        FunctionPromptMapping existingMapping =
-                this.getOne(new LambdaQueryWrapper<FunctionPromptMapping>()
+        FunctionPromptMapping existingMapping = this.getOne(
+                new LambdaQueryWrapper<FunctionPromptMapping>()
                         .eq(FunctionPromptMapping::getFunctionCode, functionCode)
-                        .eq(FunctionPromptMapping::getPromptCode, promptCode));
+                        .last("LIMIT 1"));
 
         if (existingMapping != null) {
-            // 更新现有映射
-            existingMapping.setPriority(priority);
+            existingMapping.setPromptCode(promptCode);
             return this.updateById(existingMapping);
-        } else {
-            // 创建新映射
-            FunctionPromptMapping newMapping = new FunctionPromptMapping();
-            newMapping.setFunctionCode(functionCode);
-            newMapping.setPromptCode(promptCode);
-            newMapping.setPriority(priority);
-            return this.save(newMapping);
         }
+
+        FunctionPromptMapping newMapping = new FunctionPromptMapping();
+        newMapping.setFunctionCode(functionCode);
+        newMapping.setPromptCode(promptCode);
+        return this.save(newMapping);
     }
 
     @Override
     public List<FunctionPromptMapping> listAllMappingsWithPrompt() {
-        List<FunctionPromptMapping> mappings =
-                this.list(new LambdaQueryWrapper<FunctionPromptMapping>()
-                        .orderByAsc(FunctionPromptMapping::getFunctionCode)
-                        .orderByDesc(FunctionPromptMapping::getPriority));
+        List<FunctionPromptMapping> mappings = this
+                .list(new LambdaQueryWrapper<FunctionPromptMapping>()
+                        .orderByAsc(FunctionPromptMapping::getFunctionCode));
 
         // 填充提示词模板信息
         for (FunctionPromptMapping mapping : mappings) {

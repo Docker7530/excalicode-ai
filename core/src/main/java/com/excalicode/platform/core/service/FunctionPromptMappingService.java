@@ -22,10 +22,9 @@ public interface FunctionPromptMappingService extends IService<FunctionPromptMap
      *
      * @param functionCode 功能代码
      * @param promptCode 提示词代码
-     * @param priority 优先级
      * @return 是否设置成功
      */
-    boolean setFunctionPromptMapping(String functionCode, String promptCode, Integer priority);
+    boolean setFunctionPromptMapping(String functionCode, String promptCode);
 
     /**
      * 查询所有映射(带提示词模板信息)

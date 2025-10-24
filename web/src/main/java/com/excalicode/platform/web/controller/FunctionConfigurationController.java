@@ -72,8 +72,7 @@ public class FunctionConfigurationController {
                 functionPromptMappingService.listAllMappingsWithPrompt();
         Map<String, FunctionPromptMapping> result = new LinkedHashMap<>();
         for (FunctionPromptMapping mapping : promptMappings) {
-            // 列表按优先级倒序返回，保留第一个即可代表当前配置
-            result.putIfAbsent(mapping.getFunctionCode(), mapping);
+            result.put(mapping.getFunctionCode(), mapping);
         }
         return result;
     }
@@ -93,4 +92,3 @@ public class FunctionConfigurationController {
         return items;
     }
 }
-

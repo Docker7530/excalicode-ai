@@ -55,11 +55,11 @@ public class FunctionPromptMappingController {
      */
     @PostMapping
     public ResponseEntity<Void> setMapping(@RequestBody SetFunctionPromptMappingRequest request) {
-        log.info("设置功能-提示词映射: functionCode={}, promptCode={}, priority={}",
-                request.getFunctionCode(), request.getPromptCode(), request.getPriority());
+        log.info("设置功能-提示词映射: functionCode={}, promptCode={}", request.getFunctionCode(),
+                request.getPromptCode());
 
         boolean success = mappingService.setFunctionPromptMapping(request.getFunctionCode(),
-                request.getPromptCode(), request.getPriority());
+                request.getPromptCode());
         if (success) {
             return ResponseEntity.ok().build();
         } else {

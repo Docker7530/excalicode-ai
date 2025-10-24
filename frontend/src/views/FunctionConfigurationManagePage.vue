@@ -105,12 +105,7 @@
               <div class="config-title">
                 {{ row.promptMapping.promptTemplate?.name || '-' }}
               </div>
-              <div class="config-sub">
-                {{ row.promptMapping.promptCode }}
-                <ElTag size="small" effect="plain">
-                  优先级 {{ row.promptMapping.priority ?? 0 }}
-                </ElTag>
-              </div>
+              <div class="config-sub">{{ row.promptMapping.promptCode }}</div>
             </div>
             <ElTag v-else type="info" size="small">未配置</ElTag>
           </template>
@@ -207,15 +202,6 @@
           </ElSelect>
         </ElFormItem>
 
-        <ElFormItem label="提示词优先级">
-          <ElInputNumber
-            v-model="form.priority"
-            :min="0"
-            :max="100"
-            controls-position="right"
-            :disabled="!form.promptCode"
-          />
-        </ElFormItem>
       </ElForm>
 
       <template #footer>
@@ -263,7 +249,6 @@ const editingItem = ref(null);
 const form = reactive({
   modelId: null,
   promptCode: '',
-  priority: 0,
 });
 
 const totalFunctions = computed(() => configurations.value.length);
@@ -297,7 +282,6 @@ const openEditDialog = (item) => {
   editingItem.value = item;
   form.modelId = item.modelMapping?.modelId ?? null;
   form.promptCode = item.promptMapping?.promptCode ?? '';
-  form.priority = item.promptMapping?.priority ?? 0;
   dialogVisible.value = true;
 };
 
@@ -324,18 +308,14 @@ const handleSubmit = async () => {
   }
 
   const currentPromptCode = editingItem.value.promptMapping?.promptCode ?? '';
-  const currentPriority = editingItem.value.promptMapping?.priority ?? 0;
   const promptChanged = form.promptCode !== currentPromptCode;
-  const priorityChanged =
-    Number(form.priority ?? 0) !== Number(currentPriority ?? 0);
 
-  if (promptChanged || priorityChanged) {
+  if (promptChanged) {
     if (form.promptCode) {
       tasks.push(
         setFunctionPromptMapping({
           functionCode,
           promptCode: form.promptCode,
-          priority: form.priority ?? 0,
         }),
       );
     } else if (editingItem.value.promptMapping) {

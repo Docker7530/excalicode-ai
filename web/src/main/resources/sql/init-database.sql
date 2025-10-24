@@ -87,12 +87,11 @@ CREATE TABLE IF NOT EXISTS function_prompt_mapping (
     id BIGINT AUTO_INCREMENT COMMENT '主键ID',
     function_code VARCHAR(100) NOT NULL COMMENT '功能标识(对应 AiFunctionType.code)',
     prompt_code VARCHAR(100) NOT NULL COMMENT '提示词代码(对应 prompt_template.code)',
-    priority INT NOT NULL DEFAULT 0 COMMENT '优先级(数字越大优先级越高)',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_function_prompt (function_code, prompt_code, deleted) COMMENT '功能-提示词唯一索引',
+    UNIQUE KEY uk_function_code (function_code, deleted) COMMENT '功能唯一提示词索引',
     INDEX idx_function_code (function_code),
     INDEX idx_prompt_code (prompt_code),
     INDEX idx_deleted (deleted)

@@ -37,12 +37,6 @@ public class FunctionPromptMapping {
     private String promptCode;
 
     /**
-     * 优先级（数字越大优先级越高） 用于一个功能绑定多个提示词时的排序
-     */
-    @TableField("priority")
-    private Integer priority;
-
-    /**
      * 创建时间, 插入时自动填充
      */
     @TableField(value = "created_time", fill = FieldFill.INSERT)
