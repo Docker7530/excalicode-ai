@@ -46,7 +46,6 @@ import com.excalicode.platform.core.dto.ProcessBreakdownResultDto;
 import com.excalicode.platform.core.dto.ProcessTableExportRequestDto;
 import com.excalicode.platform.core.pojo.DuplicateCheckResult;
 import com.excalicode.platform.core.pojo.DuplicateItem;
-import com.excalicode.platform.core.support.JsonExampleGenerator;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -63,7 +62,6 @@ public class CosmicService {
     private final CosmicProcessingConfig config;
     private final ExcelService excelService;
     private final PrdService prdService;
-    private final JsonExampleGenerator jsonExampleGenerator;
     private final ExecutorService executorService;
 
     private static final String COSMIC_IMPORT_SHEET = "功能点拆分表";
@@ -76,14 +74,12 @@ public class CosmicService {
     private static final int COLUMN_DATA_ATTRIBUTES = 8;
 
     public CosmicService(ChatModelProvider chatModelProvider, PromptService promptService,
-            CosmicProcessingConfig config, ExcelService excelService, PrdService prdService,
-            JsonExampleGenerator jsonExampleGenerator) {
+            CosmicProcessingConfig config, ExcelService excelService, PrdService prdService) {
         this.chatModelProvider = chatModelProvider;
         this.promptService = promptService;
         this.config = config;
         this.excelService = excelService;
         this.prdService = prdService;
-        this.jsonExampleGenerator = jsonExampleGenerator;
         this.executorService = Executors.newFixedThreadPool(config.getConcurrency());
     }
 
@@ -144,8 +140,8 @@ public class CosmicService {
         List<Message> messages = new ArrayList<>();
         messages.add(systemMessage);
         messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN, jsonSchema,
-                FunctionalProcessesResponse.class, messages);
+        Prompt prompt =
+                buildJsonPrompt(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN, jsonSchema, messages);
         ChatResponse chatResponse = chatModelProvider
                 .getChatModel(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN).call(prompt);
         String response = chatResponse.getResult().getOutput().getText();
@@ -181,26 +177,14 @@ public class CosmicService {
     }
 
     private Prompt buildJsonPrompt(AiFunctionType functionType, String jsonSchema,
-            Class<?> responseType, List<Message> baseMessages) {
+            List<Message> baseMessages) {
         boolean supportsJsonSchema = chatModelProvider.supportsJsonSchema(functionType);
         OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder();
-        if (supportsJsonSchema) {
-            optionsBuilder.responseFormat(
-                    new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema));
-            return new Prompt(baseMessages, optionsBuilder.build());
-        }
-        String exampleJson = jsonExampleGenerator.generateExample(responseType);
-        List<Message> enhancedMessages = new ArrayList<>(baseMessages);
-        enhancedMessages.add(new SystemMessage(buildJsonExampleInstruction(exampleJson)));
-        optionsBuilder.responseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, null));
-        return new Prompt(enhancedMessages, optionsBuilder.build());
-    }
-
-    private String buildJsonExampleInstruction(String exampleJson) {
-        String lineSeparator = System.lineSeparator();
-        return new StringBuilder().append("请直接返回合法的 json 字符串，字段结构必须与下列示例一致，仅将示例值替换为真实内容。")
-                .append(lineSeparator).append(exampleJson).append(lineSeparator)
-                .append("禁止输出任何额外解释或 Markdown。").toString();
+        ResponseFormat responseFormat =
+                supportsJsonSchema ? new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema)
+                        : new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, null);
+        optionsBuilder.responseFormat(responseFormat);
+        return new Prompt(baseMessages, optionsBuilder.build());
     }
 
     /**
@@ -446,8 +430,7 @@ public class CosmicService {
         List<Message> messages = new ArrayList<>();
         messages.add(systemMessage);
         messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_V1, jsonSchema,
-                CosmicProcessesResponse.class, messages);
+        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_V1, jsonSchema, messages);
         String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_ANALYSIS_V1)
                 .call(prompt).getResult().getOutput().getText();
         if (response == null) {
@@ -517,8 +500,8 @@ public class CosmicService {
         List<Message> messages = new ArrayList<>();
         messages.add(systemMessage);
         messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE1, jsonSchema,
-                CosmicProcessBaseResponse.class, messages);
+        Prompt prompt =
+                buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE1, jsonSchema, messages);
 
         String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_ANALYSIS_PHASE1)
                 .call(prompt).getResult().getOutput().getText();
@@ -613,8 +596,8 @@ public class CosmicService {
         List<Message> messages = new ArrayList<>();
         messages.add(systemMessage);
         messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE2, jsonSchema,
-                DataGroupAttributeResponse.class, messages);
+        Prompt prompt =
+                buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE2, jsonSchema, messages);
 
         String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_ANALYSIS_PHASE2)
                 .call(prompt).getResult().getOutput().getText();
@@ -784,8 +767,7 @@ public class CosmicService {
         List<Message> messages = new ArrayList<>();
         messages.add(systemMessage);
         messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_FIX_DUPLICATES, jsonSchema,
-                FixDuplicateResponse.class, messages);
+        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_FIX_DUPLICATES, jsonSchema, messages);
 
         String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_FIX_DUPLICATES)
                 .call(prompt).getResult().getOutput().getText();

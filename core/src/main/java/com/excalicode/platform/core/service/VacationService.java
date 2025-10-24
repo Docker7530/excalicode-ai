@@ -35,7 +35,6 @@ import com.excalicode.platform.core.dto.VacationDetailItem;
 import com.excalicode.platform.core.dto.VacationDetailRecordDto;
 import com.excalicode.platform.core.dto.VacationRecordDto;
 import com.excalicode.platform.core.dto.VacationSplitResultDto;
-import com.excalicode.platform.core.support.TokenBucketRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,8 +61,6 @@ public class VacationService {
         }
     };
 
-    private static final int AI_CORRECTION_RPM_LIMIT = 300;
-    private static final Duration AI_RATE_LIMIT_PERIOD = Duration.ofMinutes(1);
     private static final int MAX_CONCURRENT_CORRECTIONS = 5;
     private static final int MAX_RATE_LIMIT_RETRIES = 1;
     private static final Duration RATE_LIMIT_BACKOFF = Duration.ofMinutes(1);
@@ -72,8 +69,6 @@ public class VacationService {
 
     private static final Set<String> FIXED_ONE_DAY_VACATION_TYPES = Set.of("迟到", "迟到早退", "未刷卡");
 
-    private final TokenBucketRateLimiter correctionRateLimiter =
-            new TokenBucketRateLimiter(AI_CORRECTION_RPM_LIMIT, AI_RATE_LIMIT_PERIOD);
     private final Semaphore correctionConcurrencyLimiter =
             new Semaphore(MAX_CONCURRENT_CORRECTIONS, true);
 
@@ -261,13 +256,6 @@ public class VacationService {
 
         while (attempt < maxAttempts) {
             attempt++;
-            try {
-                correctionRateLimiter.acquire();
-            } catch (IllegalStateException e) {
-                log.warn("AI速率控制异常，返回原始备注作为兜底", e);
-                return remark;
-            }
-
             try {
                 String correctedRemark = invokeAiCorrection(remark);
                 log.info("备注修正 - 原始: {}, 修正后: {}", remark, correctedRemark);
