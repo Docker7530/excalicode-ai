@@ -117,7 +117,6 @@ public class CosmicService {
         AiFunctionExecutor.AiFunctionResult<FunctionalProcessesResponse> aiResult =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FUNCTIONAL_BREAKDOWN,
                         userPromptText, FunctionalProcessesResponse.class);
-        log.info("AI 功能过程拆解响应: {}", aiResult.rawResponse());
 
         FunctionalProcessesResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getFunctionalProcesses())) {
