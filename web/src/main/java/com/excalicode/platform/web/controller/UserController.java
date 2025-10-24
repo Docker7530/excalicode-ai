@@ -1,7 +1,6 @@
 package com.excalicode.platform.web.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.excalicode.platform.common.exception.BusinessException;
 import com.excalicode.platform.core.dto.SysUserResponse;
 import com.excalicode.platform.core.dto.UserCreateRequest;
 import com.excalicode.platform.core.dto.UserUpdateRequest;
@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
-public class AdminUserController {
+public class UserController {
 
     private final SysUserService sysUserService;
     private final PasswordEncoder passwordEncoder;
@@ -46,7 +46,7 @@ public class AdminUserController {
     @GetMapping
     public ResponseEntity<List<SysUserResponse>> listUsers() {
         List<SysUserResponse> responses =
-                sysUserService.list().stream().map(this::toResponse).collect(Collectors.toList());
+                sysUserService.list().stream().map(this::toResponse).toList();
         return ResponseEntity.ok(responses);
     }
 
@@ -57,9 +57,10 @@ public class AdminUserController {
      * @return 创建后的用户信息
      */
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserCreateRequest request) {
+    public ResponseEntity<SysUserResponse> createUser(
+            @RequestBody @Valid UserCreateRequest request) {
         if (sysUserService.existsByUsername(request.getUsername())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("用户名已存在");
+            throw new BusinessException("用户名已存在");
         }
 
         SysUser user = new SysUser();
@@ -81,17 +82,17 @@ public class AdminUserController {
      * @return 更新后的用户信息
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id,
+    public ResponseEntity<SysUserResponse> updateUser(@PathVariable Long id,
             @RequestBody @Valid UserUpdateRequest request) {
         SysUser existing = sysUserService.getById(id);
         if (existing == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("用户不存在");
+            throw new BusinessException("用户名已存在");
         }
 
         boolean usernameChanged = !existing.getUsername().equals(request.getUsername());
         if (usernameChanged && sysUserService.lambdaQuery()
                 .eq(SysUser::getUsername, request.getUsername()).ne(SysUser::getId, id).exists()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("用户名已存在");
+            throw new BusinessException("用户名已存在");
         }
 
         existing.setUsername(request.getUsername());
@@ -113,16 +114,16 @@ public class AdminUserController {
      * @return 删除结果
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         SysUser existing = sysUserService.getById(id);
         if (existing == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("用户不存在");
+            throw new BusinessException("用户不存在");
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication != null ? authentication.getName() : null;
         if (existing.getUsername().equals(currentUsername)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("不能删除当前登录用户");
+            throw new BusinessException("不能删除当前登录用户");
         }
 
         sysUserService.removeById(id);

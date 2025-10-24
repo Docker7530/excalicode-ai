@@ -36,7 +36,6 @@ export const ENDPOINTS = Object.freeze({
   },
 
   AI_FUNCTION: {
-    FUNCTION_TYPES: '/api/ai-function/function-types',
     LIST: '/api/ai-function/list',
     SET: '/api/ai-function/set',
     DETAIL: (id) => `/api/ai-function/${id}`,
@@ -64,7 +63,6 @@ export const ENDPOINTS = Object.freeze({
   },
 
   FUNCTION_PROMPT: {
-    FUNCTION_TYPES: '/api/function-prompts/function-types',
     LIST: '/api/function-prompts',
     DETAIL: (functionCode) => `/api/function-prompts/${functionCode}`,
     SET: '/api/function-prompts',

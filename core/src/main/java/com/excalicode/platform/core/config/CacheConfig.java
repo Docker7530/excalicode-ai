@@ -1,10 +1,9 @@
-package com.excalicode.platform.web.config;
+package com.excalicode.platform.core.config;
 
 import java.time.Duration;
 import java.util.List;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +15,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * 缓存配置类 使用 Caffeine 作为本地缓存实现。
  */
 @Configuration
-@EnableCaching
 public class CacheConfig {
 
     /**
      * 缓存名称常量
      */
     public static final String PROMPTS_CACHE = "prompts";
+    public static final String AI_FUNCTION_CONFIGS_CACHE = "aiFunctionConfigs";
 
     /**
      * 配置 Caffeine 缓存管理器
@@ -31,7 +30,8 @@ public class CacheConfig {
     @Primary
     CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
-        cacheManager.setCaches(List.of(buildCache(PROMPTS_CACHE, 1000, Duration.ofHours(24))));
+        cacheManager.setCaches(List.of(buildCache(PROMPTS_CACHE, 1000, Duration.ofHours(24)),
+                buildCache(AI_FUNCTION_CONFIGS_CACHE, 200, Duration.ofMinutes(30))));
         return cacheManager;
     }
 

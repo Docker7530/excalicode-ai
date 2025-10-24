@@ -1,4 +1,4 @@
-package com.excalicode.platform.core.service;
+package com.excalicode.platform.core.ai;
 
 import java.util.Objects;
 import org.springframework.ai.chat.model.ChatModel;
@@ -10,9 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.AiModel;
 import com.excalicode.platform.core.entity.AiProvider;
 import com.excalicode.platform.core.entity.PromptTemplate;
+import com.excalicode.platform.core.service.AiFunctionModelMappingService;
+import com.excalicode.platform.core.service.AiModelService;
+import com.excalicode.platform.core.service.AiProviderService;
+import com.excalicode.platform.core.service.FunctionPromptMappingService;
+import com.excalicode.platform.core.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,27 +40,24 @@ public class AiFunctionConfigurationService {
     /**
      * 根据功能类型组合出完整执行配置。
      */
-    @Cacheable(value = "aiFunctionConfigs", key = "#functionType.code")
+    @Cacheable(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, key = "#functionType.code")
     public AiFunctionConfiguration getConfiguration(AiFunctionType functionType) {
         Objects.requireNonNull(functionType, "functionType 不能为空");
         String functionCode = functionType.getCode();
-        String promptCode =
-                functionPromptMappingService.getPromptCodeByFunctionCode(functionCode);
+        String promptCode = functionPromptMappingService.getPromptCodeByFunctionCode(functionCode);
         if (!StringUtils.hasText(promptCode)) {
-            throw new BusinessException(String.format("功能 [%s] 未配置提示词映射",
-                    functionType.getDescription()));
+            throw new BusinessException(
+                    String.format("功能 [%s] 未配置提示词映射", functionType.getDescription()));
         }
 
         PromptTemplate promptTemplate = promptTemplateService.getByCode(promptCode);
         if (promptTemplate == null) {
-            throw new BusinessException(
-                    String.format("提示词模板 [%s] 不存在", promptCode));
+            throw new BusinessException(String.format("提示词模板 [%s] 不存在", promptCode));
         }
 
         String promptContent = promptTemplate.getContent();
         if (!StringUtils.hasText(promptContent)) {
-            throw new BusinessException(
-                    String.format("提示词模板 [%s] 内容为空", promptCode));
+            throw new BusinessException(String.format("提示词模板 [%s] 内容为空", promptCode));
         }
 
         Long modelId = functionModelMappingService.getModelIdByFunctionType(functionType);
@@ -69,8 +72,7 @@ public class AiFunctionConfigurationService {
             } else {
                 AiProvider provider = aiProviderService.getById(model.getProviderId());
                 if (provider == null) {
-                    log.warn("模型 {} 映射的厂商 {} 不存在，回退到默认 ChatModel", modelId,
-                            model.getProviderId());
+                    log.warn("模型 {} 映射的厂商 {} 不存在，回退到默认 ChatModel", modelId, model.getProviderId());
                 } else {
                     chatModel = createChatModel(provider, model);
                     supportsJsonSchema = model.getSupportsJsonSchema() == null
@@ -87,8 +89,8 @@ public class AiFunctionConfigurationService {
         if (!StringUtils.hasText(provider.getBaseUrl())
                 || !StringUtils.hasText(provider.getApiKey())
                 || !StringUtils.hasText(model.getModelName())) {
-            log.warn("厂商或模型配置缺失，使用默认 ChatModel。provider={}, model={}",
-                    provider.getId(), model.getId());
+            log.warn("厂商或模型配置缺失，使用默认 ChatModel。provider={}, model={}", provider.getId(),
+                    model.getId());
             return defaultChatModel;
         }
 

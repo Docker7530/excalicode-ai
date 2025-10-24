@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.ai.AiFunctionExecutor;
 import com.excalicode.platform.core.config.CosmicProcessingConfig;
 import com.excalicode.platform.core.dto.AnalysisResultDto;
 import com.excalicode.platform.core.dto.CosmicAnalysisRequestDto;

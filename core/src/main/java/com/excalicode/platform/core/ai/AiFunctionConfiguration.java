@@ -1,4 +1,4 @@
-package com.excalicode.platform.core.service;
+package com.excalicode.platform.core.ai;
 
 import org.springframework.ai.chat.model.ChatModel;
 import com.excalicode.platform.common.enums.AiFunctionType;

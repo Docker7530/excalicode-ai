@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.PromptTemplate;
 import com.excalicode.platform.core.mapper.PromptTemplateMapper;
 import com.excalicode.platform.core.service.PromptTemplateService;
@@ -18,7 +19,7 @@ public class PromptTemplateServiceImpl extends ServiceImpl<PromptTemplateMapper,
         implements PromptTemplateService {
 
     @Override
-    @Cacheable(value = "prompts", key = "#code")
+    @Cacheable(value = CacheConfig.PROMPTS_CACHE, key = "#code")
     public PromptTemplate getByCode(String code) {
         if (code == null || code.trim().isEmpty()) {
             return null;
@@ -42,7 +43,8 @@ public class PromptTemplateServiceImpl extends ServiceImpl<PromptTemplateMapper,
     }
 
     @Override
-    @CacheEvict(value = {"prompts", "aiFunctionConfigs"}, allEntries = true)
+    @CacheEvict(value = {CacheConfig.PROMPTS_CACHE, CacheConfig.AI_FUNCTION_CONFIGS_CACHE},
+            allEntries = true)
     public boolean saveOrUpdatePrompt(PromptTemplate promptTemplate) {
         if (promptTemplate == null) {
             return false;
@@ -66,7 +68,8 @@ public class PromptTemplateServiceImpl extends ServiceImpl<PromptTemplateMapper,
     }
 
     @Override
-    @CacheEvict(value = {"prompts", "aiFunctionConfigs"}, allEntries = true)
+    @CacheEvict(value = {CacheConfig.PROMPTS_CACHE, CacheConfig.AI_FUNCTION_CONFIGS_CACHE},
+            allEntries = true)
     public boolean removeById(java.io.Serializable id) {
         return super.removeById(id);
     }

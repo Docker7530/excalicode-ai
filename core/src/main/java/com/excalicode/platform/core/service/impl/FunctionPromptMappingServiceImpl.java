@@ -5,6 +5,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.FunctionPromptMapping;
 import com.excalicode.platform.core.entity.PromptTemplate;
 import com.excalicode.platform.core.mapper.FunctionPromptMappingMapper;
@@ -37,7 +38,7 @@ public class FunctionPromptMappingServiceImpl
     }
 
     @Override
-    @CacheEvict(value = "aiFunctionConfigs", allEntries = true)
+    @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
     public boolean setFunctionPromptMapping(String functionCode, String promptCode,
             Integer priority) {
         if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null
@@ -88,7 +89,7 @@ public class FunctionPromptMappingServiceImpl
     }
 
     @Override
-    @CacheEvict(value = "aiFunctionConfigs", allEntries = true)
+    @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
     public boolean deleteFunctionPromptMapping(String functionCode, String promptCode) {
         if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null
                 || promptCode.trim().isEmpty()) {

@@ -1,4 +1,4 @@
-package com.excalicode.platform.core.service;
+package com.excalicode.platform.core.ai;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +52,8 @@ public class AiFunctionExecutor {
         return trimmed;
     }
 
-    public <T> AiFunctionResult<T> executeStructured(AiFunctionType functionType,
-            String userPrompt, Class<T> responseType) {
+    public <T> AiFunctionResult<T> executeStructured(AiFunctionType functionType, String userPrompt,
+            Class<T> responseType) {
         return executeStructured(functionType, List.of(new UserMessage(userPrompt)), responseType);
     }
 

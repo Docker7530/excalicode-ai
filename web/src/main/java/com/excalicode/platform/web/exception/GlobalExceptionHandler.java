@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGenericException(Exception e) {
         log.error("系统异常", e);
-        String message = StringUtils.hasText(e.getMessage()) ? e.getMessage() : "系统内部错误";
+        String message = "系统异常，请稍后重试或联系技术支持。";
         return createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }
 

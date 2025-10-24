@@ -1,8 +1,6 @@
 package com.excalicode.platform.web.controller;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,8 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.core.dto.AiFunctionTypeDto;
 import com.excalicode.platform.core.dto.SetFunctionPromptMappingRequest;
 import com.excalicode.platform.core.entity.FunctionPromptMapping;
 import com.excalicode.platform.core.service.FunctionPromptMappingService;
@@ -31,17 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 public class FunctionPromptMappingController {
 
     private final FunctionPromptMappingService mappingService;
-
-    /**
-     * 获取所有功能类型枚举
-     */
-    @GetMapping("/function-types")
-    public ResponseEntity<List<AiFunctionTypeDto>> getFunctionTypes() {
-        List<AiFunctionTypeDto> functionTypes = Arrays.stream(AiFunctionType.values())
-                .map(type -> new AiFunctionTypeDto(type.getCode(), type.getDescription()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(functionTypes);
-    }
 
     /**
      * 获取所有映射关系 (包含提示词模板信息)
