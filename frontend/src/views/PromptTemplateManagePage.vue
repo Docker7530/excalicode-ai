@@ -11,7 +11,6 @@
       />
       <div class="header-content">
         <h1>提示词模板管理</h1>
-        <p class="subtitle">可视化编辑和管理 Markdown 格式的提示词模板</p>
       </div>
     </div>
 
@@ -423,12 +422,6 @@ onBeforeUnmount(() => {
         font-size: 28px;
         font-weight: 600;
         color: #303133;
-      }
-
-      .subtitle {
-        margin: 5px 0 0 0;
-        font-size: 14px;
-        color: #909399;
       }
     }
   }
