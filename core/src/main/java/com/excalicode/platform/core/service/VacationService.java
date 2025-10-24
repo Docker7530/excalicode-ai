@@ -20,10 +20,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -46,8 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class VacationService {
 
-    private final ChatModel chatModel;
-    private final PromptService promptService;
+    private final AiFunctionExecutor aiFunctionExecutor;
 
     /**
      * 需要识别的列名映射
@@ -337,13 +332,7 @@ public class VacationService {
     }
 
     private String invokeAiCorrection(String remark) {
-        String systemPrompt = promptService.getPrompt(AiFunctionType.QINSHI_DATA_PROCESSING);
-        SystemMessage systemMessage = new SystemMessage(systemPrompt);
-        UserMessage userMessage = new UserMessage(remark);
-
-        Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
-        String correctedRemark = chatModel.call(prompt).getResult().getOutput().getText();
-        return correctedRemark != null ? correctedRemark.trim() : "";
+        return aiFunctionExecutor.executeText(AiFunctionType.QINSHI_DATA_PROCESSING, remark);
     }
 
     private boolean isRateLimitException(Exception exception) {

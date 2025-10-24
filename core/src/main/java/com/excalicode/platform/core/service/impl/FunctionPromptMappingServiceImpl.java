@@ -1,8 +1,7 @@
 package com.excalicode.platform.core.service.impl;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,15 +9,12 @@ import com.excalicode.platform.core.entity.FunctionPromptMapping;
 import com.excalicode.platform.core.entity.PromptTemplate;
 import com.excalicode.platform.core.mapper.FunctionPromptMappingMapper;
 import com.excalicode.platform.core.service.FunctionPromptMappingService;
-import com.excalicode.platform.core.service.PromptService;
 import com.excalicode.platform.core.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 功能-提示词映射 Service 实现类
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FunctionPromptMappingServiceImpl
@@ -26,10 +22,6 @@ public class FunctionPromptMappingServiceImpl
         implements FunctionPromptMappingService {
 
     private final PromptTemplateService promptTemplateService;
-
-    @Autowired
-    @Lazy
-    private PromptService promptService;
 
     @Override
     public String getPromptCodeByFunctionCode(String functionCode) {
@@ -45,6 +37,7 @@ public class FunctionPromptMappingServiceImpl
     }
 
     @Override
+    @CacheEvict(value = "aiFunctionConfigs", allEntries = true)
     public boolean setFunctionPromptMapping(String functionCode, String promptCode,
             Integer priority) {
         if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null
@@ -63,26 +56,18 @@ public class FunctionPromptMappingServiceImpl
                         .eq(FunctionPromptMapping::getFunctionCode, functionCode)
                         .eq(FunctionPromptMapping::getPromptCode, promptCode));
 
-        boolean result;
         if (existingMapping != null) {
             // 更新现有映射
             existingMapping.setPriority(priority);
-            result = this.updateById(existingMapping);
+            return this.updateById(existingMapping);
         } else {
             // 创建新映射
             FunctionPromptMapping newMapping = new FunctionPromptMapping();
             newMapping.setFunctionCode(functionCode);
             newMapping.setPromptCode(promptCode);
             newMapping.setPriority(priority);
-            result = this.save(newMapping);
+            return this.save(newMapping);
         }
-
-        // 清除 PromptService 缓存
-        if (result) {
-            evictPromptServiceCache(functionCode);
-        }
-
-        return result;
     }
 
     @Override
@@ -103,38 +88,15 @@ public class FunctionPromptMappingServiceImpl
     }
 
     @Override
+    @CacheEvict(value = "aiFunctionConfigs", allEntries = true)
     public boolean deleteFunctionPromptMapping(String functionCode, String promptCode) {
         if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null
                 || promptCode.trim().isEmpty()) {
             return false;
         }
 
-        boolean result = this.remove(new LambdaQueryWrapper<FunctionPromptMapping>()
+        return this.remove(new LambdaQueryWrapper<FunctionPromptMapping>()
                 .eq(FunctionPromptMapping::getFunctionCode, functionCode)
                 .eq(FunctionPromptMapping::getPromptCode, promptCode));
-
-        // 清除 PromptService 缓存
-        if (result) {
-            evictPromptServiceCache(functionCode);
-        }
-
-        return result;
-    }
-
-    /**
-     * 清除 PromptService 的缓存
-     *
-     * @param functionCode 功能代码
-     */
-    private void evictPromptServiceCache(String functionCode) {
-        try {
-            if (promptService != null) {
-                promptService.evictCache(functionCode);
-                log.info("已清除 PromptService 缓存: functionCode={}", functionCode);
-            }
-        } catch (Exception e) {
-            log.error("清除 PromptService 缓存失败: functionCode={}", functionCode, e);
-            // 不抛出异常，避免影响主流程
-        }
     }
 }

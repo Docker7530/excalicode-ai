@@ -40,7 +40,6 @@ export const ENDPOINTS = Object.freeze({
     LIST: '/api/ai-function/list',
     SET: '/api/ai-function/set',
     DETAIL: (id) => `/api/ai-function/${id}`,
-    CLEAR_CACHE: '/api/ai-function/clear-cache',
   },
 
   REQUIREMENT: {
@@ -71,7 +70,6 @@ export const ENDPOINTS = Object.freeze({
     SET: '/api/function-prompts',
     DELETE: (functionCode, promptCode) =>
       `/api/function-prompts/${functionCode}/${promptCode}`,
-    CLEAR_CACHE: '/api/function-prompts/clear-cache',
   },
 
   FUNCTION_CONFIGURATION: {

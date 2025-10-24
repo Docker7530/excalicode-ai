@@ -3,7 +3,6 @@ package com.excalicode.platform.web.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -98,13 +97,4 @@ public class FunctionPromptMappingController {
         }
     }
 
-    /**
-     * 手动清除 Prompt 缓存
-     */
-    @PostMapping("/clear-cache")
-    @CacheEvict(value = "prompts", allEntries = true)
-    public ResponseEntity<Void> clearCache() {
-        log.info("手动清除 Prompt 缓存");
-        return ResponseEntity.ok().build();
-    }
 }

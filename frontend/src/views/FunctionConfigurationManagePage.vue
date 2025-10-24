@@ -75,23 +75,6 @@
         >
           刷新数据
         </ElButton>
-        <ElButton
-          :icon="Setting"
-          size="large"
-          class="toolbar-btn"
-          @click="handleClearModelCache"
-        >
-          清除模型缓存
-        </ElButton>
-        <ElButton
-          type="warning"
-          :icon="Delete"
-          size="large"
-          class="toolbar-btn"
-          @click="handleClearPromptCache"
-        >
-          清除提示词缓存
-        </ElButton>
       </div>
     </div>
 
@@ -249,8 +232,6 @@
 
 <script setup>
 import {
-  clearModelCache,
-  clearPromptCache,
   deleteFunctionModelMapping,
   deleteFunctionPromptMapping,
   listFunctionConfigurations,
@@ -261,12 +242,10 @@ import {
   ArrowLeft,
   Connection,
   Cpu,
-  Delete,
   Document,
   Edit,
   Grid,
   RefreshRight,
-  Setting,
 } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -435,26 +414,6 @@ const handleClearPromptMapping = async (item) => {
       console.error('清除提示词配置失败', error);
       ElMessage.error(error.message || '清除提示词配置失败');
     }
-  }
-};
-
-const handleClearModelCache = async () => {
-  try {
-    await clearModelCache();
-    ElMessage.success('模型缓存已清除');
-  } catch (error) {
-    console.error('清除模型缓存失败', error);
-    ElMessage.error(error.message || '清除模型缓存失败');
-  }
-};
-
-const handleClearPromptCache = async () => {
-  try {
-    await clearPromptCache();
-    ElMessage.success('提示词缓存已清除');
-  } catch (error) {
-    console.error('清除提示词缓存失败', error);
-    ElMessage.error(error.message || '清除提示词缓存失败');
   }
 };
 

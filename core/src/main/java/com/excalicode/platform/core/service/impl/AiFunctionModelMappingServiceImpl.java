@@ -1,6 +1,8 @@
 package com.excalicode.platform.core.service.impl;
 
 import java.util.List;
+import java.io.Serializable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -40,6 +42,7 @@ public class AiFunctionModelMappingServiceImpl
     }
 
     @Override
+    @CacheEvict(value = "aiFunctionConfigs", allEntries = true)
     public boolean setFunctionModelMapping(AiFunctionType functionType, Long modelId) {
         if (functionType == null || modelId == null) {
             return false;
@@ -78,5 +81,11 @@ public class AiFunctionModelMappingServiceImpl
         }
 
         return mappings;
+    }
+
+    @Override
+    @CacheEvict(value = "aiFunctionConfigs", allEntries = true)
+    public boolean removeById(Serializable id) {
+        return super.removeById(id);
     }
 }

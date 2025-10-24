@@ -26,10 +26,10 @@ excalicode-ai/
 
 ## 核心模块
 
-- `common`: 统一的提示词加载服务、业务异常、枚举定义，结合 Caffeine 缓存提升提示词读取效率。
+- `common`: 统一的提示词加载服务、业务异常、枚举定义，结合 Spring Cache 提升提示词读取效率。
 - `core`:
   - `CosmicService` 负责多阶段 AI 调用、Excel 导入导出、重复项修复与文档生成。
-  - `ChatModelProvider` 动态选择模型，支持 JSON Schema 响应与本地缓存。
+  - `AiFunctionExecutor` 聚合提示词、模型、厂商配置，按功能统一调度 AI 并处理 JSON Schema。
   - MyBatis-Plus 实体与 Mapper 层封装常用基础数据操作。
 - `web`: Spring MVC 控制器、JWT 过滤链、全局异常处理、.env 自动加载、接口分发与静态资源配置。
 - `frontend`: Vue Router 多页面（需求分析、休假处理、后台管理），结合 Element Plus UI、SSE 流式渲染、Axios 统一错误处理。
@@ -122,9 +122,9 @@ npm run dev
 
 ## AI 提示词与模型管理
 
-- 提示词定义位于 `common/src/main/resources/prompts`，通过 `PromptService` 读取并缓存 24h。
+- 提示词定义位于 `common/src/main/resources/prompts`，由 `AiFunctionConfigurationService` 结合 Spring Cache 自动加载。
 - `AiFunctionType` 定义各业务功能（需求扩写、功能拆解、备注修正等），配合数据库映射表可分配不同模型。
-- `TokenBucketRateLimiter` 与信号量共同约束备注修正的请求速率，防止触发厂商限流。
+- 备注修正请求依靠信号量控制并发，辅以限流重试兜底，规避厂商速率限制。
 
 ## 开发注意事项
 

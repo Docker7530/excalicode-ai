@@ -14,14 +14,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -57,8 +49,7 @@ import reactor.core.publisher.Flux;
 @Service
 public class CosmicService {
 
-    private final ChatModelProvider chatModelProvider;
-    private final PromptService promptService;
+    private final AiFunctionExecutor aiFunctionExecutor;
     private final CosmicProcessingConfig config;
     private final ExcelService excelService;
     private final PrdService prdService;
@@ -73,10 +64,9 @@ public class CosmicService {
     private static final int COLUMN_DATA_GROUP = 7;
     private static final int COLUMN_DATA_ATTRIBUTES = 8;
 
-    public CosmicService(ChatModelProvider chatModelProvider, PromptService promptService,
-            CosmicProcessingConfig config, ExcelService excelService, PrdService prdService) {
-        this.chatModelProvider = chatModelProvider;
-        this.promptService = promptService;
+    public CosmicService(AiFunctionExecutor aiFunctionExecutor, CosmicProcessingConfig config,
+            ExcelService excelService, PrdService prdService) {
+        this.aiFunctionExecutor = aiFunctionExecutor;
         this.config = config;
         this.excelService = excelService;
         this.prdService = prdService;
@@ -99,16 +89,10 @@ public class CosmicService {
         if (!StringUtils.hasText(originalRequirement)) {
             return Flux.error(new BusinessException("原始需求描述不能为空"));
         }
-        String enhancePrompt = promptService.getPrompt(AiFunctionType.REQUIREMENT_ENHANCE);
-        SystemMessage systemMessage = new SystemMessage(enhancePrompt);
-        UserMessage userMessage = new UserMessage(originalRequirement.trim());
-        Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
+        Flux<String> flux = aiFunctionExecutor.streamText(AiFunctionType.REQUIREMENT_ENHANCE,
+                originalRequirement.trim());
 
-        return chatModelProvider.getChatModel(AiFunctionType.REQUIREMENT_ENHANCE).stream(prompt)
-                .map(response -> {
-                    String chunk = response.getResult().getOutput().getText();
-                    return chunk != null ? chunk : "";
-                }).doOnSubscribe(subscription -> log.info("开始流式推送需求扩写结果"))
+        return flux.doOnSubscribe(subscription -> log.info("开始流式推送需求扩写结果"))
                 .doOnNext(chunk1 -> log.info("需求扩写流式片段: {}", chunk1))
                 .doOnComplete(() -> log.info("需求扩写流式完成"))
                 .doOnError(error -> log.error("流式需求扩写失败", error)).onErrorMap(error1 -> {
@@ -127,30 +111,14 @@ public class CosmicService {
      * @throws BusinessException 业务异常
      */
     public ProcessBreakdownResultDto breakdownProcess(ProcessBreakdownRequestDto request) {
-        BeanOutputConverter<FunctionalProcessesResponse> outputConverter =
-                new BeanOutputConverter<>(FunctionalProcessesResponse.class);
-        String jsonSchema = outputConverter.getJsonSchema();
-
-        String systemPromptText =
-                promptService.getPrompt(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN);
-        SystemMessage systemMessage = new SystemMessage(systemPromptText);
         String userPromptText = buildFunctionalProcessUserPrompt(
                 request.getRequirementDescription(), request.getExpectedProcessCount());
-        UserMessage userMessage = new UserMessage(userPromptText);
-        List<Message> messages = new ArrayList<>();
-        messages.add(systemMessage);
-        messages.add(userMessage);
-        Prompt prompt =
-                buildJsonPrompt(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN, jsonSchema, messages);
-        ChatResponse chatResponse = chatModelProvider
-                .getChatModel(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN).call(prompt);
-        String response = chatResponse.getResult().getOutput().getText();
-        if (response == null) {
-            throw new BusinessException("AI 拆解未能生成有效的功能过程: 响应为空");
-        }
-        log.info("AI 功能过程拆解响应: {}", response);
+        AiFunctionExecutor.AiFunctionResult<FunctionalProcessesResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN,
+                        userPromptText, FunctionalProcessesResponse.class);
+        log.info("AI 功能过程拆解响应: {}", aiResult.rawResponse());
 
-        FunctionalProcessesResponse result = outputConverter.convert(response);
+        FunctionalProcessesResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getFunctionalProcesses())) {
             throw new BusinessException("AI 拆解未能生成有效的功能过程");
         }
@@ -174,17 +142,6 @@ public class CosmicService {
         }
 
         return builder.toString();
-    }
-
-    private Prompt buildJsonPrompt(AiFunctionType functionType, String jsonSchema,
-            List<Message> baseMessages) {
-        boolean supportsJsonSchema = chatModelProvider.supportsJsonSchema(functionType);
-        OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder();
-        ResponseFormat responseFormat =
-                supportsJsonSchema ? new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema)
-                        : new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, null);
-        optionsBuilder.responseFormat(responseFormat);
-        return new Prompt(baseMessages, optionsBuilder.build());
     }
 
     /**
@@ -419,26 +376,13 @@ public class CosmicService {
      * @throws BusinessException 业务异常
      */
     public AnalysisResultDto analyzeRequirement(CosmicAnalysisRequestDto request) {
-        BeanOutputConverter<CosmicProcessesResponse> outputConverter =
-                new BeanOutputConverter<>(CosmicProcessesResponse.class);
-        String jsonSchema = outputConverter.getJsonSchema();
-        String cosmicPrompt = promptService.getPrompt(AiFunctionType.COSMIC_ANALYSIS_V1);
-        SystemMessage systemMessage = new SystemMessage(cosmicPrompt);
-
         String userPromptText = buildCosmicUserPrompt(request.getFunctionalProcesses());
-        UserMessage userMessage = new UserMessage(userPromptText);
-        List<Message> messages = new ArrayList<>();
-        messages.add(systemMessage);
-        messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_V1, jsonSchema, messages);
-        String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_ANALYSIS_V1)
-                .call(prompt).getResult().getOutput().getText();
-        if (response == null) {
-            throw new BusinessException("AI 分析未能生成有效的 COSMIC 过程: 响应为空");
-        }
-        log.info("AI COSMIC 分析响应: {}", response);
+        AiFunctionExecutor.AiFunctionResult<CosmicProcessesResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_V1,
+                        userPromptText, CosmicProcessesResponse.class);
+        log.info("AI COSMIC 分析响应: {}", aiResult.rawResponse());
 
-        CosmicProcessesResponse result = outputConverter.convert(response);
+        CosmicProcessesResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getProcesses())) {
             throw new BusinessException("AI 分析未能生成有效的 COSMIC 过程");
         }
@@ -487,31 +431,14 @@ public class CosmicService {
 
     private List<CosmicProcessBaseDto> analyzeCosmicProcessesPhase1(
             List<FunctionalProcessDto> functionalProcesses) {
-        BeanOutputConverter<CosmicProcessBaseResponse> outputConverter =
-                new BeanOutputConverter<>(CosmicProcessBaseResponse.class);
-        String jsonSchema = outputConverter.getJsonSchema();
-
-        String systemPrompt = promptService.getPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE1);
-        SystemMessage systemMessage = new SystemMessage(systemPrompt);
-
         String userPromptText = buildCosmicUserPrompt(functionalProcesses);
-        UserMessage userMessage = new UserMessage(userPromptText);
-
-        List<Message> messages = new ArrayList<>();
-        messages.add(systemMessage);
-        messages.add(userMessage);
-        Prompt prompt =
-                buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE1, jsonSchema, messages);
-
-        String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_ANALYSIS_PHASE1)
-                .call(prompt).getResult().getOutput().getText();
+        AiFunctionExecutor.AiFunctionResult<CosmicProcessBaseResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE1,
+                        userPromptText, CosmicProcessBaseResponse.class);
+        String response = aiResult.rawResponse();
         log.info("阶段1 AI响应长度: {} 字符", response != null ? response.length() : 0);
 
-        if (response == null) {
-            throw new BusinessException("阶段1: AI未能生成基础字段");
-        }
-
-        CosmicProcessBaseResponse result = outputConverter.convert(response);
+        CosmicProcessBaseResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getProcesses())) {
             throw new BusinessException("阶段1: AI未能生成有效的基础过程");
         }
@@ -581,32 +508,14 @@ public class CosmicService {
     }
 
     private DataGroupAttributeResponse callPhase2AI(CosmicProcessBaseDto baseProcess) {
-        BeanOutputConverter<DataGroupAttributeResponse> outputConverter =
-                new BeanOutputConverter<>(DataGroupAttributeResponse.class);
-        String jsonSchema = outputConverter.getJsonSchema();
-
-        String systemPrompt = promptService.getPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE2);
-        SystemMessage systemMessage = new SystemMessage(systemPrompt);
-
         String userPromptText =
-                String.format("功能过程: %s\n子过程描述: %s\n数据移动类型: %s", baseProcess.getFunctionalProcess(),
+                String.format("功能过程: %s%n子过程描述: %s%n数据移动类型: %s", baseProcess.getFunctionalProcess(),
                         baseProcess.getSubProcessDesc(), baseProcess.getDataMovementType());
-        UserMessage userMessage = new UserMessage(userPromptText);
+        AiFunctionExecutor.AiFunctionResult<DataGroupAttributeResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE2,
+                        userPromptText, DataGroupAttributeResponse.class);
 
-        List<Message> messages = new ArrayList<>();
-        messages.add(systemMessage);
-        messages.add(userMessage);
-        Prompt prompt =
-                buildJsonPrompt(AiFunctionType.COSMIC_ANALYSIS_PHASE2, jsonSchema, messages);
-
-        String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_ANALYSIS_PHASE2)
-                .call(prompt).getResult().getOutput().getText();
-
-        if (response == null) {
-            throw new BusinessException("阶段2: AI未返回数据组和数据属性");
-        }
-
-        DataGroupAttributeResponse result = outputConverter.convert(response);
+        DataGroupAttributeResponse result = aiResult.value();
         if (result == null || !StringUtils.hasText(result.getDataGroup())) {
             throw new BusinessException("阶段2: AI返回的数据组为空");
         }
@@ -756,27 +665,11 @@ public class CosmicService {
     }
 
     private String callFixAI(String userPrompt) {
-        BeanOutputConverter<FixDuplicateResponse> outputConverter =
-                new BeanOutputConverter<>(FixDuplicateResponse.class);
-        String jsonSchema = outputConverter.getJsonSchema();
+        AiFunctionExecutor.AiFunctionResult<FixDuplicateResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FIX_DUPLICATES,
+                        userPrompt, FixDuplicateResponse.class);
 
-        String systemPrompt = promptService.getPrompt(AiFunctionType.COSMIC_FIX_DUPLICATES);
-        SystemMessage systemMessage = new SystemMessage(systemPrompt);
-        UserMessage userMessage = new UserMessage(userPrompt);
-
-        List<Message> messages = new ArrayList<>();
-        messages.add(systemMessage);
-        messages.add(userMessage);
-        Prompt prompt = buildJsonPrompt(AiFunctionType.COSMIC_FIX_DUPLICATES, jsonSchema, messages);
-
-        String response = chatModelProvider.getChatModel(AiFunctionType.COSMIC_FIX_DUPLICATES)
-                .call(prompt).getResult().getOutput().getText();
-
-        if (response == null) {
-            throw new BusinessException("修复AI未返回结果");
-        }
-
-        FixDuplicateResponse result = outputConverter.convert(response);
+        FixDuplicateResponse result = aiResult.value();
         if (result == null || !StringUtils.hasText(result.getFixed())) {
             throw new BusinessException("修复AI返回的内容为空");
         }
@@ -814,12 +707,9 @@ public class CosmicService {
         if (!StringUtils.hasText(requirementName)) {
             throw new BusinessException("需求名称不能为空");
         }
-        String prdPrompt = promptService.getPrompt(AiFunctionType.PRD_GENERATION);
         String userInput =
                 String.format("需求名称：%s\n功能过程或子过程描述：%s", requirementName.trim(), processDescription);
-        Prompt prompt = new Prompt(prdPrompt + "\n\n" + userInput);
-        return chatModelProvider.getChatModel(AiFunctionType.PRD_GENERATION).call(prompt)
-                .getResult().getOutput().getText();
+        return aiFunctionExecutor.executeText(AiFunctionType.PRD_GENERATION, userInput);
     }
 
     /**

@@ -16,7 +16,6 @@ import com.excalicode.platform.core.dto.AiFunctionTypeDto;
 import com.excalicode.platform.core.dto.SetFunctionMappingRequest;
 import com.excalicode.platform.core.entity.AiFunctionModelMapping;
 import com.excalicode.platform.core.service.AiFunctionModelMappingService;
-import com.excalicode.platform.core.service.ChatModelProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AiFunctionMappingController {
 
     private final AiFunctionModelMappingService mappingService;
-    private final ChatModelProvider chatModelProvider;
 
     /**
      * 获取所有功能类型枚举
@@ -70,8 +68,6 @@ public class AiFunctionMappingController {
         boolean success =
                 mappingService.setFunctionModelMapping(functionType, request.getModelId());
         if (success) {
-            // 清除缓存，使新配置生效
-            chatModelProvider.clearCache();
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.internalServerError().build();
@@ -86,21 +82,10 @@ public class AiFunctionMappingController {
         log.info("删除功能映射: id={}", id);
         boolean success = mappingService.removeById(id);
         if (success) {
-            // 清除缓存
-            chatModelProvider.clearCache();
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    /**
-     * 手动清除 ChatModel 缓存
-     */
-    @PostMapping("/clear-cache")
-    public ResponseEntity<Void> clearCache() {
-        log.info("手动清除 ChatModel 缓存");
-        chatModelProvider.clearCache();
-        return ResponseEntity.ok().build();
-    }
 }

@@ -27,13 +27,6 @@ export function deleteFunctionModelMapping(id) {
 }
 
 /**
- * 清除模型缓存
- */
-export function clearModelCache() {
-  return api.post(ENDPOINTS.AI_FUNCTION.CLEAR_CACHE);
-}
-
-/**
  * 设置功能的提示词映射
  */
 export function setFunctionPromptMapping(data) {
@@ -45,11 +38,4 @@ export function setFunctionPromptMapping(data) {
  */
 export function deleteFunctionPromptMapping(functionCode, promptCode) {
   return api.delete(ENDPOINTS.FUNCTION_PROMPT.DELETE(functionCode, promptCode));
-}
-
-/**
- * 清除提示词缓存
- */
-export function clearPromptCache() {
-  return api.post(ENDPOINTS.FUNCTION_PROMPT.CLEAR_CACHE);
 }
