@@ -90,7 +90,7 @@ public class CosmicService {
         if (!StringUtils.hasText(originalRequirement)) {
             return Flux.error(new BusinessException("原始需求描述不能为空"));
         }
-        Flux<String> flux = aiFunctionExecutor.streamText(AiFunctionType.REQUIREMENT_ENHANCE,
+        Flux<String> flux = aiFunctionExecutor.streamText(AiFunctionType.COSMIC_REQUIREMENT_ENHANCE,
                 originalRequirement.trim());
 
         return flux.doOnSubscribe(subscription -> log.info("开始流式推送需求扩写结果"))
@@ -115,7 +115,7 @@ public class CosmicService {
         String userPromptText = buildFunctionalProcessUserPrompt(
                 request.getRequirementDescription(), request.getExpectedProcessCount());
         AiFunctionExecutor.AiFunctionResult<FunctionalProcessesResponse> aiResult =
-                aiFunctionExecutor.executeStructured(AiFunctionType.FUNCTIONAL_PROCESS_BREAKDOWN,
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FUNCTIONAL_BREAKDOWN,
                         userPromptText, FunctionalProcessesResponse.class);
         log.info("AI 功能过程拆解响应: {}", aiResult.rawResponse());
 
@@ -710,7 +710,7 @@ public class CosmicService {
         }
         String userInput =
                 String.format("需求名称：%s\n功能过程或子过程描述：%s", requirementName.trim(), processDescription);
-        return aiFunctionExecutor.executeText(AiFunctionType.PRD_GENERATION, userInput);
+        return aiFunctionExecutor.executeText(AiFunctionType.COSMIC_PRD_GENERATION, userInput);
     }
 
     /**

@@ -13,12 +13,12 @@ public enum AiFunctionType {
     /**
      * 需求扩写美化
      */
-    REQUIREMENT_ENHANCE("REQUIREMENT_ENHANCE", "需求扩写美化"),
+    COSMIC_REQUIREMENT_ENHANCE("COSMIC_REQUIREMENT_ENHANCE", "需求扩写美化"),
 
     /**
      * 功能过程拆解
      */
-    FUNCTIONAL_PROCESS_BREAKDOWN("FUNCTIONAL_PROCESS_BREAKDOWN", "功能过程拆解"),
+    COSMIC_FUNCTIONAL_BREAKDOWN("COSMIC_FUNCTIONAL_BREAKDOWN", "功能过程拆解"),
 
     /**
      * COSMIC 分析 - 阶段1 (生成基础字段)
@@ -43,7 +43,7 @@ public enum AiFunctionType {
     /**
      * PRD 文档生成
      */
-    PRD_GENERATION("PRD_GENERATION", "PRD文档生成"),
+    COSMIC_PRD_GENERATION("PRD_GENERATION", "PRD文档生成"),
 
     /**
      * 勤时数据处理 - 备注修正

@@ -295,7 +295,7 @@
             </template>
           </ElInput>
         </ElFormItem>
-        <ElFormItem label="JSON Schema 支持">
+        <ElFormItem label="JSON Schema">
           <ElSwitch
             v-model="modelForm.supportsJsonSchema"
             inline-prompt
