@@ -12,16 +12,16 @@ public class DuplicateCheckResult {
     private final List<DuplicateItem> duplicateDataGroups = new ArrayList<>();
     private final List<DuplicateItem> duplicateDataAttributes = new ArrayList<>();
 
-    public void addDuplicateSubProcessDesc(int index, String value) {
-        duplicateSubProcessDescs.add(new DuplicateItem(index, value));
+    public void addDuplicateSubProcessDesc(int processIndex, int stepIndex, String value) {
+        duplicateSubProcessDescs.add(new DuplicateItem(processIndex, stepIndex, value));
     }
 
-    public void addDuplicateDataGroup(int index, String value) {
-        duplicateDataGroups.add(new DuplicateItem(index, value));
+    public void addDuplicateDataGroup(int processIndex, int stepIndex, String value) {
+        duplicateDataGroups.add(new DuplicateItem(processIndex, stepIndex, value));
     }
 
-    public void addDuplicateDataAttribute(int index, String value) {
-        duplicateDataAttributes.add(new DuplicateItem(index, value));
+    public void addDuplicateDataAttribute(int processIndex, int stepIndex, String value) {
+        duplicateDataAttributes.add(new DuplicateItem(processIndex, stepIndex, value));
     }
 
     public boolean hasDuplicates() {

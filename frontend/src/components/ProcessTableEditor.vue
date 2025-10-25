@@ -332,57 +332,66 @@ const cloneData = (source = []) => {
   }
 };
 
-// 将平铺的过程数据转换为分组数据（优化版）
+const EXCEL_FILE_PATTERN = /\.(xlsx|xls)$/i;
+const ALLOWED_MOVEMENT_TYPES = new Set(['E', 'R', 'W', 'X']);
+
+const normalizeMovementType = (value) => {
+  const normalized = (value ?? '').toString().trim().toUpperCase();
+  return ALLOWED_MOVEMENT_TYPES.has(normalized) ? normalized : 'E';
+};
+
+// 将嵌套过程数据转换为分组数据
 const convertToGrouped = (processes = []) => {
-  if (!processes.length) return [];
+  if (!Array.isArray(processes) || !processes.length) return [];
 
-  const groupsMap = new Map();
+  return processes.map((process) => {
+    const triggerEvent = (process?.triggerEvent || '').trim();
+    const functionalProcess = (process?.functionalProcess || '').trim();
+    const steps = Array.isArray(process?.processSteps)
+      ? process.processSteps.map((step) => ({
+          id: generateId(),
+          subProcessDesc: (step?.subProcessDesc || '').trim(),
+          dataMovementType: normalizeMovementType(step?.dataMovementType),
+          dataGroup: (step?.dataGroup || '').trim(),
+          dataAttributes: (step?.dataAttributes || '').trim(),
+        }))
+      : [];
 
-  for (let i = 0; i < processes.length; i++) {
-    const process = processes[i];
-    const key = `${process.triggerEvent || ''}|${process.functionalProcess || ''}`;
-
-    if (!groupsMap.has(key)) {
-      groupsMap.set(key, {
+    if (!steps.length) {
+      steps.push({
         id: generateId(),
-        triggerEvent: process.triggerEvent || '',
-        functionalProcess: process.functionalProcess || '',
-        subProcesses: [],
+        subProcessDesc: '',
+        dataMovementType: 'E',
+        dataGroup: '',
+        dataAttributes: '',
       });
     }
 
-    groupsMap.get(key).subProcesses.push({
+    return {
       id: generateId(),
-      subProcessDesc: process.subProcessDesc || '',
-      dataMovementType: process.dataMovementType || 'E',
-      dataGroup: process.dataGroup || '',
-      dataAttributes: process.dataAttributes || '',
-    });
-  }
-
-  return Array.from(groupsMap.values());
+      triggerEvent,
+      functionalProcess,
+      subProcesses: steps,
+    };
+  });
 };
 
-// 将分组数据转换回平铺数据（优化版）
+// 将分组数据转换回嵌套过程数据
 const convertToFlat = (groups = []) => {
   if (!groups.length) return [];
 
-  const processes = [];
-
-  for (const group of groups) {
-    for (const subProcess of group.subProcesses) {
-      processes.push({
-        triggerEvent: group.triggerEvent,
-        functionalProcess: group.functionalProcess,
-        subProcessDesc: subProcess.subProcessDesc,
-        dataMovementType: subProcess.dataMovementType,
-        dataGroup: subProcess.dataGroup,
-        dataAttributes: subProcess.dataAttributes,
-      });
-    }
-  }
-
-  return processes;
+  return groups.map((group) => ({
+    triggerEvent: (group?.triggerEvent || '').trim(),
+    functionalProcess: (group?.functionalProcess || '').trim(),
+    processSteps: Array.isArray(group?.subProcesses)
+      ? group.subProcesses.map((subProcess) => ({
+          subProcessDesc: (subProcess?.subProcessDesc || '').trim(),
+          dataMovementType: normalizeMovementType(subProcess?.dataMovementType),
+          dataGroup: (subProcess?.dataGroup || '').trim(),
+          dataAttributes: (subProcess?.dataAttributes || '').trim(),
+        }))
+      : [],
+  }));
 };
 
 // 使用 reactive 但避免深度监听在输入时的干扰
@@ -392,14 +401,6 @@ const state = reactive({
 
 const importInputRef = ref(null);
 const importing = ref(false);
-
-const EXCEL_FILE_PATTERN = /\.(xlsx|xls)$/i;
-const ALLOWED_MOVEMENT_TYPES = new Set(['E', 'R', 'W', 'X']);
-
-const normalizeMovementType = (value) => {
-  const normalized = (value ?? '').toString().trim().toUpperCase();
-  return ALLOWED_MOVEMENT_TYPES.has(normalized) ? normalized : 'E';
-};
 
 const resetImportInput = (inputEl) => {
   const element = inputEl ?? importInputRef.value;
@@ -434,17 +435,31 @@ const handleImportFile = async (event) => {
     const result = await cosmicService.importCosmicProcesses(file);
     const imported = Array.isArray(result?.processes) ? result.processes : [];
     const sanitized = imported
-      .map((item) => ({
-        triggerEvent: (item?.triggerEvent || '').trim(),
-        functionalProcess: (item?.functionalProcess || '').trim(),
-        subProcessDesc: (item?.subProcessDesc || '').trim(),
-        dataMovementType: normalizeMovementType(item?.dataMovementType),
-        dataGroup: (item?.dataGroup || '').trim(),
-        dataAttributes: (item?.dataAttributes || '').trim(),
-      }))
+      .map((process) => {
+        const triggerEvent = (process?.triggerEvent || '').trim();
+        const functionalProcess = (process?.functionalProcess || '').trim();
+        const steps = Array.isArray(process?.processSteps)
+          ? process.processSteps
+              .map((step) => ({
+                subProcessDesc: (step?.subProcessDesc || '').trim(),
+                dataMovementType: normalizeMovementType(step?.dataMovementType),
+                dataGroup: (step?.dataGroup || '').trim(),
+                dataAttributes: (step?.dataAttributes || '').trim(),
+              }))
+              .filter((step) => step.subProcessDesc && step.dataGroup)
+          : [];
+
+        return {
+          triggerEvent,
+          functionalProcess,
+          processSteps: steps,
+        };
+      })
       .filter(
         (item) =>
-          item.triggerEvent && item.functionalProcess && item.subProcessDesc,
+          item.triggerEvent &&
+          item.functionalProcess &&
+          item.processSteps.length,
       );
 
     if (!sanitized.length) {

@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import com.excalicode.platform.common.exception.BusinessException;
 import com.excalicode.platform.core.dto.CosmicProcessDto;
+import com.excalicode.platform.core.dto.CosmicProcessStepDto;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -95,79 +96,79 @@ public class ExcelService {
     private void fillData(Sheet sheet, List<CosmicProcessDto> processes, CellStyle dataStyle,
             CellStyle centerDataStyle) {
         int rowNum = 1;
-        int totalRows = processes.size();
+        int totalRows = processes.stream().mapToInt(p -> p.getProcessSteps().size()).sum();
         String currentTriggerEvent = "";
         String currentFunctionalProcess = "";
         int triggerEventStartRow = 1;
         int functionalProcessStartRow = 1;
 
-        for (int i = 0; i < processes.size(); i++) {
-            CosmicProcessDto process = processes.get(i);
-            Row row = sheet.createRow(rowNum);
-            row.setHeight(ROW_HEIGHT);
+        for (CosmicProcessDto process : processes) {
+            String triggerEvent = process.getTriggerEvent();
+            String functionalProcess = process.getFunctionalProcess();
 
-            // 前三列空白
-            row.createCell(0).setCellValue("");
-            row.createCell(1).setCellValue("");
-            row.createCell(2).setCellValue("");
+            List<CosmicProcessStepDto> steps = process.getProcessSteps();
+            boolean firstStepOfProcess = true;
+            for (CosmicProcessStepDto step : steps) {
+                Row row = sheet.createRow(rowNum);
+                row.setHeight(ROW_HEIGHT);
 
-            // 原有数据列（索引3-8）
-            row.createCell(3).setCellValue(process.getTriggerEvent());
-            row.createCell(4).setCellValue(process.getFunctionalProcess());
-            row.createCell(5).setCellValue(process.getSubProcessDesc());
-            row.createCell(6).setCellValue(process.getDataMovementType());
-            row.createCell(7).setCellValue(process.getDataGroup());
-            row.createCell(8).setCellValue(process.getDataAttributes());
+                row.createCell(0).setCellValue("");
+                row.createCell(1).setCellValue("");
+                row.createCell(2).setCellValue("");
 
-            // CFP列默认值1
-            row.createCell(9).setCellValue(1);
+                row.createCell(3).setCellValue(triggerEvent);
+                row.createCell(4).setCellValue(functionalProcess);
+                row.createCell(5).setCellValue(step.getSubProcessDesc());
+                row.createCell(6).setCellValue(step.getDataMovementType());
+                row.createCell(7).setCellValue(step.getDataGroup());
+                row.createCell(8).setCellValue(step.getDataAttributes());
+                row.createCell(9).setCellValue(1);
 
-            // 应用样式
-            for (int j = 0; j < 10; j++) {
-                // 数据移动类型列（索引6）和CFP列（索引9）使用居中样式
-                if (j == 6 || j == 9) {
-                    row.getCell(j).setCellStyle(centerDataStyle);
-                } else {
-                    row.getCell(j).setCellStyle(dataStyle);
+                for (int column = 0; column < 10; column++) {
+                    if (column == 6 || column == 9) {
+                        row.getCell(column).setCellStyle(centerDataStyle);
+                    } else {
+                        row.getCell(column).setCellStyle(dataStyle);
+                    }
                 }
+
+                if (firstStepOfProcess) {
+                    if (!triggerEvent.equals(currentTriggerEvent)) {
+                        if (rowNum > 1 && triggerEventStartRow < rowNum - 1) {
+                            sheet.addMergedRegion(
+                                    new CellRangeAddress(triggerEventStartRow, rowNum - 1, 3, 3));
+                        }
+                        currentTriggerEvent = triggerEvent;
+                        triggerEventStartRow = rowNum;
+                    }
+
+                    if (!functionalProcess.equals(currentFunctionalProcess)) {
+                        if (rowNum > 1 && functionalProcessStartRow < rowNum - 1) {
+                            sheet.addMergedRegion(new CellRangeAddress(functionalProcessStartRow,
+                                    rowNum - 1, 4, 4));
+                        }
+                        currentFunctionalProcess = functionalProcess;
+                        functionalProcessStartRow = rowNum;
+                    }
+                    firstStepOfProcess = false;
+                }
+
+                rowNum++;
             }
-
-            if (!process.getTriggerEvent().equals(currentTriggerEvent)) {
-                if (rowNum > 1 && triggerEventStartRow < rowNum - 1) {
-                    sheet.addMergedRegion(
-                            new CellRangeAddress(triggerEventStartRow, rowNum - 1, 3, 3));
-                }
-                currentTriggerEvent = process.getTriggerEvent();
-                triggerEventStartRow = rowNum;
-            }
-
-            if (!process.getFunctionalProcess().equals(currentFunctionalProcess)) {
-                if (rowNum > 1 && functionalProcessStartRow < rowNum - 1) {
-                    sheet.addMergedRegion(
-                            new CellRangeAddress(functionalProcessStartRow, rowNum - 1, 4, 4));
-                }
-                currentFunctionalProcess = process.getFunctionalProcess();
-                functionalProcessStartRow = rowNum;
-            }
-
-            if (i == processes.size() - 1) {
-                if (triggerEventStartRow < rowNum) {
-                    sheet.addMergedRegion(new CellRangeAddress(triggerEventStartRow, rowNum, 3, 3));
-                }
-                if (functionalProcessStartRow < rowNum) {
-                    sheet.addMergedRegion(
-                            new CellRangeAddress(functionalProcessStartRow, rowNum, 4, 4));
-                }
-            }
-
-            rowNum++;
         }
 
-        // 合并前三列（客户需求、功能用户、功能用户需求）从第一行数据到最后一行数据
+        if (triggerEventStartRow < rowNum - 1) {
+            sheet.addMergedRegion(new CellRangeAddress(triggerEventStartRow, rowNum - 1, 3, 3));
+        }
+        if (functionalProcessStartRow < rowNum - 1) {
+            sheet.addMergedRegion(
+                    new CellRangeAddress(functionalProcessStartRow, rowNum - 1, 4, 4));
+        }
+
         if (totalRows > 0) {
-            sheet.addMergedRegion(new CellRangeAddress(1, totalRows, 0, 0)); // 客户需求
-            sheet.addMergedRegion(new CellRangeAddress(1, totalRows, 1, 1)); // 功能用户
-            sheet.addMergedRegion(new CellRangeAddress(1, totalRows, 2, 2)); // 功能用户需求
+            sheet.addMergedRegion(new CellRangeAddress(1, totalRows, 0, 0));
+            sheet.addMergedRegion(new CellRangeAddress(1, totalRows, 1, 1));
+            sheet.addMergedRegion(new CellRangeAddress(1, totalRows, 2, 2));
         }
     }
 

@@ -1,8 +1,11 @@
 package com.excalicode.platform.core.dto;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,18 +37,12 @@ public class CosmicProcessBaseDto {
     private String functionalProcess;
 
     /**
-     * 子过程描述 详细描述该功能过程下的具体操作步骤
+     * 子过程步骤列表
      */
+    @NotEmpty(message = "子过程列表不能为空")
+    @Valid
     @JsonProperty(required = true)
-    @JsonPropertyDescription("详细描述该功能过程下的具体操作步骤")
-    private String subProcessDesc;
-
-    /**
-     * 数据移动类型 COSMIC分析中的数据移动分类:E(输入)、R(读取)、W(写入)、X(输出)
-     */
-    @NotBlank(message = "数据移动类型不能为空")
-    @JsonProperty(required = true)
-    @JsonPropertyDescription("COSMIC分析中的数据移动分类:E(输入)、R(读取)、W(写入)、X(输出)")
-    private String dataMovementType;
+    @JsonPropertyDescription("该功能过程对应的子过程步骤集合（阶段1输出）")
+    private List<CosmicProcessStepBaseDto> processSteps;
 
 }
