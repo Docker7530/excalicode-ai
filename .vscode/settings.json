@@ -1,13 +1,8 @@
 {
   "java.compile.nullAnalysis.mode": "automatic",
   "java.configuration.updateBuildConfiguration": "automatic",
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "prettier.configPath": "frontend/prettier.config.cjs",
-  "prettier.prettierPath": "frontend/node_modules/prettier/index.cjs",
   "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
-  "[xml]": {
-    "editor.defaultFormatter": "redhat.vscode-xml"
-  }
+  "prettier.configPath": "frontend/prettier.config.cjs",
+  "prettier.prettierPath": "frontend/node_modules/prettier/index.cjs"
 }
