@@ -1,8 +1,4 @@
 {
-  "java.compile.nullAnalysis.mode": "automatic",
-  "java.configuration.updateBuildConfiguration": "automatic",
-  "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
-  "java.format.settings.profile": "GoogleStyle",
   "prettier.configPath": "frontend/prettier.config.cjs",
   "prettier.prettierPath": "frontend/node_modules/prettier/index.cjs"
 }
