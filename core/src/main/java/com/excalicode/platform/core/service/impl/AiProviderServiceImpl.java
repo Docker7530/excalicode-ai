@@ -25,16 +25,6 @@ public class AiProviderServiceImpl
     private final AiModelService aiModelService;
 
     @Override
-    public AiProvider getProviderWithModels(Long providerId) {
-        AiProvider provider = this.getById(providerId);
-        if (provider != null) {
-            provider.setModels(aiModelService.listByProviderId(providerId));
-            maskApiKey(provider);
-        }
-        return provider;
-    }
-
-    @Override
     public List<AiProvider> listProvidersWithModels() {
         List<AiProvider> providers = this.list();
         providers.forEach(provider -> {
@@ -46,10 +36,10 @@ public class AiProviderServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean removeProviderWithModels(Long providerId) {
+    public void removeProviderWithModels(Long providerId) {
         aiModelService
                 .remove(new LambdaQueryWrapper<AiModel>().eq(AiModel::getProviderId, providerId));
-        return this.removeById(providerId);
+        this.removeById(providerId);
     }
 
     /**

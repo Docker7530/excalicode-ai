@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -518,7 +519,7 @@ public class CosmicService {
 
         for (int i = 0; i < processes.size(); i++) {
             CosmicProcessDto process = processes.get(i);
-            if (process.getProcessSteps().stream().anyMatch(step -> step == null)) {
+            if (process.getProcessSteps().stream().anyMatch(Objects::isNull)) {
                 throw new BusinessException(String.format("阶段2: 第 %d 个功能过程存在未完成的步骤生成", i + 1));
             }
         }
@@ -595,7 +596,7 @@ public class CosmicService {
         int round = 0;
         boolean hasDuplicates = true;
 
-        while (hasDuplicates && round < config.getMaxFixRounds()) {
+        while (round < config.getMaxFixRounds()) {
             round++;
             log.info("开始第 {} 轮重复项检测", round);
 
@@ -685,53 +686,55 @@ public class CosmicService {
                 .collect(Collectors.toSet());
 
         for (DuplicateItem item : checkResult.getDuplicateSubProcessDescs()) {
-            CosmicProcessDto process = processes.get(item.getProcessIndex());
-            CosmicProcessStepDto step = process.getProcessSteps().get(item.getStepIndex());
+            CosmicProcessDto process = processes.get(item.processIndex());
+            CosmicProcessStepDto step = process.getProcessSteps().get(item.stepIndex());
             String fixed = fixSubProcessDesc(process, step, allSubProcessDescs);
             step.setSubProcessDesc(fixed);
             allSubProcessDescs.add(fixed);
             log.info("修复子过程描述 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"",
-                     item.getProcessIndex(),
-                     item.getStepIndex(),
-                     item.getValue(),
+                     item.processIndex(),
+                     item.stepIndex(),
+                     item.value(),
                      fixed);
         }
 
         for (DuplicateItem item : checkResult.getDuplicateDataGroups()) {
-            CosmicProcessDto process = processes.get(item.getProcessIndex());
-            CosmicProcessStepDto step = process.getProcessSteps().get(item.getStepIndex());
+            CosmicProcessDto process = processes.get(item.processIndex());
+            CosmicProcessStepDto step = process.getProcessSteps().get(item.stepIndex());
             String fixed = fixDataGroup(process, step, allDataGroups);
             step.setDataGroup(fixed);
             allDataGroups.add(fixed);
             log.info("修复数据组 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"",
-                     item.getProcessIndex(),
-                     item.getStepIndex(),
-                     item.getValue(),
+                     item.processIndex(),
+                     item.stepIndex(),
+                     item.value(),
                      fixed);
         }
 
         for (DuplicateItem item : checkResult.getDuplicateDataAttributes()) {
-            CosmicProcessDto process = processes.get(item.getProcessIndex());
-            CosmicProcessStepDto step = process.getProcessSteps().get(item.getStepIndex());
+            CosmicProcessDto process = processes.get(item.processIndex());
+            CosmicProcessStepDto step = process.getProcessSteps().get(item.stepIndex());
             String fixed = fixDataAttributes(process, step, allDataAttributes);
             step.setDataAttributes(fixed);
             allDataAttributes.add(fixed);
             log.info("修复数据属性 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"",
-                     item.getProcessIndex(),
-                     item.getStepIndex(),
-                     item.getValue(),
+                     item.processIndex(),
+                     item.stepIndex(),
+                     item.value(),
                      fixed);
         }
     }
 
     private String fixSubProcessDesc(CosmicProcessDto process, CosmicProcessStepDto step, Set<String> usedDescs) {
-        String userPrompt = String.format("修复类型: subProcessDesc\n"
-                                          + "原始内容: %s\n"
-                                          + "原始上下文:\n"
-                                          + "  触发事件: %s\n"
-                                          + "  功能过程: %s\n"
-                                          + "  数据移动类型: %s\n"
-                                          + "已使用列表:\n%s",
+        String userPrompt = String.format("""
+                                                  修复类型: subProcessDesc
+                                                  原始内容: %s
+                                                  原始上下文:
+                                                    触发事件: %s
+                                                    功能过程: %s
+                                                    数据移动类型: %s
+                                                  已使用列表:
+                                                  %s""",
                                           step.getSubProcessDesc(),
                                           process.getTriggerEvent(),
                                           process.getFunctionalProcess(),
@@ -742,14 +745,16 @@ public class CosmicService {
     }
 
     private String fixDataGroup(CosmicProcessDto process, CosmicProcessStepDto step, Set<String> usedGroups) {
-        String userPrompt = String.format("修复类型: dataGroup\n"
-                                          + "原始内容: %s\n"
-                                          + "原始上下文:\n"
-                                          + "  触发事件: %s\n"
-                                          + "  功能过程: %s\n"
-                                          + "  子过程描述: %s\n"
-                                          + "  数据移动类型: %s\n"
-                                          + "已使用列表:\n%s",
+        String userPrompt = String.format("""
+                                                  修复类型: dataGroup
+                                                  原始内容: %s
+                                                  原始上下文:
+                                                    触发事件: %s
+                                                    功能过程: %s
+                                                    子过程描述: %s
+                                                    数据移动类型: %s
+                                                  已使用列表:
+                                                  %s""",
                                           step.getDataGroup(),
                                           process.getTriggerEvent(),
                                           process.getFunctionalProcess(),
@@ -761,14 +766,16 @@ public class CosmicService {
     }
 
     private String fixDataAttributes(CosmicProcessDto process, CosmicProcessStepDto step, Set<String> usedAttributes) {
-        String userPrompt = String.format("修复类型: dataAttributes\n"
-                                          + "原始内容: %s\n"
-                                          + "原始上下文:\n"
-                                          + "  触发事件: %s\n"
-                                          + "  功能过程: %s\n"
-                                          + "  子过程描述: %s\n"
-                                          + "  数据移动类型: %s\n"
-                                          + "已使用列表:\n%s",
+        String userPrompt = String.format("""
+                                                  修复类型: dataAttributes
+                                                  原始内容: %s
+                                                  原始上下文:
+                                                    触发事件: %s
+                                                    功能过程: %s
+                                                    子过程描述: %s
+                                                    数据移动类型: %s
+                                                  已使用列表:
+                                                  %s""",
                                           step.getDataAttributes(),
                                           process.getTriggerEvent(),
                                           process.getFunctionalProcess(),

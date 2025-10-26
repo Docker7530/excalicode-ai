@@ -47,7 +47,7 @@ public class VacationService {
     /**
      * 需要识别的列名映射
      */
-    private static final Map<String, String> COLUMN_MAPPING = new HashMap<String, String>() {
+    private static final Map<String, String> COLUMN_MAPPING = new HashMap<>() {
         {
             put("身份证号码", "idCard");
             put("姓名", "name");
@@ -231,7 +231,6 @@ public class VacationService {
                     return String.valueOf(cell.getNumericCellValue());
                 }
             case BLANK:
-                return "";
             default:
                 return "";
         }
@@ -252,7 +251,7 @@ public class VacationService {
         int attempt = 0;
         int maxAttempts = MAX_RATE_LIMIT_RETRIES + 1;
 
-        while (attempt < maxAttempts) {
+        while (true) {
             attempt++;
             try {
                 String correctedRemark = invokeAiCorrection(remark);
@@ -266,7 +265,7 @@ public class VacationService {
                              remark,
                              ex.getMessage());
                     log.error("限流异常堆栈", ex);
-                    sleepQuietly(RATE_LIMIT_BACKOFF);
+                    sleepQuietly();
                     continue;
                 }
                 log.error("备注修正失败: {}", remark, ex);
@@ -277,7 +276,6 @@ public class VacationService {
             }
         }
 
-        return remark;
     }
 
     /**
@@ -362,9 +360,9 @@ public class VacationService {
         return false;
     }
 
-    private void sleepQuietly(Duration duration) {
+    private void sleepQuietly() {
         try {
-            Thread.sleep(duration.toMillis());
+            Thread.sleep(VacationService.RATE_LIMIT_BACKOFF.toMillis());
         } catch (InterruptedException interruptedException) {
             Thread.currentThread().interrupt();
             log.warn("等待限流重试时被中断", interruptedException);

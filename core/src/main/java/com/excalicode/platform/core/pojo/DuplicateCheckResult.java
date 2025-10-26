@@ -1,11 +1,14 @@
 package com.excalicode.platform.core.pojo;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 记录重复项的检测结果。
  */
+@Getter
 public class DuplicateCheckResult {
 
     private final List<DuplicateItem> duplicateSubProcessDescs = new ArrayList<>();
@@ -30,15 +33,4 @@ public class DuplicateCheckResult {
                || !duplicateDataAttributes.isEmpty();
     }
 
-    public List<DuplicateItem> getDuplicateSubProcessDescs() {
-        return duplicateSubProcessDescs;
-    }
-
-    public List<DuplicateItem> getDuplicateDataGroups() {
-        return duplicateDataGroups;
-    }
-
-    public List<DuplicateItem> getDuplicateDataAttributes() {
-        return duplicateDataAttributes;
-    }
 }

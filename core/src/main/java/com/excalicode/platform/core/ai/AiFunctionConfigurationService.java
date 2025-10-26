@@ -76,7 +76,7 @@ public class AiFunctionConfigurationService {
                 } else {
                     chatModel = createChatModel(provider, model);
                     supportsJsonSchema =
-                            model.getSupportsJsonSchema() == null || Boolean.TRUE.equals(model.getSupportsJsonSchema());
+                            model.getSupportsJsonSchema() == null || model.getSupportsJsonSchema();
                 }
             }
         }
