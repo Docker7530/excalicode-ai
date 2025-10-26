@@ -1,18 +1,19 @@
 package com.excalicode.platform.core.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.regex.Pattern;
+import com.excalicode.platform.common.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule;
 import org.springframework.stereotype.Service;
-import com.excalicode.platform.common.exception.BusinessException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.regex.Pattern;
 
 /**
  * PRD 产品需求文档服务
@@ -47,7 +48,7 @@ public class PrdService {
         }
 
         try (XWPFDocument document = new XWPFDocument();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             String[] lines = content.split("\n");
             boolean isFirstNonEmptyLine = true;

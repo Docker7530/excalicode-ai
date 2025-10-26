@@ -1,7 +1,8 @@
 package com.excalicode.platform.core.dto;
 
-import java.time.LocalDateTime;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * 系统用户响应

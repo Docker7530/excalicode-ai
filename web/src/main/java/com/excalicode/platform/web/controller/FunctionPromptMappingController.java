@@ -1,6 +1,10 @@
 package com.excalicode.platform.web.controller;
 
-import java.util.List;
+import com.excalicode.platform.core.dto.SetFunctionPromptMappingRequest;
+import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
+import com.excalicode.platform.core.service.FunctionPromptMappingService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,15 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.excalicode.platform.core.dto.SetFunctionPromptMappingRequest;
-import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
-import com.excalicode.platform.core.service.FunctionPromptMappingService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * 功能-提示词映射管理 Controller
- *
  * 提供功能与提示词模板绑定的管理接口
  */
 @Slf4j
@@ -56,10 +56,10 @@ public class FunctionPromptMappingController {
     @PostMapping
     public ResponseEntity<Void> setMapping(@RequestBody SetFunctionPromptMappingRequest request) {
         log.info("设置功能-提示词映射: functionCode={}, promptCode={}", request.getFunctionCode(),
-                request.getPromptCode());
+                 request.getPromptCode());
 
         boolean success = mappingService.setFunctionPromptMapping(request.getFunctionCode(),
-                request.getPromptCode());
+                                                                  request.getPromptCode());
         if (success) {
             return ResponseEntity.ok().build();
         } else {
@@ -72,7 +72,7 @@ public class FunctionPromptMappingController {
      */
     @DeleteMapping("/{functionCode}/{promptCode}")
     public ResponseEntity<Void> delete(@PathVariable String functionCode,
-            @PathVariable String promptCode) {
+                                       @PathVariable String promptCode) {
         log.info("删除功能-提示词映射: functionCode={}, promptCode={}", functionCode, promptCode);
         boolean success = mappingService.deleteFunctionPromptMapping(functionCode, promptCode);
         if (success) {

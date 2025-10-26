@@ -1,9 +1,5 @@
 package com.excalicode.platform.core.service.impl;
 
-import java.io.Serializable;
-import java.util.List;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.common.enums.AiFunctionType;
@@ -16,6 +12,11 @@ import com.excalicode.platform.core.service.AiFunctionModelMappingService;
 import com.excalicode.platform.core.service.AiModelService;
 import com.excalicode.platform.core.service.AiProviderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Service;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * AI 功能-模型映射 Service 实现类
@@ -35,9 +36,9 @@ public class AiFunctionModelMappingServiceImpl
             return null;
         }
 
-        AiFunctionModelMapping mapping =
-                this.getOne(new LambdaQueryWrapper<AiFunctionModelMapping>()
-                        .eq(AiFunctionModelMapping::getFunctionType, functionType.getCode()));
+        AiFunctionModelMapping mapping = this.getOne(new LambdaQueryWrapper<AiFunctionModelMapping>().eq(
+                AiFunctionModelMapping::getFunctionType,
+                functionType.getCode()));
 
         return mapping != null ? mapping.getModelId() : null;
     }
@@ -50,9 +51,9 @@ public class AiFunctionModelMappingServiceImpl
         }
 
         // 查找现有映射
-        AiFunctionModelMapping existingMapping =
-                this.getOne(new LambdaQueryWrapper<AiFunctionModelMapping>()
-                        .eq(AiFunctionModelMapping::getFunctionType, functionType.getCode()));
+        AiFunctionModelMapping existingMapping = this.getOne(new LambdaQueryWrapper<AiFunctionModelMapping>().eq(
+                AiFunctionModelMapping::getFunctionType,
+                functionType.getCode()));
 
         if (existingMapping != null) {
             // 更新现有映射

@@ -1,13 +1,13 @@
 package com.excalicode.platform.core.dto;
 
-import java.util.List;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.entity.AiProvider;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 功能配置聚合响应
- *
  * 统一返回功能列表以及可用的模型、提示词资源，减少前端多次请求。
  */
 @Data

@@ -1,7 +1,5 @@
 package com.excalicode.platform.core.entity;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -10,9 +8,11 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 /**
  * AI 厂商实体
- *
  * 存储 AI 模型厂商的基本信息, 包括厂商名称、API地址、密钥等
  */
 @Data
@@ -32,7 +32,7 @@ public class AiProvider {
     private String providerName;
 
     /**
-     * API 基础地址 (如: https://api.openai.com/v1)
+     * API 基础地址 (如: <a href="https://api.openai.com/v1">...</a>)
      */
     @TableField("base_url")
     private String baseUrl;

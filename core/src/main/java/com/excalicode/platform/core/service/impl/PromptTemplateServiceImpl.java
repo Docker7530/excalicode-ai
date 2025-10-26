@@ -1,21 +1,23 @@
 package com.excalicode.platform.core.service.impl;
 
-import java.util.List;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.mapper.AiPromptTemplateMapper;
 import com.excalicode.platform.core.service.PromptTemplateService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 提示词模板 Service 实现类
  */
 @Service
-public class PromptTemplateServiceImpl extends ServiceImpl<AiPromptTemplateMapper, AiPromptTemplate>
+public class PromptTemplateServiceImpl
+        extends ServiceImpl<AiPromptTemplateMapper, AiPromptTemplate>
         implements PromptTemplateService {
 
     @Override
@@ -25,8 +27,7 @@ public class PromptTemplateServiceImpl extends ServiceImpl<AiPromptTemplateMappe
             return null;
         }
 
-        return this.getOne(
-                new LambdaQueryWrapper<AiPromptTemplate>().eq(AiPromptTemplate::getCode, code));
+        return this.getOne(new LambdaQueryWrapper<AiPromptTemplate>().eq(AiPromptTemplate::getCode, code));
     }
 
     @Override
@@ -35,16 +36,16 @@ public class PromptTemplateServiceImpl extends ServiceImpl<AiPromptTemplateMappe
             return this.list();
         }
 
-        return this.list(
-                new LambdaQueryWrapper<AiPromptTemplate>().like(AiPromptTemplate::getName, keyword)
-                        .or().like(AiPromptTemplate::getDescription, keyword).or()
-                        .like(AiPromptTemplate::getCode, keyword)
-                        .orderByDesc(AiPromptTemplate::getUpdatedTime));
+        return this.list(new LambdaQueryWrapper<AiPromptTemplate>().like(AiPromptTemplate::getName, keyword)
+                                 .or()
+                                 .like(AiPromptTemplate::getDescription, keyword)
+                                 .or()
+                                 .like(AiPromptTemplate::getCode, keyword)
+                                 .orderByDesc(AiPromptTemplate::getUpdatedTime));
     }
 
     @Override
-    @CacheEvict(value = {CacheConfig.PROMPTS_CACHE, CacheConfig.AI_FUNCTION_CONFIGS_CACHE},
-            allEntries = true)
+    @CacheEvict(value = {CacheConfig.PROMPTS_CACHE, CacheConfig.AI_FUNCTION_CONFIGS_CACHE}, allEntries = true)
     public boolean saveOrUpdatePrompt(AiPromptTemplate promptTemplate) {
         if (promptTemplate == null) {
             return false;
@@ -68,8 +69,7 @@ public class PromptTemplateServiceImpl extends ServiceImpl<AiPromptTemplateMappe
     }
 
     @Override
-    @CacheEvict(value = {CacheConfig.PROMPTS_CACHE, CacheConfig.AI_FUNCTION_CONFIGS_CACHE},
-            allEntries = true)
+    @CacheEvict(value = {CacheConfig.PROMPTS_CACHE, CacheConfig.AI_FUNCTION_CONFIGS_CACHE}, allEntries = true)
     public boolean removeById(java.io.Serializable id) {
         return super.removeById(id);
     }

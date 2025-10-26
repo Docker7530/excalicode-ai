@@ -1,6 +1,11 @@
 package com.excalicode.platform.web.controller;
 
-import java.util.List;
+import com.excalicode.platform.common.enums.AiFunctionType;
+import com.excalicode.platform.core.dto.SetFunctionMappingRequest;
+import com.excalicode.platform.core.entity.AiFunctionModelMapping;
+import com.excalicode.platform.core.service.AiFunctionModelMappingService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,16 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.core.dto.SetFunctionMappingRequest;
-import com.excalicode.platform.core.entity.AiFunctionModelMapping;
-import com.excalicode.platform.core.service.AiFunctionModelMappingService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * AI 功能-模型映射管理 Controller
- *
  * 提供功能类型与 AI 模型绑定的管理接口
  */
 @Slf4j
@@ -44,7 +44,7 @@ public class AiFunctionMappingController {
     @PostMapping("/set")
     public ResponseEntity<Void> setMapping(@RequestBody SetFunctionMappingRequest request) {
         log.info("设置功能映射: functionType={}, modelId={}", request.getFunctionType(),
-                request.getModelId());
+                 request.getModelId());
 
         AiFunctionType functionType = AiFunctionType.fromCode(request.getFunctionType());
         if (functionType == null) {

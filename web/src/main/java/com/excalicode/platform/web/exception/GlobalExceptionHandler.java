@@ -1,14 +1,15 @@
 package com.excalicode.platform.web.exception;
 
-import java.time.OffsetDateTime;
+import com.excalicode.platform.common.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.excalicode.platform.common.exception.BusinessException;
-import lombok.extern.slf4j.Slf4j;
+
+import java.time.OffsetDateTime;
 
 /**
  * 全局异常处理器
@@ -40,7 +41,8 @@ public class GlobalExceptionHandler {
 
     private ProblemDetail createProblemDetail(HttpStatus status, String message) {
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(status,
-                StringUtils.hasText(message) ? message : status.getReasonPhrase());
+                                                                StringUtils.hasText(message) ? message :
+                                                                        status.getReasonPhrase());
         detail.setTitle(status.getReasonPhrase());
         detail.setProperty("timestamp", OffsetDateTime.now());
         String traceId = MDC.get(TRACE_ID_KEY);

@@ -1,14 +1,5 @@
 package com.excalicode.platform.web.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.core.dto.FunctionConfigurationItemDto;
 import com.excalicode.platform.core.dto.FunctionConfigurationResponse;
@@ -20,10 +11,19 @@ import com.excalicode.platform.core.service.FunctionPromptMappingService;
 import com.excalicode.platform.core.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 功能配置聚合接口
- *
  * 将功能类型、模型映射、提示词映射与基础资源整合到一次返回，方便前端以功能为中心进行配置。
  */
 @Slf4j

@@ -1,8 +1,9 @@
 package com.excalicode.platform.core.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
+import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.dto.CosmicProcessDto;
+import com.excalicode.platform.core.dto.CosmicProcessStepDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -16,10 +17,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.dto.CosmicProcessDto;
-import com.excalicode.platform.core.dto.CosmicProcessStepDto;
-import lombok.extern.slf4j.Slf4j;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Excel 报告生成服务
@@ -47,8 +48,7 @@ public class ExcelService {
             throw new BusinessException("COSMIC过程列表不能为空");
         }
 
-        try (Workbook workbook = new XSSFWorkbook();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             // 创建时序图sheet（空白）
             workbook.createSheet("时序图");
@@ -93,8 +93,10 @@ public class ExcelService {
         }
     }
 
-    private void fillData(Sheet sheet, List<CosmicProcessDto> processes, CellStyle dataStyle,
-            CellStyle centerDataStyle) {
+    private void fillData(Sheet sheet,
+                          List<CosmicProcessDto> processes,
+                          CellStyle dataStyle,
+                          CellStyle centerDataStyle) {
         int rowNum = 1;
         int totalRows = processes.stream().mapToInt(p -> p.getProcessSteps().size()).sum();
         String currentTriggerEvent = "";
@@ -135,8 +137,7 @@ public class ExcelService {
                 if (firstStepOfProcess) {
                     if (!triggerEvent.equals(currentTriggerEvent)) {
                         if (rowNum > 1 && triggerEventStartRow < rowNum - 1) {
-                            sheet.addMergedRegion(
-                                    new CellRangeAddress(triggerEventStartRow, rowNum - 1, 3, 3));
+                            sheet.addMergedRegion(new CellRangeAddress(triggerEventStartRow, rowNum - 1, 3, 3));
                         }
                         currentTriggerEvent = triggerEvent;
                         triggerEventStartRow = rowNum;
@@ -144,8 +145,7 @@ public class ExcelService {
 
                     if (!functionalProcess.equals(currentFunctionalProcess)) {
                         if (rowNum > 1 && functionalProcessStartRow < rowNum - 1) {
-                            sheet.addMergedRegion(new CellRangeAddress(functionalProcessStartRow,
-                                    rowNum - 1, 4, 4));
+                            sheet.addMergedRegion(new CellRangeAddress(functionalProcessStartRow, rowNum - 1, 4, 4));
                         }
                         currentFunctionalProcess = functionalProcess;
                         functionalProcessStartRow = rowNum;
@@ -161,8 +161,7 @@ public class ExcelService {
             sheet.addMergedRegion(new CellRangeAddress(triggerEventStartRow, rowNum - 1, 3, 3));
         }
         if (functionalProcessStartRow < rowNum - 1) {
-            sheet.addMergedRegion(
-                    new CellRangeAddress(functionalProcessStartRow, rowNum - 1, 4, 4));
+            sheet.addMergedRegion(new CellRangeAddress(functionalProcessStartRow, rowNum - 1, 4, 4));
         }
 
         if (totalRows > 0) {

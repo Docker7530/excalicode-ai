@@ -1,6 +1,13 @@
 package com.excalicode.platform.web.controller;
 
-import java.util.List;
+import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.dto.SysUserResponse;
+import com.excalicode.platform.core.dto.UserCreateRequest;
+import com.excalicode.platform.core.dto.UserUpdateRequest;
+import com.excalicode.platform.core.entity.SysUser;
+import com.excalicode.platform.core.service.SysUserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,14 +23,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.dto.SysUserResponse;
-import com.excalicode.platform.core.dto.UserCreateRequest;
-import com.excalicode.platform.core.dto.UserUpdateRequest;
-import com.excalicode.platform.core.entity.SysUser;
-import com.excalicode.platform.core.service.SysUserService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 /**
  * 管理员用户管理接口
@@ -45,8 +46,7 @@ public class UserController {
      */
     @GetMapping
     public ResponseEntity<List<SysUserResponse>> listUsers() {
-        List<SysUserResponse> responses =
-                sysUserService.list().stream().map(this::toResponse).toList();
+        List<SysUserResponse> responses = sysUserService.list().stream().map(this::toResponse).toList();
         return ResponseEntity.ok(responses);
     }
 
@@ -54,11 +54,11 @@ public class UserController {
      * 新增用户
      *
      * @param request 创建请求
+     *
      * @return 创建后的用户信息
      */
     @PostMapping
-    public ResponseEntity<SysUserResponse> createUser(
-            @RequestBody @Valid UserCreateRequest request) {
+    public ResponseEntity<SysUserResponse> createUser(@RequestBody @Valid UserCreateRequest request) {
         if (sysUserService.existsByUsername(request.getUsername())) {
             throw new BusinessException("用户名已存在");
         }
@@ -77,13 +77,14 @@ public class UserController {
     /**
      * 更新用户
      *
-     * @param id 用户ID
+     * @param id      用户ID
      * @param request 更新请求
+     *
      * @return 更新后的用户信息
      */
     @PutMapping("/{id}")
     public ResponseEntity<SysUserResponse> updateUser(@PathVariable Long id,
-            @RequestBody @Valid UserUpdateRequest request) {
+                                                      @RequestBody @Valid UserUpdateRequest request) {
         SysUser existing = sysUserService.getById(id);
         if (existing == null) {
             throw new BusinessException("用户名已存在");
@@ -91,7 +92,9 @@ public class UserController {
 
         boolean usernameChanged = !existing.getUsername().equals(request.getUsername());
         if (usernameChanged && sysUserService.lambdaQuery()
-                .eq(SysUser::getUsername, request.getUsername()).ne(SysUser::getId, id).exists()) {
+                .eq(SysUser::getUsername, request.getUsername())
+                .ne(SysUser::getId, id)
+                .exists()) {
             throw new BusinessException("用户名已存在");
         }
 
@@ -111,6 +114,7 @@ public class UserController {
      * 删除用户
      *
      * @param id 用户ID
+     *
      * @return 删除结果
      */
     @DeleteMapping("/{id}")

@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.dto;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import jakarta.validation.Valid;
@@ -10,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * COSMIC过程基础信息(阶段1输出) 包含触发事件、功能过程、子过程描述和数据移动类型

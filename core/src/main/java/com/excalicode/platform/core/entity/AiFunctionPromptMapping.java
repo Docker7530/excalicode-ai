@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.entity;
 
-import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,9 +8,10 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 功能-提示词映射实体
- *
  * 存储功能与提示词模板的绑定关系，实现功能级别的提示词切换
  */
 @Data

@@ -1,13 +1,13 @@
 package com.excalicode.platform.common.enums;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
  * AI 功能类型枚举
- *
- * 定义系统中所有需要调用 AI 的功能类型，用于功能与 AI 模型的映射
  */
 @Getter
+@AllArgsConstructor
 public enum AiFunctionType {
 
     /**
@@ -60,15 +60,11 @@ public enum AiFunctionType {
      */
     private final String description;
 
-    AiFunctionType(String code, String description) {
-        this.code = code;
-        this.description = description;
-    }
-
     /**
      * 根据 code 查找枚举
      *
      * @param code 功能类型代码
+     *
      * @return 对应的枚举值, 找不到返回 null
      */
     public static AiFunctionType fromCode(String code) {

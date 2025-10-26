@@ -1,23 +1,25 @@
 package com.excalicode.platform.core.service.impl;
 
-import java.util.List;
-import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.entity.AiModel;
 import com.excalicode.platform.core.mapper.AiModelMapper;
 import com.excalicode.platform.core.service.AiModelService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * AI 模型 Service 实现类
  */
 @Service
-public class AiModelServiceImpl extends ServiceImpl<AiModelMapper, AiModel>
+public class AiModelServiceImpl
+        extends ServiceImpl<AiModelMapper, AiModel>
         implements AiModelService {
 
     @Override
     public List<AiModel> listByProviderId(Long providerId) {
         return this.list(new LambdaQueryWrapper<AiModel>().eq(AiModel::getProviderId, providerId)
-                .orderByDesc(AiModel::getCreatedTime));
+                                 .orderByDesc(AiModel::getCreatedTime));
     }
 }

@@ -1,8 +1,11 @@
 package com.excalicode.platform.core.pojo;
 
+import lombok.Getter;
+
 /**
  * 重复项的位置信息和原始值。
  */
+@Getter
 public class DuplicateItem {
 
     private final int processIndex;
@@ -15,15 +18,4 @@ public class DuplicateItem {
         this.value = value;
     }
 
-    public int getProcessIndex() {
-        return processIndex;
-    }
-
-    public int getStepIndex() {
-        return stepIndex;
-    }
-
-    public String getValue() {
-        return value;
-    }
 }

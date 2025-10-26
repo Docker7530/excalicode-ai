@@ -1,6 +1,10 @@
 package com.excalicode.platform.web.controller;
 
-import java.util.List;
+import com.excalicode.platform.core.dto.PromptTemplateRequest;
+import com.excalicode.platform.core.entity.AiPromptTemplate;
+import com.excalicode.platform.core.service.PromptTemplateService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,15 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.excalicode.platform.core.dto.PromptTemplateRequest;
-import com.excalicode.platform.core.entity.AiPromptTemplate;
-import com.excalicode.platform.core.service.PromptTemplateService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * 提示词模板管理 Controller
- *
  * 提供提示词模板的 CRUD 接口
  */
 @Slf4j
@@ -99,8 +99,7 @@ public class PromptTemplateController {
      * 更新提示词模板
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable Long id,
-            @RequestBody PromptTemplateRequest request) {
+    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody PromptTemplateRequest request) {
         log.info("更新提示词模板: id={}, code={}, name={}", id, request.getCode(), request.getName());
 
         AiPromptTemplate template = promptTemplateService.getById(id);

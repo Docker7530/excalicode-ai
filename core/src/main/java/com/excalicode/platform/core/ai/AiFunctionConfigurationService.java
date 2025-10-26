@@ -1,13 +1,5 @@
 package com.excalicode.platform.core.ai;
 
-import java.util.Objects;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
 import com.excalicode.platform.core.config.CacheConfig;
@@ -21,6 +13,15 @@ import com.excalicode.platform.core.service.FunctionPromptMappingService;
 import com.excalicode.platform.core.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.Objects;
 
 /**
  * 聚合 AI 功能执行所需的提示词与模型配置，并提供缓存。
@@ -46,8 +47,7 @@ public class AiFunctionConfigurationService {
         String functionCode = functionType.getCode();
         String promptCode = functionPromptMappingService.getPromptCodeByFunctionCode(functionCode);
         if (!StringUtils.hasText(promptCode)) {
-            throw new BusinessException(
-                    String.format("功能 [%s] 未配置提示词映射", functionType.getDescription()));
+            throw new BusinessException(String.format("功能 [%s] 未配置提示词映射", functionType.getDescription()));
         }
 
         AiPromptTemplate promptTemplate = promptTemplateService.getByCode(promptCode);
@@ -75,29 +75,32 @@ public class AiFunctionConfigurationService {
                     log.warn("模型 {} 映射的厂商 {} 不存在，回退到默认 ChatModel", modelId, model.getProviderId());
                 } else {
                     chatModel = createChatModel(provider, model);
-                    supportsJsonSchema = model.getSupportsJsonSchema() == null
-                            || Boolean.TRUE.equals(model.getSupportsJsonSchema());
+                    supportsJsonSchema =
+                            model.getSupportsJsonSchema() == null || Boolean.TRUE.equals(model.getSupportsJsonSchema());
                 }
             }
         }
 
-        return new AiFunctionConfiguration(functionType, promptCode, promptContent, chatModel,
-                supportsJsonSchema, model);
+        return new AiFunctionConfiguration(functionType,
+                                           promptCode,
+                                           promptContent,
+                                           chatModel,
+                                           supportsJsonSchema,
+                                           model);
     }
 
     private ChatModel createChatModel(AiProvider provider, AiModel model) {
         if (!StringUtils.hasText(provider.getBaseUrl())
-                || !StringUtils.hasText(provider.getApiKey())
-                || !StringUtils.hasText(model.getModelName())) {
-            log.warn("厂商或模型配置缺失，使用默认 ChatModel。provider={}, model={}", provider.getId(),
-                    model.getId());
+            || !StringUtils.hasText(provider.getApiKey())
+            || !StringUtils.hasText(model.getModelName())) {
+            log.warn("厂商或模型配置缺失，使用默认 ChatModel。provider={}, model={}", provider.getId(), model.getId());
             return defaultChatModel;
         }
 
-        OpenAiApi openAiApi = OpenAiApi.builder().baseUrl(provider.getBaseUrl())
-                .apiKey(provider.getApiKey()).build();
+        OpenAiApi openAiApi = OpenAiApi.builder().baseUrl(provider.getBaseUrl()).apiKey(provider.getApiKey()).build();
 
-        return OpenAiChatModel.builder().openAiApi(openAiApi)
+        return OpenAiChatModel.builder()
+                .openAiApi(openAiApi)
                 .defaultOptions(OpenAiChatOptions.builder().model(model.getModelName()).build())
                 .build();
     }

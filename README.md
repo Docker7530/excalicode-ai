@@ -28,9 +28,9 @@ excalicode-ai/
 
 - `common`: 统一的提示词加载服务、业务异常、枚举定义，结合 Spring Cache 提升提示词读取效率。
 - `core`:
-  - `CosmicService` 负责多阶段 AI 调用、Excel 导入导出、重复项修复与文档生成。
-  - `AiFunctionExecutor` 聚合提示词、模型、厂商配置，按功能统一调度 AI 并处理 JSON Schema。
-  - MyBatis-Plus 实体与 Mapper 层封装常用基础数据操作。
+    - `CosmicService` 负责多阶段 AI 调用、Excel 导入导出、重复项修复与文档生成。
+    - `AiFunctionExecutor` 聚合提示词、模型、厂商配置，按功能统一调度 AI 并处理 JSON Schema。
+    - MyBatis-Plus 实体与 Mapper 层封装常用基础数据操作。
 - `web`: Spring MVC 控制器、JWT 过滤链、全局异常处理、.env 自动加载、接口分发与静态资源配置。
 - `frontend`: Vue Router 多页面（需求分析、休假处理、后台管理），结合 Element Plus UI、SSE 流式渲染、Axios 统一错误处理。
 
@@ -76,7 +76,8 @@ mvn -pl web -am spring-boot:run
 ```
 
 - 默认监听 `http://localhost:9527`。
-- `spring.ai.openai.base-url` 默认指向 `https://api.siliconflow.cn`，如需改用自建或官方 OpenAI，修改 `application.properties` 或环境变量。
+- `spring.ai.openai.base-url` 默认指向 `https://api.siliconflow.cn`，如需改用自建或官方 OpenAI，修改
+  `application.properties` 或环境变量。
 
 ### 4. 启动前端
 
@@ -104,19 +105,19 @@ npm run dev
 
 ## 主要接口速览
 
-| 模块   | 方法 | 路径                           | 说明                     |
-| ------ | ---- | ------------------------------ | ------------------------ |
-| 认证   | POST | `/api/auth/login`              | 账号密码登陆，返回 JWT   |
-| COSMIC | POST | `/api/requirement/enhance`     | SSE 流式扩写需求         |
-| COSMIC | POST | `/api/process/breakdown`       | 功能过程拆解             |
-| COSMIC | POST | `/api/cosmic/analyze`          | 子过程生成（单阶段）     |
-| COSMIC | POST | `/api/cosmic/analyze-v2`       | 子过程生成（并发两阶段） |
-| COSMIC | POST | `/api/cosmic/table/export`     | 导出 Excel 表            |
-| COSMIC | POST | `/api/cosmic/documents/export` | 导出 Word 终稿           |
-| COSMIC | POST | `/api/cosmic/process/import`   | 导入功能过程 Excel       |
-| 管理   | GET  | `/api/ai-provider/list`        | 查看厂商+模型            |
-| 管理   | POST | `/api/ai-function/set`         | 功能 → 模型映射          |
-| 管理   | REST | `/api/admin/users/**`          | 管理员 CRUD              |
+| 模块     | 方法   | 路径                             | 说明            |
+|--------|------|--------------------------------|---------------|
+| 认证     | POST | `/api/auth/login`              | 账号密码登陆，返回 JWT |
+| COSMIC | POST | `/api/requirement/enhance`     | SSE 流式扩写需求    |
+| COSMIC | POST | `/api/process/breakdown`       | 功能过程拆解        |
+| COSMIC | POST | `/api/cosmic/analyze`          | 子过程生成（单阶段）    |
+| COSMIC | POST | `/api/cosmic/analyze-v2`       | 子过程生成（并发两阶段）  |
+| COSMIC | POST | `/api/cosmic/table/export`     | 导出 Excel 表    |
+| COSMIC | POST | `/api/cosmic/documents/export` | 导出 Word 终稿    |
+| COSMIC | POST | `/api/cosmic/process/import`   | 导入功能过程 Excel  |
+| 管理     | GET  | `/api/ai-provider/list`        | 查看厂商+模型       |
+| 管理     | POST | `/api/ai-function/set`         | 功能 → 模型映射     |
+| 管理     | REST | `/api/admin/users/**`          | 管理员 CRUD      |
 
 > 管理端接口默认需要 `ADMIN` 角色；其余业务端接口需登录携带 `Authorization: Bearer <token>`。
 

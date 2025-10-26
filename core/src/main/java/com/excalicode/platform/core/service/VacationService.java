@@ -1,5 +1,26 @@
 package com.excalicode.platform.core.service;
 
+import com.excalicode.platform.common.enums.AiFunctionType;
+import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.ai.AiFunctionExecutor;
+import com.excalicode.platform.core.dto.VacationDetailItem;
+import com.excalicode.platform.core.dto.VacationDetailRecordDto;
+import com.excalicode.platform.core.dto.VacationRecordDto;
+import com.excalicode.platform.core.dto.VacationSplitResultDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.ai.retry.NonTransientAiException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,26 +35,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.ai.retry.NonTransientAiException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.multipart.MultipartFile;
-import com.excalicode.platform.core.ai.AiFunctionExecutor;
-import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.dto.VacationDetailItem;
-import com.excalicode.platform.core.dto.VacationDetailRecordDto;
-import com.excalicode.platform.core.dto.VacationRecordDto;
-import com.excalicode.platform.core.dto.VacationSplitResultDto;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 员工休假记录服务
@@ -42,8 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class VacationService {
-
-    private final AiFunctionExecutor aiFunctionExecutor;
 
     /**
      * 需要识别的列名映射
@@ -56,24 +55,21 @@ public class VacationService {
             put("备注", "remark");
         }
     };
-
     private static final int MAX_CONCURRENT_CORRECTIONS = 5;
     private static final int MAX_RATE_LIMIT_RETRIES = 1;
     private static final Duration RATE_LIMIT_BACKOFF = Duration.ofMinutes(1);
     private static final String RATE_LIMIT_MESSAGE_KEYWORD = "您的速率达到上限";
     private static final String HTTP_429_CODE = "HTTP 429";
-
     private static final Set<String> FIXED_ONE_DAY_VACATION_TYPES = Set.of("迟到", "迟到早退", "未刷卡");
-
-    private final Semaphore correctionConcurrencyLimiter =
-            new Semaphore(MAX_CONCURRENT_CORRECTIONS, true);
-
     private static final BigDecimal HOURS_PER_DAY = new BigDecimal("8");
+    private final AiFunctionExecutor aiFunctionExecutor;
+    private final Semaphore correctionConcurrencyLimiter = new Semaphore(MAX_CONCURRENT_CORRECTIONS, true);
 
     /**
      * 解析员工休假记录Excel文件
      *
      * @param file Excel文件
+     *
      * @return 休假记录拆分结果
      */
     public VacationSplitResultDto parseVacationExcel(MultipartFile file) {
@@ -121,8 +117,11 @@ public class VacationService {
 
             log.info("解析Excel完成,总记录数:{},有效记录数:{}", allRecords.size(), validRecords.size());
 
-            return VacationSplitResultDto.builder().records(validRecords)
-                    .totalCount(allRecords.size()).validCount(validRecords.size()).build();
+            return VacationSplitResultDto.builder()
+                    .records(validRecords)
+                    .totalCount(allRecords.size())
+                    .validCount(validRecords.size())
+                    .build();
 
         } catch (BusinessException e) {
             throw e;
@@ -182,10 +181,12 @@ public class VacationService {
      * 解析数据行
      */
     private VacationRecordDto parseRow(Row row, Map<String, Integer> columnIndexMap) {
-        return VacationRecordDto.builder().idCard(getCellValue(row, columnIndexMap.get("idCard")))
+        return VacationRecordDto.builder()
+                .idCard(getCellValue(row, columnIndexMap.get("idCard")))
                 .name(getCellValue(row, columnIndexMap.get("name")))
                 .department(getCellValue(row, columnIndexMap.get("department")))
-                .remark(getCellValue(row, columnIndexMap.get("remark"))).build();
+                .remark(getCellValue(row, columnIndexMap.get("remark")))
+                .build();
     }
 
     /**
@@ -240,6 +241,7 @@ public class VacationService {
      * 使用AI修正备注
      *
      * @param remark 原始备注
+     *
      * @return 修正后的备注
      */
     public String correctRemark(String remark) {
@@ -258,8 +260,11 @@ public class VacationService {
                 return correctedRemark;
             } catch (NonTransientAiException ex) {
                 if (isRateLimitException(ex) && attempt < maxAttempts) {
-                    log.warn("备注修正请求触发限流，第{}次尝试将在{}后重试。remark={}，异常信息: {}", attempt,
-                            RATE_LIMIT_BACKOFF, remark, ex.getMessage());
+                    log.warn("备注修正请求触发限流，第{}次尝试将在{}后重试。remark={}，异常信息: {}",
+                             attempt,
+                             RATE_LIMIT_BACKOFF,
+                             remark,
+                             ex.getMessage());
                     log.error("限流异常堆栈", ex);
                     sleepQuietly(RATE_LIMIT_BACKOFF);
                     continue;
@@ -279,6 +284,7 @@ public class VacationService {
      * 批量修正备注
      *
      * @param records 休假记录列表
+     *
      * @return 修正后的休假记录列表
      */
     public List<VacationRecordDto> correctRemarks(List<VacationRecordDto> records) {
@@ -288,8 +294,8 @@ public class VacationService {
 
         log.info("开始批量修正备注，共{}条记录", records.size());
 
-        List<VacationRecordDto> candidates = records.stream().filter(
-                record -> record.getRemark() != null && !record.getRemark().trim().isEmpty())
+        List<VacationRecordDto> candidates = records.stream()
+                .filter(record -> record.getRemark() != null && !record.getRemark().trim().isEmpty())
                 .toList();
 
         if (candidates.isEmpty()) {
@@ -308,8 +314,7 @@ public class VacationService {
                         correctionConcurrencyLimiter.acquire();
                         acquired = true;
                         String correctedRemark = correctRemark(record.getRemark());
-                        record.setCorrectedRemark(
-                                correctedRemark != null ? correctedRemark : record.getRemark());
+                        record.setCorrectedRemark(correctedRemark != null ? correctedRemark : record.getRemark());
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         log.warn("备注修正任务被中断，保留原始备注: {}", record.getRemark(), ie);
@@ -342,15 +347,14 @@ public class VacationService {
         }
 
         String message = aiException.getMessage();
-        if (message != null && (message.contains(HTTP_429_CODE)
-                || message.contains(RATE_LIMIT_MESSAGE_KEYWORD))) {
+        if (message != null && (message.contains(HTTP_429_CODE) || message.contains(RATE_LIMIT_MESSAGE_KEYWORD))) {
             return true;
         }
 
         Throwable cause = aiException.getCause();
         while (cause != null) {
             if (cause instanceof HttpStatusCodeException statusException
-                    && statusException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                && statusException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
                 return true;
             }
             cause = cause.getCause();
@@ -372,6 +376,7 @@ public class VacationService {
      * 小时；2025/9/16-2025/9/30 陪产假 15 天
      *
      * @param correctedRemark 修正后的备注
+     *
      * @return 休假记录项列表
      */
     private List<VacationDetailItem> parseVacationDetails(String correctedRemark) {
@@ -410,6 +415,7 @@ public class VacationService {
      * 解析单条休假记录 格式: 日期 休假类型 数量 单位 例如: 2025/9/2 调休 1 天 或 2025/9/16-2025/9/30 陪产假 15 天
      *
      * @param record 单条记录
+     *
      * @return 休假记录项
      */
     private VacationDetailItem parseVacationRecord(String record) {
@@ -445,8 +451,12 @@ public class VacationService {
 
             String vacationDays = formatVacationDays(quantity, unit);
 
-            return VacationDetailItem.builder().startDate(startDate).endDate(endDate)
-                    .vacationType(vacationType).vacationDays(vacationDays).build();
+            return VacationDetailItem.builder()
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .vacationType(vacationType)
+                    .vacationDays(vacationDays)
+                    .build();
 
         } catch (Exception e) {
             log.error("解析休假记录失败: {}", record, e);
@@ -462,8 +472,7 @@ public class VacationService {
             return "";
         }
 
-        String normalizedQuantity =
-                quantity.replace("，", ",").replace(',', '.').replaceAll("[^0-9.]+", "");
+        String normalizedQuantity = quantity.replace("，", ",").replace(',', '.').replaceAll("[^0-9.]+", "");
         if (normalizedQuantity.isEmpty()) {
             return quantity;
         }
@@ -526,10 +535,10 @@ public class VacationService {
      * 生成休假数据表
      *
      * @param records 带有修正备注的记录列表
+     *
      * @return 休假详细记录列表
      */
-    public List<VacationDetailRecordDto> generateVacationDetailTable(
-            List<VacationRecordDto> records) {
+    public List<VacationDetailRecordDto> generateVacationDetailTable(List<VacationRecordDto> records) {
         if (records == null || records.isEmpty()) {
             return new ArrayList<>();
         }
@@ -540,8 +549,7 @@ public class VacationService {
 
         for (VacationRecordDto record : records) {
             // 如果没有修正后的备注，跳过
-            if (record.getCorrectedRemark() == null
-                    || record.getCorrectedRemark().trim().isEmpty()) {
+            if (record.getCorrectedRemark() == null || record.getCorrectedRemark().trim().isEmpty()) {
                 log.warn("记录缺少修正备注，跳过：{} - {}", record.getName(), record.getIdCard());
                 continue;
             }
@@ -552,17 +560,23 @@ public class VacationService {
             // 为每个拆解项创建一条详细记录
             for (VacationDetailItem item : items) {
                 String vacationType = item.getVacationType();
-                String finalVacationDays =
-                        shouldUseFixedOneDay(vacationType) ? "1" : item.getVacationDays();
+                String finalVacationDays = shouldUseFixedOneDay(vacationType) ? "1" : item.getVacationDays();
 
-                VacationDetailRecordDto detailRecord =
-                        VacationDetailRecordDto.builder().idCard(record.getIdCard())
-                                .name(record.getName()).department(record.getDepartment())
-                                .startDate(item.getStartDate()).endDate(item.getEndDate())
-                                .vacationType(vacationType).vacationDays(finalVacationDays)
-                                // 以下字段保持为空
-                                .startTime("").endTime("").annualLeaveYear("").childName("")
-                                .remark("").build();
+                VacationDetailRecordDto detailRecord = VacationDetailRecordDto.builder()
+                        .idCard(record.getIdCard())
+                        .name(record.getName())
+                        .department(record.getDepartment())
+                        .startDate(item.getStartDate())
+                        .endDate(item.getEndDate())
+                        .vacationType(vacationType)
+                        .vacationDays(finalVacationDays)
+                        // 以下字段保持为空
+                        .startTime("")
+                        .endTime("")
+                        .annualLeaveYear("")
+                        .childName("")
+                        .remark("")
+                        .build();
 
                 detailRecords.add(detailRecord);
             }

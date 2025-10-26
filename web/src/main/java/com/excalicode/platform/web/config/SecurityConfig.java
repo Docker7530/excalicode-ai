@@ -1,6 +1,9 @@
 package com.excalicode.platform.web.config;
 
-import java.util.Arrays;
+import com.excalicode.platform.web.security.filter.JwtAuthenticationFilter;
+import com.excalicode.platform.web.security.handler.JsonAccessDeniedHandler;
+import com.excalicode.platform.web.security.handler.JsonAuthenticationEntryPoint;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,10 +20,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.excalicode.platform.web.security.filter.JwtAuthenticationFilter;
-import com.excalicode.platform.web.security.handler.JsonAccessDeniedHandler;
-import com.excalicode.platform.web.security.handler.JsonAuthenticationEntryPoint;
-import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 /**
  * 只配置必要的部分,关闭所有不需要的垃圾功能
@@ -39,18 +40,18 @@ public class SecurityConfig {
      * 安全过滤器链配置
      */
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jsonAuthenticationEntryPoint)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jsonAuthenticationEntryPoint)
                         .accessDeniedHandler(jsonAccessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

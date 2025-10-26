@@ -1,17 +1,19 @@
 package com.excalicode.platform.core.service.impl;
 
-import java.util.Optional;
-import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.entity.SysUser;
 import com.excalicode.platform.core.mapper.SysUserMapper;
 import com.excalicode.platform.core.service.SysUserService;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * 系统用户 Service 实现
  */
 @Service
-public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
+public class SysUserServiceImpl
+        extends ServiceImpl<SysUserMapper, SysUser>
         implements SysUserService {
 
     @Override

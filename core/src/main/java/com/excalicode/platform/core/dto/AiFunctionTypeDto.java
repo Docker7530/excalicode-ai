@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * AI 功能类型 DTO
- *
  * 用于前端展示枚举值
  */
 @Data

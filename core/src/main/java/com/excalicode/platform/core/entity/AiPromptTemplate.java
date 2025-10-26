@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.entity;
 
-import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,9 +8,10 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 提示词模板实体
- *
  * 存储 Markdown 格式的提示词模板，用于替代原来的 resources/prompts/ 静态文件
  */
 @Data

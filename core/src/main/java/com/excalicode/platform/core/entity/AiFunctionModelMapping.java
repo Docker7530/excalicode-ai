@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.entity;
 
-import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,9 +8,10 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * AI 功能-模型映射实体
- *
  * 存储功能类型与 AI 模型的绑定关系，实现功能级别的模型切换
  */
 @Data
