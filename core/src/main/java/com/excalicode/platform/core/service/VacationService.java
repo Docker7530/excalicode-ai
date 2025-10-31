@@ -1,30 +1,8 @@
 package com.excalicode.platform.core.service;
 
-import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.ai.AiFunctionExecutor;
-import com.excalicode.platform.core.dto.VacationDetailItem;
-import com.excalicode.platform.core.dto.VacationDetailRecordDto;
-import com.excalicode.platform.core.dto.VacationRecordDto;
-import com.excalicode.platform.core.dto.VacationSplitResultDto;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.ai.retry.NonTransientAiException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +10,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.ai.retry.NonTransientAiException;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.excalicode.platform.common.enums.AiFunctionType;
+import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.ai.AiFunctionExecutor;
+import com.excalicode.platform.core.dto.VacationDetailItem;
+import com.excalicode.platform.core.dto.VacationDetailRecordDto;
+import com.excalicode.platform.core.dto.VacationRecordDto;
+import com.excalicode.platform.core.dto.VacationSplitResultDto;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 员工休假记录服务
@@ -56,13 +53,10 @@ public class VacationService {
         }
     };
     private static final int MAX_CONCURRENT_CORRECTIONS = 5;
-    private static final int MAX_RATE_LIMIT_RETRIES = 1;
-    private static final Duration RATE_LIMIT_BACKOFF = Duration.ofMinutes(1);
-    private static final String RATE_LIMIT_MESSAGE_KEYWORD = "您的速率达到上限";
-    private static final String HTTP_429_CODE = "HTTP 429";
     private static final Set<String> FIXED_ONE_DAY_VACATION_TYPES = Set.of("迟到", "迟到早退", "未刷卡");
     private static final BigDecimal HOURS_PER_DAY = new BigDecimal("8");
     private final AiFunctionExecutor aiFunctionExecutor;
+    private final ExecutorService applicationExecutorService;
     private final Semaphore correctionConcurrencyLimiter = new Semaphore(MAX_CONCURRENT_CORRECTIONS, true);
 
     /**
@@ -248,34 +242,17 @@ public class VacationService {
             return "";
         }
 
-        int attempt = 0;
-        int maxAttempts = MAX_RATE_LIMIT_RETRIES + 1;
-
-        while (true) {
-            attempt++;
-            try {
-                String correctedRemark = invokeAiCorrection(remark);
-                log.info("备注修正 - 原始: {}, 修正后: {}", remark, correctedRemark);
-                return correctedRemark;
-            } catch (NonTransientAiException ex) {
-                if (isRateLimitException(ex) && attempt < maxAttempts) {
-                    log.warn("备注修正请求触发限流，第{}次尝试将在{}后重试。remark={}，异常信息: {}",
-                             attempt,
-                             RATE_LIMIT_BACKOFF,
-                             remark,
-                             ex.getMessage());
-                    log.error("限流异常堆栈", ex);
-                    sleepQuietly();
-                    continue;
-                }
-                log.error("备注修正失败: {}", remark, ex);
-                return remark;
-            } catch (Exception e) {
-                log.error("备注修正失败: {}", remark, e);
-                return remark;
-            }
+        try {
+            String correctedRemark = invokeAiCorrection(remark);
+            log.info("备注修正 - 原始: {}, 修正后: {}", remark, correctedRemark);
+            return correctedRemark;
+        } catch (NonTransientAiException ex) {
+            log.error("备注修正失败: {}", remark, ex);
+            return remark;
+        } catch (Exception e) {
+            log.error("备注修正失败: {}", remark, e);
+            return remark;
         }
-
     }
 
     /**
@@ -301,35 +278,31 @@ public class VacationService {
             return records;
         }
 
-        ThreadFactory threadFactory = Thread.ofVirtual().name("vacation-correction-", 0).factory();
-
-        try (ExecutorService executor = Executors.newThreadPerTaskExecutor(threadFactory)) {
-            List<CompletableFuture<Void>> futures = new ArrayList<>(candidates.size());
-            for (VacationRecordDto record : candidates) {
-                futures.add(CompletableFuture.runAsync(() -> {
-                    boolean acquired = false;
-                    try {
-                        correctionConcurrencyLimiter.acquire();
-                        acquired = true;
-                        String correctedRemark = correctRemark(record.getRemark());
-                        record.setCorrectedRemark(correctedRemark != null ? correctedRemark : record.getRemark());
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        log.warn("备注修正任务被中断，保留原始备注: {}", record.getRemark(), ie);
-                        record.setCorrectedRemark(record.getRemark());
-                    } catch (Exception ex) {
-                        log.error("备注修正任务异常，保留原始备注: {}", record.getRemark(), ex);
-                        record.setCorrectedRemark(record.getRemark());
-                    } finally {
-                        if (acquired) {
-                            correctionConcurrencyLimiter.release();
-                        }
+        List<CompletableFuture<Void>> futures = new ArrayList<>(candidates.size());
+        for (VacationRecordDto record : candidates) {
+            futures.add(CompletableFuture.runAsync(() -> {
+                boolean acquired = false;
+                try {
+                    correctionConcurrencyLimiter.acquire();
+                    acquired = true;
+                    String correctedRemark = correctRemark(record.getRemark());
+                    record.setCorrectedRemark(correctedRemark != null ? correctedRemark : record.getRemark());
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    log.warn("备注修正任务被中断，保留原始备注: {}", record.getRemark(), ie);
+                    record.setCorrectedRemark(record.getRemark());
+                } catch (Exception ex) {
+                    log.error("备注修正任务异常，保留原始备注: {}", record.getRemark(), ex);
+                    record.setCorrectedRemark(record.getRemark());
+                } finally {
+                    if (acquired) {
+                        correctionConcurrencyLimiter.release();
                     }
-                }, executor));
-            }
-
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+                }
+            }, applicationExecutorService));
         }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
         log.info("批量修正备注完成");
         return records;
@@ -339,38 +312,9 @@ public class VacationService {
         return aiFunctionExecutor.executeText(AiFunctionType.QINSHI_DATA_PROCESSING, remark);
     }
 
-    private boolean isRateLimitException(Exception exception) {
-        if (!(exception instanceof NonTransientAiException aiException)) {
-            return false;
-        }
-
-        String message = aiException.getMessage();
-        if (message != null && (message.contains(HTTP_429_CODE) || message.contains(RATE_LIMIT_MESSAGE_KEYWORD))) {
-            return true;
-        }
-
-        Throwable cause = aiException.getCause();
-        while (cause != null) {
-            if (cause instanceof HttpStatusCodeException statusException
-                && statusException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                return true;
-            }
-            cause = cause.getCause();
-        }
-        return false;
-    }
-
-    private void sleepQuietly() {
-        try {
-            Thread.sleep(VacationService.RATE_LIMIT_BACKOFF.toMillis());
-        } catch (InterruptedException interruptedException) {
-            Thread.currentThread().interrupt();
-            log.warn("等待限流重试时被中断", interruptedException);
-        }
-    }
-
     /**
-     * 拆解单条修正后的备注为多条休假记录（基于规则解析） 格式: 日期 休假类型 数量 单位；日期 休假类型 数量 单位 例如: 2025/9/2 调休 1 天；2025/9/9 调休 3.5
+     * 拆解单条修正后的备注为多条休假记录（基于规则解析） 格式: 日期 休假类型 数量 单位；日期 休假类型 数量 单位 例如: 2025/9/2 调休 1
+     * 天；2025/9/9 调休 3.5
      * 小时；2025/9/16-2025/9/30 陪产假 15 天
      *
      * @param correctedRemark 修正后的备注

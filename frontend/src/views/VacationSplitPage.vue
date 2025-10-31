@@ -435,7 +435,7 @@ const handleUpload = async () => {
     const formData = new FormData();
     formData.append('file', selectedFile.value);
 
-    const response = await api.post('/vacation/split', formData, {
+    const response = await api.post('/api/vacation/split', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -468,7 +468,7 @@ const handleCorrectRemarks = async () => {
   correctingLoading.value = true;
 
   try {
-    const response = await api.post('/vacation/correct', {
+    const response = await api.post('/api/vacation/correct', {
       records: result.value.records,
     });
 
@@ -508,7 +508,7 @@ const handleGenerateTable = async () => {
   generatingTableLoading.value = true;
 
   try {
-    const response = await api.post('/vacation/generate-table', {
+    const response = await api.post('/api/vacation/generate-table', {
       records: result.value.records,
     });
 
