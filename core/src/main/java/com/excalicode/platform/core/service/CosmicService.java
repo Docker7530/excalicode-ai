@@ -411,7 +411,7 @@ public class CosmicService {
     public AnalysisResultDto analyzeRequirement(CosmicAnalysisRequestDto request) {
         String userPromptText = buildCosmicUserPrompt(request.getFunctionalProcesses());
         AiFunctionExecutor.AiFunctionResult<CosmicProcessesResponse> aiResult = aiFunctionExecutor.executeStructured(
-                AiFunctionType.COSMIC_ANALYSIS_V1,
+                AiFunctionType.COSMIC_ANALYSIS,
                 userPromptText,
                 CosmicProcessesResponse.class);
         CosmicProcessesResponse result = aiResult.value();

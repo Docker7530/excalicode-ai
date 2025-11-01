@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * AI 功能-模型映射管理 Controller
@@ -43,16 +44,15 @@ public class AiFunctionMappingController {
      */
     @PostMapping("/set")
     public ResponseEntity<Void> setMapping(@RequestBody SetFunctionMappingRequest request) {
-        log.info("设置功能映射: functionType={}, modelId={}", request.getFunctionType(),
-                 request.getModelId());
+        log.info("设置功能映射: functionType={}, modelId={}", request.getFunctionType(), request.getModelId());
 
-        AiFunctionType functionType = AiFunctionType.fromCode(request.getFunctionType());
-        if (functionType == null) {
+        Optional<AiFunctionType> aiFunctionType = AiFunctionType.fromCode(request.getFunctionType());
+        if (aiFunctionType.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
+        AiFunctionType functionType = aiFunctionType.get();
 
-        boolean success =
-                mappingService.setFunctionModelMapping(functionType, request.getModelId());
+        boolean success = mappingService.setFunctionModelMapping(functionType, request.getModelId());
         if (success) {
             return ResponseEntity.ok().build();
         } else {

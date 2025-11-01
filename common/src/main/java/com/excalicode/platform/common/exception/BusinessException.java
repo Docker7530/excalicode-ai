@@ -7,7 +7,7 @@ public class BusinessException
         extends RuntimeException {
 
     /**
-     * 构造函数
+     * 构造函数。
      *
      * @param message 异常提示信息
      */
@@ -16,7 +16,7 @@ public class BusinessException
     }
 
     /**
-     * 构造函数
+     * 构造函数。
      *
      * @param message 异常提示信息
      * @param cause   原始异常
