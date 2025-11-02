@@ -126,7 +126,7 @@ public class CosmicService {
             builder.append(System.lineSeparator())
                     .append("请在不遗漏关键业务场景的前提下，尽量将上述需求拆解为约 ")
                     .append(expectedProcessCount)
-                    .append(" 个功能过程。如确需增减，请保持偏差不超过 1，并说明原因。");
+                    .append(" 个功能过程。");
         }
 
         return builder.toString();
@@ -360,8 +360,7 @@ public class CosmicService {
     }
 
     /**
-     * 执行 COSMIC 分析 V1 (稳定版本)
-     * 使用一次性生成所有字段的方式,可能在功能过程较多时出现截断问题。
+     * 执行 COSMIC 分析：使用一次性生成所有字段的方式,可能在功能过程较多时出现截断问题。
      *
      * @param request 需求请求参数
      * @return 分析结果，包含 COSMIC 过程数据

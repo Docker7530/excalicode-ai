@@ -77,8 +77,7 @@ public class CosmicController {
     }
 
     /**
-     * 生成子过程 V1 (稳定版本)
-     * 使用一次性生成所有字段的方式。
+     * 生成子过程：使用一次性生成所有字段的方式。
      */
     @PostMapping("/cosmic/analyze")
     public ResponseEntity<AnalysisResponse> analyzeRequirement(@RequestBody @Valid CosmicAnalysisRequest request) {
