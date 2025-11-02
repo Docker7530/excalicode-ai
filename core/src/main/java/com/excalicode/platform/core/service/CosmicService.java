@@ -432,7 +432,7 @@ public class CosmicService {
             throw new BusinessException("阶段1: AI未能生成有效的基础过程");
         }
 
-        return sanitizeBaseProcesses(result.getProcesses());
+        return sanitizeCosmicProcesses(result.getProcesses());
     }
 
     private List<CosmicProcess> analyzeCosmicProcessesPhase2Parallel(List<CosmicProcess> baseProcesses) {
@@ -719,31 +719,7 @@ public class CosmicService {
             List<CosmicProcessStep> sanitizedSteps = new ArrayList<>();
             for (int stepIndex = 0; stepIndex < steps.size(); stepIndex++) {
                 CosmicProcessStep step = steps.get(stepIndex);
-                String subProcessDesc = trimToEmpty(step.getSubProcessDesc());
-                if (!StringUtils.hasText(subProcessDesc)) {
-                    throw new BusinessException(
-                            String.format("功能过程 \"%s\" 的第 %d 个子过程描述为空", functionalProcess,
-                                          stepIndex + 1));
-                }
-
-                String dataMovementType =
-                        normalizeMovementType(step.getDataMovementType(), functionalProcess, stepIndex);
-
-                String dataGroup = trimToEmpty(step.getDataGroup());
-                if (!StringUtils.hasText(dataGroup)) {
-                    throw new BusinessException(
-                            String.format("功能过程 \"%s\" 的第 %d 个子过程数据组为空", functionalProcess,
-                                          stepIndex + 1));
-                }
-
-                String dataAttributes = trimToEmpty(step.getDataAttributes());
-
-                sanitizedSteps.add(CosmicProcessStep.builder()
-                                           .subProcessDesc(subProcessDesc)
-                                           .dataMovementType(dataMovementType)
-                                           .dataGroup(dataGroup)
-                                           .dataAttributes(dataAttributes)
-                                           .build());
+                sanitizedSteps.add(sanitizeStep(step, functionalProcess, stepIndex));
             }
 
             sanitized.add(CosmicProcess.builder()
@@ -756,57 +732,29 @@ public class CosmicService {
         return sanitized;
     }
 
-    private List<CosmicProcess> sanitizeBaseProcesses(List<CosmicProcess> processes) {
-        if (CollectionUtils.isEmpty(processes)) {
-            throw new BusinessException("阶段1: AI未能生成有效的基础过程");
+    private CosmicProcessStep sanitizeStep(CosmicProcessStep step, String functionalProcess, int stepIndex) {
+        // 必填:子过程描述
+        String subProcessDesc = trimToEmpty(step.getSubProcessDesc());
+        if (!StringUtils.hasText(subProcessDesc)) {
+            throw new BusinessException(
+                    String.format("功能过程 \"%s\" 的第 %d 个子过程描述为空", functionalProcess, stepIndex + 1));
         }
 
-        List<CosmicProcess> sanitized = new ArrayList<>();
-        for (int processIndex = 0; processIndex < processes.size(); processIndex++) {
-            CosmicProcess process = processes.get(processIndex);
+        // 必填:数据移动类型
+        String dataMovementType = normalizeMovementType(step.getDataMovementType(), functionalProcess, stepIndex);
 
-            String triggerEvent = trimToEmpty(process.getTriggerEvent());
-            if (!StringUtils.hasText(triggerEvent)) {
-                throw new BusinessException(String.format("阶段1: 第 %d 个功能过程缺少触发事件", processIndex + 1));
-            }
+        // 选填:数据组(有就要合法)
+        String dataGroup = trimToEmpty(step.getDataGroup());
 
-            String functionalProcess = trimToEmpty(process.getFunctionalProcess());
-            if (!StringUtils.hasText(functionalProcess)) {
-                throw new BusinessException(String.format("阶段1: 第 %d 个功能过程缺少功能过程名称", processIndex + 1));
-            }
+        // 选填:数据属性
+        String dataAttributes = trimToEmpty(step.getDataAttributes());
 
-            List<CosmicProcessStep> steps = process.getProcessSteps();
-            if (CollectionUtils.isEmpty(steps)) {
-                throw new BusinessException(String.format("阶段1: 功能过程 \"%s\" 缺少子过程步骤", functionalProcess));
-            }
-
-            List<CosmicProcessStep> sanitizedSteps = new ArrayList<>();
-            for (int stepIndex = 0; stepIndex < steps.size(); stepIndex++) {
-                CosmicProcessStep step = steps.get(stepIndex);
-                String subProcessDesc = trimToEmpty(step.getSubProcessDesc());
-                if (!StringUtils.hasText(subProcessDesc)) {
-                    throw new BusinessException(
-                            String.format("阶段1: 功能过程 \"%s\" 的第 %d 个子过程描述为空", functionalProcess,
-                                          stepIndex + 1));
-                }
-
-                String dataMovementType =
-                        normalizeMovementType(step.getDataMovementType(), functionalProcess, stepIndex);
-
-                sanitizedSteps.add(CosmicProcessStep.builder()
-                                           .subProcessDesc(subProcessDesc)
-                                           .dataMovementType(dataMovementType)
-                                           .build());
-            }
-
-            sanitized.add(CosmicProcess.builder()
-                                  .triggerEvent(triggerEvent)
-                                  .functionalProcess(functionalProcess)
-                                  .processSteps(sanitizedSteps)
-                                  .build());
-        }
-
-        return sanitized;
+        return CosmicProcessStep.builder()
+                .subProcessDesc(subProcessDesc)
+                .dataMovementType(dataMovementType)
+                .dataGroup(dataGroup)
+                .dataAttributes(dataAttributes)
+                .build();
     }
 
     private String normalizeMovementType(String value, String functionalProcess, int stepIndex) {
