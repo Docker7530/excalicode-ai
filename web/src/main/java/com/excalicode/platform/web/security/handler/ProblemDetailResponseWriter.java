@@ -36,7 +36,7 @@ public class ProblemDetailResponseWriter {
             throws IOException {
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(status,
                                                                 StringUtils.hasText(message) ? message :
-                                                                        status.getReasonPhrase());
+                                                                status.getReasonPhrase());
         detail.setTitle(status.getReasonPhrase());
         detail.setProperty("timestamp", OffsetDateTime.now());
         if (request != null) {

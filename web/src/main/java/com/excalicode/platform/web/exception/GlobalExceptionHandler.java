@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     private ProblemDetail createProblemDetail(HttpStatus status, String message) {
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(status,
                                                                 StringUtils.hasText(message) ? message :
-                                                                        status.getReasonPhrase());
+                                                                status.getReasonPhrase());
         detail.setTitle(status.getReasonPhrase());
         detail.setProperty("timestamp", OffsetDateTime.now());
         String traceId = MDC.get(TRACE_ID_KEY);

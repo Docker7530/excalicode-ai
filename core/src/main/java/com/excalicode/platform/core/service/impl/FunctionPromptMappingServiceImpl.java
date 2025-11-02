@@ -64,7 +64,8 @@ public class FunctionPromptMappingServiceImpl
     @Override
     public List<AiFunctionPromptMapping> listAllMappingsWithPrompt() {
         List<AiFunctionPromptMapping> mappings =
-                this.list(new LambdaQueryWrapper<AiFunctionPromptMapping>().orderByAsc(AiFunctionPromptMapping::getFunctionCode));
+                this.list(new LambdaQueryWrapper<AiFunctionPromptMapping>().orderByAsc(
+                        AiFunctionPromptMapping::getFunctionCode));
 
         // 填充提示词模板信息
         for (AiFunctionPromptMapping mapping : mappings) {
@@ -83,8 +84,9 @@ public class FunctionPromptMappingServiceImpl
             return false;
         }
 
-        return this.remove(new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
-                                                                                functionCode)
-                                   .eq(AiFunctionPromptMapping::getPromptCode, promptCode));
+        return this.remove(
+                new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
+                                                                     functionCode)
+                        .eq(AiFunctionPromptMapping::getPromptCode, promptCode));
     }
 }

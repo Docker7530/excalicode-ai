@@ -91,8 +91,8 @@ public class AiFunctionConfigurationService {
 
     private ChatModel createChatModel(AiProvider provider, AiModel model) {
         if (!StringUtils.hasText(provider.getBaseUrl())
-            || !StringUtils.hasText(provider.getApiKey())
-            || !StringUtils.hasText(model.getModelName())) {
+                || !StringUtils.hasText(provider.getApiKey())
+                || !StringUtils.hasText(model.getModelName())) {
             log.warn("厂商或模型配置缺失，使用默认 ChatModel。provider={}, model={}", provider.getId(), model.getId());
             return defaultChatModel;
         }

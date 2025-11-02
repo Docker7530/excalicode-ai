@@ -1,5 +1,24 @@
 package com.excalicode.platform.core.service;
 
+import com.excalicode.platform.common.enums.AiFunctionType;
+import com.excalicode.platform.common.exception.BusinessException;
+import com.excalicode.platform.core.ai.AiFunctionExecutor;
+import com.excalicode.platform.core.api.vacation.VacationDetailItem;
+import com.excalicode.platform.core.api.vacation.VacationDetailRequest;
+import com.excalicode.platform.core.api.vacation.VacationRecordRequest;
+import com.excalicode.platform.core.api.vacation.VacationSplitResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.ai.retry.NonTransientAiException;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,27 +30,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.ai.retry.NonTransientAiException;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.ai.AiFunctionExecutor;
-import com.excalicode.platform.core.api.vacation.VacationDetailItem;
-import com.excalicode.platform.core.api.vacation.VacationDetailRequest;
-import com.excalicode.platform.core.api.vacation.VacationRecordRequest;
-import com.excalicode.platform.core.api.vacation.VacationSplitResponse;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 员工休假记录服务
@@ -63,7 +61,6 @@ public class VacationService {
      * 解析员工休假记录Excel文件
      *
      * @param file Excel文件
-     *
      * @return 休假记录拆分结果
      */
     public VacationSplitResponse parseVacationExcel(MultipartFile file) {
@@ -234,7 +231,6 @@ public class VacationService {
      * 使用AI修正备注
      *
      * @param remark 原始备注
-     *
      * @return 修正后的备注
      */
     public String correctRemark(String remark) {
@@ -259,7 +255,6 @@ public class VacationService {
      * 批量修正备注
      *
      * @param records 休假记录列表
-     *
      * @return 修正后的休假记录列表
      */
     public List<VacationRecordRequest> correctRemarks(List<VacationRecordRequest> records) {
@@ -318,7 +313,6 @@ public class VacationService {
      * 小时；2025/9/16-2025/9/30 陪产假 15 天
      *
      * @param correctedRemark 修正后的备注
-     *
      * @return 休假记录项列表
      */
     private List<VacationDetailItem> parseVacationDetails(String correctedRemark) {
@@ -357,7 +351,6 @@ public class VacationService {
      * 解析单条休假记录 格式: 日期 休假类型 数量 单位 例如: 2025/9/2 调休 1 天 或 2025/9/16-2025/9/30 陪产假 15 天
      *
      * @param record 单条记录
-     *
      * @return 休假记录项
      */
     private VacationDetailItem parseVacationRecord(String record) {
@@ -477,7 +470,6 @@ public class VacationService {
      * 生成休假数据表
      *
      * @param records 带有修正备注的记录列表
-     *
      * @return 休假详细记录列表
      */
     public List<VacationDetailRequest> generateVacationDetailTable(List<VacationRecordRequest> records) {

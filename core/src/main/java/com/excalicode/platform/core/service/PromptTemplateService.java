@@ -15,7 +15,6 @@ public interface PromptTemplateService
      * 根据提示词代码查询模板
      *
      * @param code 提示词代码
-     *
      * @return 提示词模板, 如果不存在则返回 null
      */
     AiPromptTemplate getByCode(String code);
@@ -24,7 +23,6 @@ public interface PromptTemplateService
      * 搜索提示词模板（根据名称或描述）
      *
      * @param keyword 搜索关键词
-     *
      * @return 匹配的提示词列表
      */
     List<AiPromptTemplate> search(String keyword);
@@ -33,7 +31,6 @@ public interface PromptTemplateService
      * 创建或更新提示词模板
      *
      * @param promptTemplate 提示词模板
-     *
      * @return 是否成功
      */
     boolean saveOrUpdatePrompt(AiPromptTemplate promptTemplate);

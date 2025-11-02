@@ -84,8 +84,8 @@ public class AiFunctionExecutor {
         ResponseFormat responseFormat =
                 config.supportsJsonSchema() ? new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA,
                                                                  jsonSchema) :
-                        new ResponseFormat(ResponseFormat.Type.JSON_OBJECT,
-                                                                                                  null);
+                new ResponseFormat(ResponseFormat.Type.JSON_OBJECT,
+                                   null);
         optionsBuilder.responseFormat(responseFormat);
         return new Prompt(mergeMessages(config, messages), optionsBuilder.build());
     }

@@ -54,7 +54,6 @@ public class UserController {
      * 新增用户
      *
      * @param request 创建请求
-     *
      * @return 创建后的用户信息
      */
     @PostMapping
@@ -79,7 +78,6 @@ public class UserController {
      *
      * @param id      用户ID
      * @param request 更新请求
-     *
      * @return 更新后的用户信息
      */
     @PutMapping("/{id}")
@@ -114,7 +112,6 @@ public class UserController {
      * 删除用户
      *
      * @param id 用户ID
-     *
      * @return 删除结果
      */
     @DeleteMapping("/{id}")

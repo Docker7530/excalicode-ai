@@ -29,8 +29,8 @@ public class DuplicateCheckResult {
 
     public boolean hasDuplicates() {
         return !duplicateSubProcessDescs.isEmpty()
-               || !duplicateDataGroups.isEmpty()
-               || !duplicateDataAttributes.isEmpty();
+                || !duplicateDataGroups.isEmpty()
+                || !duplicateDataAttributes.isEmpty();
     }
 
 }

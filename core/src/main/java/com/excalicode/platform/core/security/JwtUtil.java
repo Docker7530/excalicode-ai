@@ -35,7 +35,6 @@ public class JwtUtil {
      * 生成 JWT Token
      *
      * @param username 用户名
-     *
      * @return JWT Token
      */
     public String generateToken(String username) {
@@ -54,7 +53,6 @@ public class JwtUtil {
      * 从 Token 中提取用户名
      *
      * @param token JWT Token
-     *
      * @return 用户名
      */
     public String getUsernameFromToken(String token) {
@@ -71,7 +69,6 @@ public class JwtUtil {
      * 验证 Token 是否有效
      *
      * @param token JWT Token
-     *
      * @return 是否有效
      */
     public boolean validateToken(String token) {

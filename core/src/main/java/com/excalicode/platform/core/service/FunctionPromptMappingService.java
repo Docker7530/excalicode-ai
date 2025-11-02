@@ -15,7 +15,6 @@ public interface FunctionPromptMappingService
      * 根据功能代码查询提示词代码
      *
      * @param functionCode 功能代码
-     *
      * @return 提示词代码, 如果没有配置则返回 null
      */
     String getPromptCodeByFunctionCode(String functionCode);
@@ -25,7 +24,6 @@ public interface FunctionPromptMappingService
      *
      * @param functionCode 功能代码
      * @param promptCode   提示词代码
-     *
      * @return 是否设置成功
      */
     boolean setFunctionPromptMapping(String functionCode, String promptCode);
@@ -42,7 +40,6 @@ public interface FunctionPromptMappingService
      *
      * @param functionCode 功能代码
      * @param promptCode   提示词代码
-     *
      * @return 是否删除成功
      */
     boolean deleteFunctionPromptMapping(String functionCode, String promptCode);

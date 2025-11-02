@@ -30,7 +30,8 @@ import java.util.List;
 public class ExcelService {
 
     private static final String[] EXCEL_HEADERS =
-            {"客户需求", "功能用户", "功能用户需求", "触发事件", "功能过程", "子过程描述", "数据移动类型", "数据组", "数据属性", "CFP"};
+            {"客户需求", "功能用户", "功能用户需求", "触发事件", "功能过程", "子过程描述", "数据移动类型", "数据组",
+                    "数据属性", "CFP"};
     // 列宽单位：1个字符宽度 ≈ 256
     private static final int[] COLUMN_WIDTHS = {25 * 256, 25 * 256, 25 * 256, // 客户需求、功能用户、功能用户需求
             25 * 256, 25 * 256, // 触发事件、功能过程

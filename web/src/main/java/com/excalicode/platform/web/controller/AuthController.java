@@ -32,7 +32,6 @@ public class AuthController {
      * 用户登录
      *
      * @param loginRequest 登录请求
-     *
      * @return 登录响应(包含 JWT Token)
      */
     @PostMapping("/login")

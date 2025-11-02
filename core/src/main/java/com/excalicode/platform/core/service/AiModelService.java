@@ -15,7 +15,6 @@ public interface AiModelService
      * 根据厂商ID查询该厂商的所有模型
      *
      * @param providerId 厂商ID
-     *
      * @return 模型列表
      */
     List<AiModel> listByProviderId(Long providerId);

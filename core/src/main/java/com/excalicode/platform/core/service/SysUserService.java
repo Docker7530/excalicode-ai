@@ -13,7 +13,6 @@ public interface SysUserService
      * 判断用户名是否已存在
      *
      * @param username 用户名
-     *
      * @return true 已存在; false 不存在
      */
     boolean existsByUsername(String username);

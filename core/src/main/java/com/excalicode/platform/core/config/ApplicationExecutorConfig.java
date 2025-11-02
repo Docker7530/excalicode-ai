@@ -1,15 +1,15 @@
 package com.excalicode.platform.core.config;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 /**
  * 统一线程池配置，集中管理平台内的并发任务。
@@ -40,11 +40,11 @@ public class ApplicationExecutorConfig {
         };
 
         return new ThreadPoolExecutor(CORE_POOL_SIZE,
-                MAX_POOL_SIZE,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(QUEUE_CAPACITY),
-                threadFactory,
-                new ThreadPoolExecutor.CallerRunsPolicy());
+                                      MAX_POOL_SIZE,
+                                      60L,
+                                      TimeUnit.SECONDS,
+                                      new LinkedBlockingQueue<>(QUEUE_CAPACITY),
+                                      threadFactory,
+                                      new ThreadPoolExecutor.CallerRunsPolicy());
     }
 }

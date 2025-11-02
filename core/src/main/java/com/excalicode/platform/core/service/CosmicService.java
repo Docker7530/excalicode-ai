@@ -3,7 +3,6 @@ package com.excalicode.platform.core.service;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
 import com.excalicode.platform.core.ai.AiFunctionExecutor;
-import com.excalicode.platform.core.config.CosmicProcessingConfig;
 import com.excalicode.platform.core.api.cosmic.AnalysisResponse;
 import com.excalicode.platform.core.api.cosmic.CosmicAnalysisRequest;
 import com.excalicode.platform.core.api.cosmic.CosmicProcessBaseResponse;
@@ -17,6 +16,7 @@ import com.excalicode.platform.core.api.cosmic.FunctionalProcessesResponse;
 import com.excalicode.platform.core.api.cosmic.ProcessBreakdownRequest;
 import com.excalicode.platform.core.api.cosmic.ProcessBreakdownResponse;
 import com.excalicode.platform.core.api.cosmic.ProcessTableExportRequest;
+import com.excalicode.platform.core.config.CosmicProcessingConfig;
 import com.excalicode.platform.core.model.cosmic.CosmicProcess;
 import com.excalicode.platform.core.model.cosmic.CosmicProcessStep;
 import com.excalicode.platform.core.model.cosmic.DuplicateCheckResult;
@@ -92,7 +92,6 @@ public class CosmicService {
      * 流式返回需求扩写结果
      *
      * @param originalRequirement 原始需求描述
-     *
      * @return SSE 文本片段流，组成扩写后的需求描述
      */
     public Flux<String> streamEnhancedRequirement(String originalRequirement) {
@@ -119,9 +118,7 @@ public class CosmicService {
      * 执行功能过程拆解，使用 AI 将需求描述拆解为功能过程列表
      *
      * @param request 需求请求参数
-     *
      * @return 拆解结果，包含功能过程列表
-     *
      * @throws BusinessException 业务异常
      */
     public ProcessBreakdownResponse breakdownProcess(ProcessBreakdownRequest request) {
@@ -164,9 +161,7 @@ public class CosmicService {
      * 从COSMIC Excel表格导入功能流程。
      *
      * @param file 上传的Excel文件
-     *
      * @return 解析得到的功能流程列表
-     *
      * @throws BusinessException 业务异常
      */
     public ProcessBreakdownResponse importFunctionalProcesses(MultipartFile file) {
@@ -253,7 +248,6 @@ public class CosmicService {
      * @param sheet       工作表
      * @param rowIndex    行索引
      * @param columnIndex 列索引
-     *
      * @return true表示应跳过，false表示需要读取
      */
     private boolean shouldSkipMergedCell(Sheet sheet, int rowIndex, int columnIndex) {
@@ -270,7 +264,6 @@ public class CosmicService {
      * 导入 COSMIC 子过程表
      *
      * @param file 上传的 Excel 文件
-     *
      * @return 子过程列表
      */
     public AnalysisResponse importCosmicProcesses(MultipartFile file) {
@@ -349,11 +342,11 @@ public class CosmicService {
             String dataAttributes = getCellValueAsString(row.getCell(COLUMN_DATA_ATTRIBUTES)).trim();
 
             boolean rowEmpty = !StringUtils.hasText(triggerEvent)
-                               && !StringUtils.hasText(functionalProcess)
-                               && !StringUtils.hasText(subProcessDesc)
-                               && !StringUtils.hasText(dataMovement)
-                               && !StringUtils.hasText(dataGroup)
-                               && !StringUtils.hasText(dataAttributes);
+                    && !StringUtils.hasText(functionalProcess)
+                    && !StringUtils.hasText(subProcessDesc)
+                    && !StringUtils.hasText(dataMovement)
+                    && !StringUtils.hasText(dataGroup)
+                    && !StringUtils.hasText(dataAttributes);
             if (rowEmpty) {
                 continue;
             }
@@ -378,11 +371,11 @@ public class CosmicService {
             final String functionalProcessKey = currentFunctionalProcess;
             String key = triggerEventKey + "||" + functionalProcessKey;
             CosmicProcess process = grouped.computeIfAbsent(key,
-                                                               ignored -> CosmicProcess.builder()
-                                                                       .triggerEvent(triggerEventKey)
-                                                                       .functionalProcess(functionalProcessKey)
-                                                                       .processSteps(new ArrayList<>())
-                                                                       .build());
+                                                            ignored -> CosmicProcess.builder()
+                                                                    .triggerEvent(triggerEventKey)
+                                                                    .functionalProcess(functionalProcessKey)
+                                                                    .processSteps(new ArrayList<>())
+                                                                    .build());
 
             process.getProcessSteps()
                     .add(CosmicProcessStep.builder()
@@ -401,9 +394,7 @@ public class CosmicService {
      * 使用一次性生成所有字段的方式,可能在功能过程较多时出现截断问题。
      *
      * @param request 需求请求参数
-     *
      * @return 分析结果，包含 COSMIC 过程数据
-     *
      * @throws BusinessException 业务异常
      */
     public AnalysisResponse analyzeRequirement(CosmicAnalysisRequest request) {
@@ -441,9 +432,7 @@ public class CosmicService {
      * 生成子过程 V2 (Alpha版本 - 两阶段方法)
      *
      * @param request 需求请求参数
-     *
      * @return 分析结果，包含 COSMIC 过程数据
-     *
      * @throws BusinessException 业务异常
      */
     public AnalysisResponse analyzeRequirementV2(CosmicAnalysisRequest request) {
@@ -526,7 +515,7 @@ public class CosmicService {
     }
 
     private CosmicProcessStep generateDataGroupAndAttributes(CosmicProcess baseProcess,
-                                                                CosmicProcessStep stepBase) {
+                                                             CosmicProcessStep stepBase) {
         int retries = 0;
         Exception lastException = null;
 
@@ -936,7 +925,6 @@ public class CosmicService {
      * 导出功能过程表格为 Excel 字节数组
      *
      * @param request 文档生成请求参数
-     *
      * @return Excel 文件字节数组
      */
     public byte[] exportProcessTableAsBytes(ProcessTableExportRequest request) {
@@ -948,9 +936,7 @@ public class CosmicService {
      * 生成文档预览内容
      *
      * @param request 文档生成请求参数
-     *
      * @return 文档预览内容
-     *
      * @throws BusinessException 业务异常
      */
     public String generateDocumentPreview(DocumentPreviewRequest request) {
@@ -981,7 +967,6 @@ public class CosmicService {
      * 生成需求文档为 Word
      *
      * @param request 文档生成请求参数
-     *
      * @return Word 文件字节数组
      */
     public byte[] generateRequirementDocumentAsBytes(DocumentExportRequest request) {
