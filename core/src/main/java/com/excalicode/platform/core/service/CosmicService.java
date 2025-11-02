@@ -410,7 +410,7 @@ public class CosmicService {
         int totalStepsPhase1 = baseProcesses.stream().mapToInt(p -> p.getProcessSteps().size()).sum();
         log.info("阶段1完成, 生成子过程数量: {}", totalStepsPhase1);
 
-        List<CosmicProcess> enrichedProcesses = analyzeCosmicProcessesPhase2Parallel(baseProcesses);
+        List<CosmicProcess> enrichedProcesses = analyzeCosmicProcessesPhase2(baseProcesses);
         int totalStepsPhase2 = enrichedProcesses.stream().mapToInt(p -> p.getProcessSteps().size()).sum();
         log.info("阶段2完成, 完整步骤数量: {}", totalStepsPhase2);
 
@@ -424,8 +424,6 @@ public class CosmicService {
         AiFunctionExecutor.AiFunctionResult<CosmicProcessBaseResponse> aiResult =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE1, userPromptText,
                                                      CosmicProcessBaseResponse.class);
-        String response = aiResult.rawResponse();
-        log.info("阶段1 AI响应长度: {} 字符", response != null ? response.length() : 0);
 
         CosmicProcessBaseResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getProcesses())) {
@@ -435,7 +433,7 @@ public class CosmicService {
         return sanitizeCosmicProcesses(result.getProcesses());
     }
 
-    private List<CosmicProcess> analyzeCosmicProcessesPhase2Parallel(List<CosmicProcess> baseProcesses) {
+    private List<CosmicProcess> analyzeCosmicProcessesPhase2(List<CosmicProcess> baseProcesses) {
         List<CosmicProcess> processes = new ArrayList<>();
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
