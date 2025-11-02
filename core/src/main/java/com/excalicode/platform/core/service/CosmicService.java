@@ -98,18 +98,12 @@ public class CosmicService {
         if (!StringUtils.hasText(originalRequirement)) {
             return Flux.error(new BusinessException("原始需求描述不能为空"));
         }
-        Flux<String> flux =
-                aiFunctionExecutor.streamText(AiFunctionType.COSMIC_REQUIREMENT_ENHANCE, originalRequirement.trim());
-
-        return flux.doOnSubscribe(subscription -> log.info("开始流式推送需求扩写结果"))
-                .doOnNext(chunk1 -> log.info("需求扩写流式片段: {}", chunk1))
-                .doOnComplete(() -> log.info("需求扩写流式完成"))
-                .doOnError(error -> log.error("流式需求扩写失败", error))
-                .onErrorMap(error1 -> {
-                    if (error1 instanceof BusinessException) {
-                        return error1;
+        return aiFunctionExecutor.streamText(AiFunctionType.COSMIC_REQUIREMENT_ENHANCE, originalRequirement.trim())
+                .onErrorMap(error -> {
+                    if (error instanceof BusinessException) {
+                        return error;
                     }
-                    return new BusinessException("AI 流式扩写失败: " + error1.getMessage(), error1);
+                    return new BusinessException("AI 流式扩写失败: " + error.getMessage(), error);
                 })
                 .switchIfEmpty(Flux.error(new BusinessException("AI 未返回任何可用的扩写内容（流式）")));
     }
@@ -125,8 +119,7 @@ public class CosmicService {
         String userPromptText = buildFunctionalProcessUserPrompt(request.getRequirementDescription(),
                                                                  request.getExpectedProcessCount());
         AiFunctionExecutor.AiFunctionResult<FunctionalProcessesResponse> aiResult =
-                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FUNCTIONAL_BREAKDOWN,
-                                                     userPromptText,
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FUNCTIONAL_BREAKDOWN, userPromptText,
                                                      FunctionalProcessesResponse.class);
 
         FunctionalProcessesResponse result = aiResult.value();
@@ -302,9 +295,8 @@ public class CosmicService {
 
     private void validateCosmicImportHeader(Row headerRow) {
         String[] expectedHeaders = {"触发事件", "功能过程", "子过程描述", "数据移动类型", "数据组", "数据属性"};
-        int[] columns =
-                {COLUMN_TRIGGER_EVENT, COLUMN_FUNCTIONAL_PROCESS, COLUMN_SUB_PROCESS, COLUMN_DATA_MOVEMENT,
-                        COLUMN_DATA_GROUP, COLUMN_DATA_ATTRIBUTES};
+        int[] columns = {COLUMN_TRIGGER_EVENT, COLUMN_FUNCTIONAL_PROCESS, COLUMN_SUB_PROCESS, COLUMN_DATA_MOVEMENT,
+                COLUMN_DATA_GROUP, COLUMN_DATA_ATTRIBUTES};
 
         for (int i = 0; i < columns.length; i++) {
             String header = getCellValueAsString(headerRow.getCell(columns[i])).trim();
@@ -341,12 +333,9 @@ public class CosmicService {
             String dataGroup = getCellValueAsString(row.getCell(COLUMN_DATA_GROUP)).trim();
             String dataAttributes = getCellValueAsString(row.getCell(COLUMN_DATA_ATTRIBUTES)).trim();
 
-            boolean rowEmpty = !StringUtils.hasText(triggerEvent)
-                    && !StringUtils.hasText(functionalProcess)
-                    && !StringUtils.hasText(subProcessDesc)
-                    && !StringUtils.hasText(dataMovement)
-                    && !StringUtils.hasText(dataGroup)
-                    && !StringUtils.hasText(dataAttributes);
+            boolean rowEmpty = !StringUtils.hasText(triggerEvent) && !StringUtils.hasText(
+                    functionalProcess) && !StringUtils.hasText(subProcessDesc) && !StringUtils.hasText(
+                    dataMovement) && !StringUtils.hasText(dataGroup) && !StringUtils.hasText(dataAttributes);
             if (rowEmpty) {
                 continue;
             }
@@ -370,12 +359,11 @@ public class CosmicService {
             final String triggerEventKey = currentTriggerEvent;
             final String functionalProcessKey = currentFunctionalProcess;
             String key = triggerEventKey + "||" + functionalProcessKey;
-            CosmicProcess process = grouped.computeIfAbsent(key,
-                                                            ignored -> CosmicProcess.builder()
-                                                                    .triggerEvent(triggerEventKey)
-                                                                    .functionalProcess(functionalProcessKey)
-                                                                    .processSteps(new ArrayList<>())
-                                                                    .build());
+            CosmicProcess process = grouped.computeIfAbsent(key, ignored -> CosmicProcess.builder()
+                    .triggerEvent(triggerEventKey)
+                    .functionalProcess(functionalProcessKey)
+                    .processSteps(new ArrayList<>())
+                    .build());
 
             process.getProcessSteps()
                     .add(CosmicProcessStep.builder()
@@ -399,10 +387,9 @@ public class CosmicService {
      */
     public AnalysisResponse analyzeRequirement(CosmicAnalysisRequest request) {
         String userPromptText = buildCosmicUserPrompt(request.getFunctionalProcesses());
-        AiFunctionExecutor.AiFunctionResult<CosmicProcessesResponse> aiResult = aiFunctionExecutor.executeStructured(
-                AiFunctionType.COSMIC_ANALYSIS,
-                userPromptText,
-                CosmicProcessesResponse.class);
+        AiFunctionExecutor.AiFunctionResult<CosmicProcessesResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS, userPromptText,
+                                                     CosmicProcessesResponse.class);
         CosmicProcessesResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getProcesses())) {
             throw new BusinessException("AI 分析未能生成有效的 COSMIC 过程");
@@ -453,10 +440,9 @@ public class CosmicService {
 
     private List<CosmicProcess> analyzeCosmicProcessesPhase1(List<FunctionalProcess> functionalProcesses) {
         String userPromptText = buildCosmicUserPrompt(functionalProcesses);
-        AiFunctionExecutor.AiFunctionResult<CosmicProcessBaseResponse> aiResult = aiFunctionExecutor.executeStructured(
-                AiFunctionType.COSMIC_ANALYSIS_PHASE1,
-                userPromptText,
-                CosmicProcessBaseResponse.class);
+        AiFunctionExecutor.AiFunctionResult<CosmicProcessBaseResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE1, userPromptText,
+                                                     CosmicProcessBaseResponse.class);
         String response = aiResult.rawResponse();
         log.info("阶段1 AI响应长度: {} 字符", response != null ? response.length() : 0);
 
@@ -514,8 +500,7 @@ public class CosmicService {
         return processes;
     }
 
-    private CosmicProcessStep generateDataGroupAndAttributes(CosmicProcess baseProcess,
-                                                             CosmicProcessStep stepBase) {
+    private CosmicProcessStep generateDataGroupAndAttributes(CosmicProcess baseProcess, CosmicProcessStep stepBase) {
         int retries = 0;
         Exception lastException = null;
 
@@ -553,23 +538,18 @@ public class CosmicService {
             }
         }
 
-        throw new BusinessException(String.format("阶段2: 生成数据组和数据属性失败(已重试%d次): %s",
-                                                  config.getMaxRetries(),
-                                                  lastException != null ? lastException.getMessage() : "未知错误"),
-                                    lastException);
+        throw new BusinessException(
+                String.format("阶段2: 生成数据组和数据属性失败(已重试%d次): %s", config.getMaxRetries(),
+                              lastException != null ? lastException.getMessage() : "未知错误"), lastException);
     }
 
-    private DataGroupAttributeResponse callPhase2AI(CosmicProcess baseProcess,
-                                                    CosmicProcessStep stepBase) {
+    private DataGroupAttributeResponse callPhase2AI(CosmicProcess baseProcess, CosmicProcessStep stepBase) {
         String userPromptText = String.format("触发事件: %s%n功能过程: %s%n子过程描述: %s%n数据移动类型: %s",
-                                              baseProcess.getTriggerEvent(),
-                                              baseProcess.getFunctionalProcess(),
-                                              stepBase.getSubProcessDesc(),
-                                              stepBase.getDataMovementType());
-        AiFunctionExecutor.AiFunctionResult<DataGroupAttributeResponse> aiResult = aiFunctionExecutor.executeStructured(
-                AiFunctionType.COSMIC_ANALYSIS_PHASE2,
-                userPromptText,
-                DataGroupAttributeResponse.class);
+                                              baseProcess.getTriggerEvent(), baseProcess.getFunctionalProcess(),
+                                              stepBase.getSubProcessDesc(), stepBase.getDataMovementType());
+        AiFunctionExecutor.AiFunctionResult<DataGroupAttributeResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE2, userPromptText,
+                                                     DataGroupAttributeResponse.class);
 
         DataGroupAttributeResponse result = aiResult.value();
         if (result == null || !StringUtils.hasText(result.getDataGroup())) {
@@ -595,10 +575,8 @@ public class CosmicService {
                 break;
             }
 
-            log.warn("第 {} 轮检测到重复项 - 子过程描述: {}, 数据组: {}, 数据属性: {}",
-                     round,
-                     checkResult.getDuplicateSubProcessDescs().size(),
-                     checkResult.getDuplicateDataGroups().size(),
+            log.warn("第 {} 轮检测到重复项 - 子过程描述: {}, 数据组: {}, 数据属性: {}", round,
+                     checkResult.getDuplicateSubProcessDescs().size(), checkResult.getDuplicateDataGroups().size(),
                      checkResult.getDuplicateDataAttributes().size());
 
             fixDuplicatesInPlace(processes, checkResult);
@@ -678,11 +656,8 @@ public class CosmicService {
             String fixed = fixSubProcessDesc(process, step, allSubProcessDescs);
             step.setSubProcessDesc(fixed);
             allSubProcessDescs.add(fixed);
-            log.info("修复子过程描述 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"",
-                     item.processIndex(),
-                     item.stepIndex(),
-                     item.value(),
-                     fixed);
+            log.info("修复子过程描述 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"", item.processIndex(), item.stepIndex(),
+                     item.value(), fixed);
         }
 
         for (DuplicateItem item : checkResult.getDuplicateDataGroups()) {
@@ -691,11 +666,8 @@ public class CosmicService {
             String fixed = fixDataGroup(process, step, allDataGroups);
             step.setDataGroup(fixed);
             allDataGroups.add(fixed);
-            log.info("修复数据组 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"",
-                     item.processIndex(),
-                     item.stepIndex(),
-                     item.value(),
-                     fixed);
+            log.info("修复数据组 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"", item.processIndex(), item.stepIndex(),
+                     item.value(), fixed);
         }
 
         for (DuplicateItem item : checkResult.getDuplicateDataAttributes()) {
@@ -704,11 +676,8 @@ public class CosmicService {
             String fixed = fixDataAttributes(process, step, allDataAttributes);
             step.setDataAttributes(fixed);
             allDataAttributes.add(fixed);
-            log.info("修复数据属性 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"",
-                     item.processIndex(),
-                     item.stepIndex(),
-                     item.value(),
-                     fixed);
+            log.info("修复数据属性 [过程索引{} 步骤索引{}]: \"{}\" → \"{}\"", item.processIndex(), item.stepIndex(),
+                     item.value(), fixed);
         }
     }
 
@@ -721,11 +690,8 @@ public class CosmicService {
                                                     功能过程: %s
                                                     数据移动类型: %s
                                                   已使用列表:
-                                                  %s""",
-                                          step.getSubProcessDesc(),
-                                          process.getTriggerEvent(),
-                                          process.getFunctionalProcess(),
-                                          step.getDataMovementType(),
+                                                  %s""", step.getSubProcessDesc(), process.getTriggerEvent(),
+                                          process.getFunctionalProcess(), step.getDataMovementType(),
                                           usedDescs.stream().map(d -> "  - " + d).collect(Collectors.joining("\n")));
 
         return callFixAI(userPrompt);
@@ -741,11 +707,8 @@ public class CosmicService {
                                                     子过程描述: %s
                                                     数据移动类型: %s
                                                   已使用列表:
-                                                  %s""",
-                                          step.getDataGroup(),
-                                          process.getTriggerEvent(),
-                                          process.getFunctionalProcess(),
-                                          step.getSubProcessDesc(),
+                                                  %s""", step.getDataGroup(), process.getTriggerEvent(),
+                                          process.getFunctionalProcess(), step.getSubProcessDesc(),
                                           step.getDataMovementType(),
                                           usedGroups.stream().map(g -> "  - " + g).collect(Collectors.joining("\n")));
 
@@ -762,13 +725,9 @@ public class CosmicService {
                                                     子过程描述: %s
                                                     数据移动类型: %s
                                                   已使用列表:
-                                                  %s""",
-                                          step.getDataAttributes(),
-                                          process.getTriggerEvent(),
-                                          process.getFunctionalProcess(),
-                                          step.getSubProcessDesc(),
-                                          step.getDataMovementType(),
-                                          usedAttributes.stream()
+                                                  %s""", step.getDataAttributes(), process.getTriggerEvent(),
+                                          process.getFunctionalProcess(), step.getSubProcessDesc(),
+                                          step.getDataMovementType(), usedAttributes.stream()
                                                   .map(a -> "  - " + a)
                                                   .collect(Collectors.joining("\n")));
 
@@ -776,10 +735,9 @@ public class CosmicService {
     }
 
     private String callFixAI(String userPrompt) {
-        AiFunctionExecutor.AiFunctionResult<FixDuplicateResponse> aiResult = aiFunctionExecutor.executeStructured(
-                AiFunctionType.COSMIC_FIX_DUPLICATES,
-                userPrompt,
-                FixDuplicateResponse.class);
+        AiFunctionExecutor.AiFunctionResult<FixDuplicateResponse> aiResult =
+                aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FIX_DUPLICATES, userPrompt,
+                                                     FixDuplicateResponse.class);
 
         FixDuplicateResponse result = aiResult.value();
         if (result == null || !StringUtils.hasText(result.getFixed())) {
@@ -818,9 +776,9 @@ public class CosmicService {
                 CosmicProcessStep step = steps.get(stepIndex);
                 String subProcessDesc = trimToEmpty(step.getSubProcessDesc());
                 if (!StringUtils.hasText(subProcessDesc)) {
-                    throw new BusinessException(String.format("功能过程 \"%s\" 的第 %d 个子过程描述为空",
-                                                              functionalProcess,
-                                                              stepIndex + 1));
+                    throw new BusinessException(
+                            String.format("功能过程 \"%s\" 的第 %d 个子过程描述为空", functionalProcess,
+                                          stepIndex + 1));
                 }
 
                 String dataMovementType =
@@ -828,9 +786,9 @@ public class CosmicService {
 
                 String dataGroup = trimToEmpty(step.getDataGroup());
                 if (!StringUtils.hasText(dataGroup)) {
-                    throw new BusinessException(String.format("功能过程 \"%s\" 的第 %d 个子过程数据组为空",
-                                                              functionalProcess,
-                                                              stepIndex + 1));
+                    throw new BusinessException(
+                            String.format("功能过程 \"%s\" 的第 %d 个子过程数据组为空", functionalProcess,
+                                          stepIndex + 1));
                 }
 
                 String dataAttributes = trimToEmpty(step.getDataAttributes());
@@ -882,9 +840,9 @@ public class CosmicService {
                 CosmicProcessStep step = steps.get(stepIndex);
                 String subProcessDesc = trimToEmpty(step.getSubProcessDesc());
                 if (!StringUtils.hasText(subProcessDesc)) {
-                    throw new BusinessException(String.format("阶段1: 功能过程 \"%s\" 的第 %d 个子过程描述为空",
-                                                              functionalProcess,
-                                                              stepIndex + 1));
+                    throw new BusinessException(
+                            String.format("阶段1: 功能过程 \"%s\" 的第 %d 个子过程描述为空", functionalProcess,
+                                          stepIndex + 1));
                 }
 
                 String dataMovementType =
@@ -909,10 +867,9 @@ public class CosmicService {
     private String normalizeMovementType(String value, String functionalProcess, int stepIndex) {
         String normalized = trimToEmpty(value).toUpperCase();
         if (!SUPPORTED_DATA_MOVEMENT_TYPES.contains(normalized)) {
-            throw new BusinessException(String.format("功能过程 \"%s\" 的第 %d 个子过程数据移动类型无效: %s",
-                                                      functionalProcess,
-                                                      stepIndex + 1,
-                                                      value));
+            throw new BusinessException(
+                    String.format("功能过程 \"%s\" 的第 %d 个子过程数据移动类型无效: %s", functionalProcess,
+                                  stepIndex + 1, value));
         }
         return normalized;
     }
@@ -949,8 +906,7 @@ public class CosmicService {
         String processDescription = sanitized.stream()
                 .flatMap(p -> p.getProcessSteps()
                         .stream()
-                        .map(step -> String.format("功能过程：%s，子过程：%s",
-                                                   p.getFunctionalProcess(),
+                        .map(step -> String.format("功能过程：%s，子过程：%s", p.getFunctionalProcess(),
                                                    step.getSubProcessDesc())))
                 .collect(Collectors.joining("；"));
 

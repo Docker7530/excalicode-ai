@@ -40,10 +40,16 @@ public class AiFunctionExecutor {
     public Flux<String> streamText(AiFunctionType functionType, String userPrompt) {
         AiFunctionConfiguration config = configurationService.getConfiguration(functionType);
         Prompt prompt = new Prompt(mergeMessages(config, List.of(new UserMessage(userPrompt))));
-        return config.chatModel().stream(prompt).map(response -> {
-            String chunk = response.getResult().getOutput().getText();
-            return chunk != null ? chunk : "";
-        });
+        return config.chatModel()
+                .stream(prompt)
+                .map(response -> {
+                    String chunk = response.getResult().getOutput().getText();
+                    return chunk != null ? chunk : "";
+                })
+                .doOnSubscribe(subscription -> log.info("开始流式推送 AI 功能 [{}]", functionType.getDescription()))
+                .doOnNext(chunk -> log.info("AI 功能 [{}] 流式片段: {}", functionType.getDescription(), chunk))
+                .doOnComplete(() -> log.info("AI 功能 [{}] 流式完成", functionType.getDescription()))
+                .doOnError(error -> log.error("AI 功能 [{}] 流式失败", functionType.getDescription(), error));
     }
 
     /**
