@@ -19,7 +19,7 @@ import java.util.List;
 public class CacheConfig {
 
     /**
-     * 缓存名称常量
+     * 缓存名称常量。
      */
     public static final String PROMPTS_CACHE = "prompts";
     public static final String AI_FUNCTION_CONFIGS_CACHE = "aiFunctionConfigs";
@@ -37,12 +37,15 @@ public class CacheConfig {
     }
 
     /**
-     * 构建 Caffeine 缓存实例
+     * 构建 Caffeine 缓存实例。
      */
     private Cache buildCache(String name, int maximumSize, Duration expireAfterWrite) {
-        return new CaffeineCache(name,
-                                 Caffeine.newBuilder().maximumSize(maximumSize).expireAfterWrite(expireAfterWrite)
-                                         .expireAfterAccess(Duration.ofHours(2)).recordStats().build());
+        return new CaffeineCache(name, Caffeine.newBuilder()
+                .maximumSize(maximumSize)
+                .expireAfterWrite(expireAfterWrite)
+                .expireAfterAccess(Duration.ofHours(2))
+                .recordStats()
+                .build());
     }
 
 }

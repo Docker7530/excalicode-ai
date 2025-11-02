@@ -1,5 +1,6 @@
 package com.excalicode.platform.core.config;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 统一线程池配置，集中管理平台内的并发任务。
+ * 线程池配置。
  */
 @Configuration
 public class ApplicationExecutorConfig {
@@ -31,7 +32,7 @@ public class ApplicationExecutorConfig {
             private final AtomicInteger counter = new AtomicInteger(0);
 
             @Override
-            public Thread newThread(Runnable runnable) {
+            public Thread newThread(@NotNull Runnable runnable) {
                 Thread thread = new Thread(runnable);
                 thread.setName("platform-worker-" + counter.incrementAndGet());
                 thread.setDaemon(false);
@@ -39,12 +40,8 @@ public class ApplicationExecutorConfig {
             }
         };
 
-        return new ThreadPoolExecutor(CORE_POOL_SIZE,
-                                      MAX_POOL_SIZE,
-                                      60L,
-                                      TimeUnit.SECONDS,
-                                      new LinkedBlockingQueue<>(QUEUE_CAPACITY),
-                                      threadFactory,
+        return new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 60L, TimeUnit.SECONDS,
+                                      new LinkedBlockingQueue<>(QUEUE_CAPACITY), threadFactory,
                                       new ThreadPoolExecutor.CallerRunsPolicy());
     }
 }
