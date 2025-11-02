@@ -2,7 +2,7 @@ package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.core.api.ai.PromptTemplateRequest;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
-import com.excalicode.platform.core.service.entity.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.AiPromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +28,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PromptTemplateController {
 
-    private final PromptTemplateService promptTemplateService;
+    private final AiPromptTemplateService aiPromptTemplateService;
 
     /**
      * 获取所有提示词模板
      */
     @GetMapping
     public ResponseEntity<List<AiPromptTemplate>> list() {
-        List<AiPromptTemplate> templates = promptTemplateService.list();
+        List<AiPromptTemplate> templates = aiPromptTemplateService.list();
         return ResponseEntity.ok(templates);
     }
 
@@ -44,7 +44,7 @@ public class PromptTemplateController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<AiPromptTemplate>> search(@RequestParam String keyword) {
-        List<AiPromptTemplate> templates = promptTemplateService.search(keyword);
+        List<AiPromptTemplate> templates = aiPromptTemplateService.search(keyword);
         return ResponseEntity.ok(templates);
     }
 
@@ -53,7 +53,7 @@ public class PromptTemplateController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<AiPromptTemplate> getById(@PathVariable Long id) {
-        AiPromptTemplate template = promptTemplateService.getById(id);
+        AiPromptTemplate template = aiPromptTemplateService.getById(id);
         if (template != null) {
             return ResponseEntity.ok(template);
         } else {
@@ -66,7 +66,7 @@ public class PromptTemplateController {
      */
     @GetMapping("/code/{code}")
     public ResponseEntity<AiPromptTemplate> getByCode(@PathVariable String code) {
-        AiPromptTemplate template = promptTemplateService.getByCode(code);
+        AiPromptTemplate template = aiPromptTemplateService.getByCode(code);
         if (template != null) {
             return ResponseEntity.ok(template);
         } else {
@@ -86,7 +86,7 @@ public class PromptTemplateController {
         template.setName(request.getName());
         template.setContent(request.getContent());
 
-        boolean success = promptTemplateService.saveOrUpdatePrompt(template);
+        boolean success = aiPromptTemplateService.saveOrUpdatePrompt(template);
         if (success) {
             return ResponseEntity.ok().build();
         } else {
@@ -101,7 +101,7 @@ public class PromptTemplateController {
     public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody PromptTemplateRequest request) {
         log.info("更新提示词模板: id={}, code={}, name={}", id, request.getCode(), request.getName());
 
-        AiPromptTemplate template = promptTemplateService.getById(id);
+        AiPromptTemplate template = aiPromptTemplateService.getById(id);
         if (template == null) {
             return ResponseEntity.notFound().build();
         }
@@ -110,7 +110,7 @@ public class PromptTemplateController {
         template.setName(request.getName());
         template.setContent(request.getContent());
 
-        boolean success = promptTemplateService.saveOrUpdatePrompt(template);
+        boolean success = aiPromptTemplateService.saveOrUpdatePrompt(template);
         if (success) {
             return ResponseEntity.ok().build();
         } else {
@@ -124,7 +124,7 @@ public class PromptTemplateController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("删除提示词模板: id={}", id);
-        boolean success = promptTemplateService.removeById(id);
+        boolean success = aiPromptTemplateService.removeById(id);
         if (success) {
             return ResponseEntity.ok().build();
         } else {

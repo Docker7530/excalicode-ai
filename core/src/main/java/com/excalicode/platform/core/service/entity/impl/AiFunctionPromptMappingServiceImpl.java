@@ -6,8 +6,8 @@ import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.mapper.AiFunctionPromptMappingMapper;
-import com.excalicode.platform.core.service.entity.FunctionPromptMappingService;
-import com.excalicode.platform.core.service.entity.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.AiFunctionPromptMappingService;
+import com.excalicode.platform.core.service.entity.AiPromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,11 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class FunctionPromptMappingServiceImpl
+public class AiFunctionPromptMappingServiceImpl
         extends ServiceImpl<AiFunctionPromptMappingMapper, AiFunctionPromptMapping>
-        implements FunctionPromptMappingService {
+        implements AiFunctionPromptMappingService {
 
-    private final PromptTemplateService promptTemplateService;
+    private final AiPromptTemplateService aiPromptTemplateService;
 
     @Override
     public String getPromptCodeByFunctionCode(String functionCode) {
@@ -68,7 +68,7 @@ public class FunctionPromptMappingServiceImpl
 
         // 填充提示词模板信息
         for (AiFunctionPromptMapping mapping : mappings) {
-            AiPromptTemplate promptTemplate = promptTemplateService.getByCode(mapping.getPromptCode());
+            AiPromptTemplate promptTemplate = aiPromptTemplateService.getByCode(mapping.getPromptCode());
             mapping.setPromptTemplate(promptTemplate);
         }
 

@@ -9,8 +9,8 @@ import com.excalicode.platform.core.entity.AiProvider;
 import com.excalicode.platform.core.service.entity.AiFunctionModelMappingService;
 import com.excalicode.platform.core.service.entity.AiModelService;
 import com.excalicode.platform.core.service.entity.AiProviderService;
-import com.excalicode.platform.core.service.entity.FunctionPromptMappingService;
-import com.excalicode.platform.core.service.entity.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.AiFunctionPromptMappingService;
+import com.excalicode.platform.core.service.entity.AiPromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -31,8 +31,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AiFunctionConfigurationService {
 
-    private final FunctionPromptMappingService functionPromptMappingService;
-    private final PromptTemplateService promptTemplateService;
+    private final AiFunctionPromptMappingService aiFunctionPromptMappingService;
+    private final AiPromptTemplateService aiPromptTemplateService;
     private final AiFunctionModelMappingService functionModelMappingService;
     private final AiModelService aiModelService;
     private final AiProviderService aiProviderService;
@@ -45,12 +45,12 @@ public class AiFunctionConfigurationService {
     public AiFunctionConfiguration getConfiguration(AiFunctionType functionType) {
         Objects.requireNonNull(functionType, "functionType 不能为空");
         String functionCode = functionType.getCode();
-        String promptCode = functionPromptMappingService.getPromptCodeByFunctionCode(functionCode);
+        String promptCode = aiFunctionPromptMappingService.getPromptCodeByFunctionCode(functionCode);
         if (!StringUtils.hasText(promptCode)) {
             throw new BusinessException(String.format("功能 [%s] 未配置提示词映射", functionType.getDescription()));
         }
 
-        AiPromptTemplate promptTemplate = promptTemplateService.getByCode(promptCode);
+        AiPromptTemplate promptTemplate = aiPromptTemplateService.getByCode(promptCode);
         if (promptTemplate == null) {
             throw new BusinessException(String.format("提示词模板 [%s] 不存在", promptCode));
         }

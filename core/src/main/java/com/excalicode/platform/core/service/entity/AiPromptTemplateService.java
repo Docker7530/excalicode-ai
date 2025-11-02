@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 提示词模板 Service 接口
  */
-public interface PromptTemplateService
+public interface AiPromptTemplateService
         extends IService<AiPromptTemplate> {
 
     /**

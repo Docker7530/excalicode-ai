@@ -7,8 +7,8 @@ import com.excalicode.platform.core.entity.AiFunctionModelMapping;
 import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import com.excalicode.platform.core.service.entity.AiFunctionModelMappingService;
 import com.excalicode.platform.core.service.entity.AiProviderService;
-import com.excalicode.platform.core.service.entity.FunctionPromptMappingService;
-import com.excalicode.platform.core.service.entity.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.AiFunctionPromptMappingService;
+import com.excalicode.platform.core.service.entity.AiPromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +33,9 @@ import java.util.Map;
 public class FunctionConfigurationController {
 
     private final AiFunctionModelMappingService aiFunctionModelMappingService;
-    private final FunctionPromptMappingService functionPromptMappingService;
+    private final AiFunctionPromptMappingService aiFunctionPromptMappingService;
     private final AiProviderService aiProviderService;
-    private final PromptTemplateService promptTemplateService;
+    private final AiPromptTemplateService aiPromptTemplateService;
 
     /**
      * 返回功能配置聚合信息。
@@ -52,7 +52,7 @@ public class FunctionConfigurationController {
         FunctionConfigurationResponse response = new FunctionConfigurationResponse();
         response.setFunctions(functions);
         response.setProviders(aiProviderService.listProvidersWithModels());
-        response.setPromptTemplates(promptTemplateService.list());
+        response.setPromptTemplates(aiPromptTemplateService.list());
 
         return ResponseEntity.ok(response);
     }
@@ -69,7 +69,7 @@ public class FunctionConfigurationController {
 
     private Map<String, AiFunctionPromptMapping> buildPromptMappingMap() {
         List<AiFunctionPromptMapping> promptMappings =
-                functionPromptMappingService.listAllMappingsWithPrompt();
+                aiFunctionPromptMappingService.listAllMappingsWithPrompt();
         Map<String, AiFunctionPromptMapping> result = new LinkedHashMap<>();
         for (AiFunctionPromptMapping mapping : promptMappings) {
             result.put(mapping.getFunctionCode(), mapping);

@@ -2,7 +2,7 @@ package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.core.api.ai.SetFunctionPromptMappingRequest;
 import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
-import com.excalicode.platform.core.service.entity.FunctionPromptMappingService;
+import com.excalicode.platform.core.service.entity.AiFunctionPromptMappingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FunctionPromptMappingController {
 
-    private final FunctionPromptMappingService mappingService;
+    private final AiFunctionPromptMappingService mappingService;
 
     /**
      * 获取所有映射关系 (包含提示词模板信息)

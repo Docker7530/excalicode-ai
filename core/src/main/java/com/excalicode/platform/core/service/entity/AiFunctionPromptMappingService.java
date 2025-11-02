@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 功能-提示词映射 Service 接口
  */
-public interface FunctionPromptMappingService
+public interface AiFunctionPromptMappingService
         extends IService<AiFunctionPromptMapping> {
 
     /**

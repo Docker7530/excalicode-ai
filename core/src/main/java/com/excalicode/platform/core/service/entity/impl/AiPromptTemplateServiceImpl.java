@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.mapper.AiPromptTemplateMapper;
-import com.excalicode.platform.core.service.entity.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.AiPromptTemplateService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,9 @@ import java.util.List;
  * 提示词模板 Service 实现类
  */
 @Service
-public class PromptTemplateServiceImpl
+public class AiPromptTemplateServiceImpl
         extends ServiceImpl<AiPromptTemplateMapper, AiPromptTemplate>
-        implements PromptTemplateService {
+        implements AiPromptTemplateService {
 
     @Override
     @Cacheable(value = CacheConfig.PROMPTS_CACHE, key = "#code")
