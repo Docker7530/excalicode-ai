@@ -1,7 +1,6 @@
 package com.excalicode.platform.core.service;
 
 import com.excalicode.platform.common.exception.BusinessException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -13,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -20,27 +22,27 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PrdService {
 
-    // 正则表达式匹配模式
-    private static final Pattern FIRST_LEVEL_LIST = Pattern.compile("^\\d+、.*");
-    private static final Pattern SECOND_LEVEL_LIST = Pattern.compile("^\\(\\d+\\).*");
-    private static final Pattern THIRD_LEVEL_LIST = Pattern.compile("^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳].*");
-
-    // 章节标题
-    private static final String[] SECTION_HEADERS = {"需求背景", "需求概述", "需求详情"};
-
-    // 缩进值（单位：twips，1英寸=1440twips）
-    private static final int FIRST_LEVEL_INDENT = 0;
-    private static final int SECOND_LEVEL_INDENT = 360; // 0.25英寸
-    private static final int THIRD_LEVEL_INDENT = 720; // 0.5英寸
-
     // 固定行距（单位：twips，22磅 = 440 twips）
-    private static final int FIXED_LINE_SPACING = 440; // 22磅
+    private static final int FIXED_LINE_SPACING = 440;
 
-    // 段落间距（单位：twips）
-    private static final int PARAGRAPH_SPACING = 50; // 列表项和普通文本的段后间距
+    // 样式配置:用数据结构消除重复代码
+    private static final StyleConfig TITLE_STYLE = new StyleConfig(16, true, 0, 200);
+    private static final StyleConfig SECTION_STYLE = new StyleConfig(14, true, 0, 150);
+    private static final StyleConfig FIRST_LEVEL_STYLE = new StyleConfig(11, false, 0, 50);
+    private static final StyleConfig SECOND_LEVEL_STYLE = new StyleConfig(11, false, 360, 50);
+    private static final StyleConfig THIRD_LEVEL_STYLE = new StyleConfig(11, false, 720, 50);
+    private static final StyleConfig NORMAL_STYLE = new StyleConfig(11, false, 0, 50);
+
+    // 章节标题集合:用Set消除循环
+    private static final Set<String> SECTION_HEADERS = Set.of("需求背景", "需求概述", "需求详情");
+
+    // 样式匹配规则:用数据结构消除if-else
+    private static final List<StyleRule> STYLE_RULES =
+            Arrays.asList(new StyleRule(Pattern.compile("^\\d+、.*"), FIRST_LEVEL_STYLE),
+                          new StyleRule(Pattern.compile("^\\(\\d+\\).*"), SECOND_LEVEL_STYLE),
+                          new StyleRule(Pattern.compile("^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳].*"), THIRD_LEVEL_STYLE));
 
     public byte[] generateWordDocument(String content) {
         if (content == null || content.trim().isEmpty()) {
@@ -54,77 +56,18 @@ public class PrdService {
             boolean isFirstNonEmptyLine = true;
 
             for (String line : lines) {
-                // 跳过空行
                 if (line.trim().isEmpty()) {
-                    // 仍然创建空段落以保持格式
                     document.createParagraph();
                     continue;
                 }
 
-                XWPFParagraph paragraph = document.createParagraph();
-                XWPFRun run = paragraph.createRun();
-                paragraph.setAlignment(ParagraphAlignment.LEFT);
-
-                // 设置固定行距为 22 磅（440 twips）
-                if (paragraph.getCTP().getPPr() == null) {
-                    paragraph.getCTP().addNewPPr();
-                }
-                if (paragraph.getCTP().getPPr().getSpacing() == null) {
-                    paragraph.getCTP().getPPr().addNewSpacing();
-                }
-                paragraph.getCTP().getPPr().getSpacing()
-                        .setLine(BigInteger.valueOf(FIXED_LINE_SPACING));
-                paragraph.getCTP().getPPr().getSpacing().setLineRule(STLineSpacingRule.EXACT);
-
                 String trimmedLine = line.trim();
+                StyleConfig style = determineStyle(trimmedLine, isFirstNonEmptyLine);
 
-                // 第一行非空行：需求名称（Heading 2）
+                createStyledParagraph(document, trimmedLine, style);
+
                 if (isFirstNonEmptyLine) {
-                    run.setText(trimmedLine);
-                    run.setFontSize(16);
-                    run.setBold(true);
-                    run.setFontFamily("Microsoft YaHei");
-                    paragraph.setSpacingAfter(200); // 标题后间距稍大
                     isFirstNonEmptyLine = false;
-                }
-                // 章节标题：需求背景/需求概述/需求详情（Heading 3）
-                else if (isSectionHeader(trimmedLine)) {
-                    run.setText(trimmedLine);
-                    run.setFontSize(14);
-                    run.setBold(true);
-                    run.setFontFamily("Microsoft YaHei");
-                    paragraph.setSpacingAfter(150); // 章节标题后间距适中
-                }
-                // 一级编号列表：1、2、3、
-                else if (FIRST_LEVEL_LIST.matcher(trimmedLine).matches()) {
-                    run.setText(trimmedLine);
-                    run.setFontSize(11);
-                    run.setFontFamily("Microsoft YaHei");
-                    paragraph.setIndentationLeft(FIRST_LEVEL_INDENT);
-                    paragraph.setSpacingAfter(PARAGRAPH_SPACING);
-                }
-                // 二级编号列表：(1) (2) (3)
-                else if (SECOND_LEVEL_LIST.matcher(trimmedLine).matches()) {
-                    run.setText(trimmedLine);
-                    run.setFontSize(11);
-                    run.setFontFamily("Microsoft YaHei");
-                    paragraph.setIndentationLeft(SECOND_LEVEL_INDENT);
-                    paragraph.setSpacingAfter(PARAGRAPH_SPACING);
-                }
-                // 三级编号列表：① ② ③
-                else if (THIRD_LEVEL_LIST.matcher(trimmedLine).matches()) {
-                    run.setText(trimmedLine);
-                    run.setFontSize(11);
-                    run.setFontFamily("Microsoft YaHei");
-                    paragraph.setIndentationLeft(THIRD_LEVEL_INDENT);
-                    paragraph.setSpacingAfter(PARAGRAPH_SPACING);
-                }
-                // 普通文本
-                else {
-                    run.setText(trimmedLine);
-                    run.setFontSize(11);
-                    run.setFontFamily("Microsoft YaHei");
-                    paragraph.setSpacingAfter(PARAGRAPH_SPACING);
                 }
             }
 
@@ -141,15 +84,68 @@ public class PrdService {
     }
 
     /**
-     * 判断是否为章节标题
+     * 确定文本应该使用的样式:用数据查找替代条件分支
      */
-    private boolean isSectionHeader(String line) {
-        for (String header : SECTION_HEADERS) {
-            if (header.equals(line)) {
-                return true;
+    private StyleConfig determineStyle(String text, boolean isFirstLine) {
+        if (isFirstLine) {
+            return TITLE_STYLE;
+        }
+        if (SECTION_HEADERS.contains(text)) {
+            return SECTION_STYLE;
+        }
+        // 遍历规则列表,找到第一个匹配的样式
+        for (StyleRule rule : STYLE_RULES) {
+            if (rule.matches(text)) {
+                return rule.style;
             }
         }
-        return false;
+        return NORMAL_STYLE;
+    }
+
+    /**
+     * 创建带样式的段落:提取重复的段落设置逻辑
+     */
+    private void createStyledParagraph(XWPFDocument document, String text, StyleConfig style) {
+        XWPFParagraph paragraph = document.createParagraph();
+        paragraph.setAlignment(ParagraphAlignment.LEFT);
+        setupLineSpacing(paragraph);
+
+        XWPFRun run = paragraph.createRun();
+        run.setText(text);
+        run.setFontSize(style.fontSize);
+        run.setBold(style.bold);
+        run.setFontFamily("Microsoft YaHei");
+
+        paragraph.setIndentationLeft(style.indent);
+        paragraph.setSpacingAfter(style.spacingAfter);
+    }
+
+    /**
+     * 设置段落固定行距:提取笨拙的POI API调用
+     */
+    private void setupLineSpacing(XWPFParagraph paragraph) {
+        if (paragraph.getCTP().getPPr() == null) {
+            paragraph.getCTP().addNewPPr();
+        }
+        if (paragraph.getCTP().getPPr().getSpacing() == null) {
+            paragraph.getCTP().getPPr().addNewSpacing();
+        }
+        paragraph.getCTP().getPPr().getSpacing().setLine(BigInteger.valueOf(FIXED_LINE_SPACING));
+        paragraph.getCTP().getPPr().getSpacing().setLineRule(STLineSpacingRule.EXACT);
+    }
+
+    /**
+     * 样式配置:所有格式参数的封装
+     */
+    private record StyleConfig(int fontSize, boolean bold, int indent, int spacingAfter) {}
+
+    /**
+     * 样式规则:模式匹配和样式的绑定
+     */
+    private record StyleRule(Pattern pattern, StyleConfig style) {
+        boolean matches(String text) {
+            return pattern.matcher(text).matches();
+        }
     }
 
 }
