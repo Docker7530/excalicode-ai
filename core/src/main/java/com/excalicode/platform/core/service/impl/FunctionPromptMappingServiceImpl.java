@@ -33,7 +33,7 @@ public class FunctionPromptMappingServiceImpl
 
         AiFunctionPromptMapping mapping = this.getOne(new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(
                 AiFunctionPromptMapping::getFunctionCode,
-                functionCode).last("LIMIT 1"));
+                functionCode));
 
         return mapping != null ? mapping.getPromptCode() : null;
     }
@@ -48,7 +48,7 @@ public class FunctionPromptMappingServiceImpl
 
         AiFunctionPromptMapping existingMapping = this.getOne(new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(
                 AiFunctionPromptMapping::getFunctionCode,
-                functionCode).last("LIMIT 1"));
+                functionCode));
 
         if (existingMapping != null) {
             existingMapping.setPromptCode(promptCode);
