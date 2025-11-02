@@ -37,8 +37,7 @@ public class AiProviderServiceImpl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void removeProviderWithModels(Long providerId) {
-        aiModelService
-                .remove(new LambdaQueryWrapper<AiModel>().eq(AiModel::getProviderId, providerId));
+        aiModelService.remove(new LambdaQueryWrapper<AiModel>().eq(AiModel::getProviderId, providerId));
         this.removeById(providerId);
     }
 
