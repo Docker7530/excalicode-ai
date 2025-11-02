@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Service
-public class PrdService {
+public class CosmicPrdService {
 
     // 固定行距（单位：twips，22磅 = 440 twips）
     private static final int FIXED_LINE_SPACING = 440;

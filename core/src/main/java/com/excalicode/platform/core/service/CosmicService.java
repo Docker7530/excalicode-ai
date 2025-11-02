@@ -66,8 +66,8 @@ public class CosmicService {
     private static final Set<String> SUPPORTED_DATA_MOVEMENT_TYPES = Set.of("E", "R", "W", "X");
 
     private final AiFunctionExecutor aiFunctionExecutor;
-    private final ExcelService excelService;
-    private final PrdService prdService;
+    private final CosmicExcelService cosmicExcelService;
+    private final CosmicPrdService cosmicPrdService;
     private final ExecutorService executorService;
 
     /**
@@ -832,7 +832,7 @@ public class CosmicService {
      */
     public byte[] exportProcessTableAsBytes(ProcessTableExportRequest request) {
         List<CosmicProcess> sanitized = sanitizeCosmicProcesses(request.getProcesses());
-        return excelService.generateExcelReport(sanitized);
+        return cosmicExcelService.generateExcelReport(sanitized);
     }
 
     /**
@@ -872,6 +872,6 @@ public class CosmicService {
      * @return Word 文件字节数组
      */
     public byte[] generateRequirementDocumentAsBytes(DocumentExportRequest request) {
-        return prdService.generateWordDocument(request.getOverrideDocumentContent());
+        return cosmicPrdService.generateWordDocument(request.getOverrideDocumentContent());
     }
 }
