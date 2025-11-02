@@ -80,9 +80,7 @@ public class AiFunctionExecutor {
      * @param responseType 响应类型
      * @return 结构化响应
      */
-    public <T> AiFunctionResult<T> executeStructured(AiFunctionType functionType,
-                                                     String userPrompt,
-                                                     Class<T> responseType) {
+    public <T> T executeStructured(AiFunctionType functionType, String userPrompt, Class<T> responseType) {
         return executeStructured(functionType, List.of(new UserMessage(userPrompt)), responseType);
     }
 
@@ -94,9 +92,7 @@ public class AiFunctionExecutor {
      * @param responseType 响应类型
      * @return 结构化响应
      */
-    public <T> AiFunctionResult<T> executeStructured(AiFunctionType functionType,
-                                                     List<Message> messages,
-                                                     Class<T> responseType) {
+    public <T> T executeStructured(AiFunctionType functionType, List<Message> messages, Class<T> responseType) {
         AiFunctionConfiguration config = configurationService.getConfiguration(functionType);
         BeanOutputConverter<T> converter = new BeanOutputConverter<>(responseType);
         String jsonSchema = converter.getJsonSchema();
@@ -112,7 +108,7 @@ public class AiFunctionExecutor {
             throw new BusinessException(String.format("AI 功能 [%s] 响应解析失败", functionType.getDescription()));
         }
         validateStructuredResult(value);
-        return new AiFunctionResult<>(value, raw);
+        return value;
     }
 
     private Prompt buildJsonPrompt(AiFunctionConfiguration config, List<Message> messages, String jsonSchema) {
@@ -141,6 +137,4 @@ public class AiFunctionExecutor {
             throw new BusinessException("AI 返回结构为空字符串");
         }
     }
-
-    public record AiFunctionResult<T>(T value, String rawResponse) {}
 }

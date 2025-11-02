@@ -100,11 +100,10 @@ public class CosmicService {
     public ProcessBreakdownResponse breakdownProcess(ProcessBreakdownRequest request) {
         String userPromptText = buildFunctionalProcessUserPrompt(request.getRequirementDescription(),
                                                                  request.getExpectedProcessCount());
-        AiFunctionExecutor.AiFunctionResult<FunctionalProcessesResponse> aiResult =
+        FunctionalProcessesResponse result =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FUNCTIONAL_BREAKDOWN, userPromptText,
                                                      FunctionalProcessesResponse.class);
 
-        FunctionalProcessesResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getFunctionalProcesses())) {
             throw new BusinessException("AI 拆解未能生成有效的功能过程");
         }
@@ -368,10 +367,10 @@ public class CosmicService {
      */
     public AnalysisResponse analyzeRequirement(CosmicAnalysisRequest request) {
         String userPromptText = buildCosmicUserPrompt(request.getFunctionalProcesses());
-        AiFunctionExecutor.AiFunctionResult<CosmicProcessesResponse> aiResult =
+        CosmicProcessesResponse result =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS, userPromptText,
                                                      CosmicProcessesResponse.class);
-        CosmicProcessesResponse result = aiResult.value();
+
         if (result == null || CollectionUtils.isEmpty(result.getProcesses())) {
             throw new BusinessException("AI 分析未能生成有效的 COSMIC 过程");
         }
@@ -421,11 +420,10 @@ public class CosmicService {
 
     private List<CosmicProcess> analyzeCosmicProcessesPhase1(List<FunctionalProcess> functionalProcesses) {
         String userPromptText = buildCosmicUserPrompt(functionalProcesses);
-        AiFunctionExecutor.AiFunctionResult<CosmicProcessBaseResponse> aiResult =
+        CosmicProcessBaseResponse result =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE1, userPromptText,
                                                      CosmicProcessBaseResponse.class);
 
-        CosmicProcessBaseResponse result = aiResult.value();
         if (result == null || CollectionUtils.isEmpty(result.getProcesses())) {
             throw new BusinessException("阶段1: AI未能生成有效的基础过程");
         }
@@ -502,11 +500,10 @@ public class CosmicService {
         String userPromptText = String.format("触发事件: %s%n功能过程: %s%n子过程描述: %s%n数据移动类型: %s",
                                               baseProcess.getTriggerEvent(), baseProcess.getFunctionalProcess(),
                                               stepBase.getSubProcessDesc(), stepBase.getDataMovementType());
-        AiFunctionExecutor.AiFunctionResult<DataGroupAttributeResponse> aiResult =
+        DataGroupAttributeResponse result =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_ANALYSIS_PHASE2, userPromptText,
                                                      DataGroupAttributeResponse.class);
 
-        DataGroupAttributeResponse result = aiResult.value();
         if (result == null || !StringUtils.hasText(result.getDataGroup())) {
             throw new BusinessException("阶段2: AI返回的数据组为空");
         }
@@ -678,11 +675,10 @@ public class CosmicService {
     }
 
     private String callFixAI(String userPrompt) {
-        AiFunctionExecutor.AiFunctionResult<FixDuplicateResponse> aiResult =
+        FixDuplicateResponse result =
                 aiFunctionExecutor.executeStructured(AiFunctionType.COSMIC_FIX_DUPLICATES, userPrompt,
                                                      FixDuplicateResponse.class);
 
-        FixDuplicateResponse result = aiResult.value();
         if (result == null || !StringUtils.hasText(result.getFixed())) {
             throw new BusinessException("修复AI返回的内容为空");
         }
