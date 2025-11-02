@@ -30,6 +30,13 @@ public class AiFunctionExecutor {
 
     private final AiFunctionConfigurationService configurationService;
 
+    /**
+     * 流式执行 AI 功能，返回文本流。
+     *
+     * @param functionType 功能类型
+     * @param userPrompt   用户输入的提示
+     * @return 文本流
+     */
     public Flux<String> streamText(AiFunctionType functionType, String userPrompt) {
         AiFunctionConfiguration config = configurationService.getConfiguration(functionType);
         Prompt prompt = new Prompt(mergeMessages(config, List.of(new UserMessage(userPrompt))));
@@ -39,6 +46,13 @@ public class AiFunctionExecutor {
         });
     }
 
+    /**
+     * 执行 AI 功能，返回文本响应。
+     *
+     * @param functionType 功能类型
+     * @param userPrompt   用户输入的提示
+     * @return 文本响应
+     */
     public String executeText(AiFunctionType functionType, String userPrompt) {
         AiFunctionConfiguration config = configurationService.getConfiguration(functionType);
         Prompt prompt = new Prompt(mergeMessages(config, List.of(new UserMessage(userPrompt))));
@@ -48,16 +62,32 @@ public class AiFunctionExecutor {
             throw new BusinessException(String.format("AI 功能 [%s] 返回空响应", functionType.getDescription()));
         }
         String trimmed = text.trim();
-        log.debug("AI 功能 [{}] 文本响应: {}", functionType.getDescription(), trimmed);
+        log.info("AI 功能 [{}] 文本响应: {}", functionType.getDescription(), trimmed);
         return trimmed;
     }
 
+    /**
+     * 执行 AI 功能，返回结构化响应。
+     *
+     * @param functionType 功能类型
+     * @param userPrompt   用户输入的提示
+     * @param responseType 响应类型
+     * @return 结构化响应
+     */
     public <T> AiFunctionResult<T> executeStructured(AiFunctionType functionType,
                                                      String userPrompt,
                                                      Class<T> responseType) {
         return executeStructured(functionType, List.of(new UserMessage(userPrompt)), responseType);
     }
 
+    /**
+     * 执行 AI 功能，返回结构化响应。
+     *
+     * @param functionType 功能类型
+     * @param messages     消息列表
+     * @param responseType 响应类型
+     * @return 结构化响应
+     */
     public <T> AiFunctionResult<T> executeStructured(AiFunctionType functionType,
                                                      List<Message> messages,
                                                      Class<T> responseType) {
@@ -81,11 +111,9 @@ public class AiFunctionExecutor {
 
     private Prompt buildJsonPrompt(AiFunctionConfiguration config, List<Message> messages, String jsonSchema) {
         OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder();
-        ResponseFormat responseFormat =
-                config.supportsJsonSchema() ? new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA,
-                                                                 jsonSchema) :
-                new ResponseFormat(ResponseFormat.Type.JSON_OBJECT,
-                                   null);
+        ResponseFormat responseFormat = config.supportsJsonSchema()
+                                        ? new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema)
+                                        : new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, null);
         optionsBuilder.responseFormat(responseFormat);
         return new Prompt(mergeMessages(config, messages), optionsBuilder.build());
     }

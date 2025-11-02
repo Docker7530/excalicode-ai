@@ -31,9 +31,9 @@ public class FunctionPromptMappingServiceImpl
             return null;
         }
 
-        AiFunctionPromptMapping mapping = this.getOne(new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(
-                AiFunctionPromptMapping::getFunctionCode,
-                functionCode));
+        AiFunctionPromptMapping mapping = this.getOne(
+                new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
+                                                                     functionCode));
 
         return mapping != null ? mapping.getPromptCode() : null;
     }
@@ -46,9 +46,9 @@ public class FunctionPromptMappingServiceImpl
             return false;
         }
 
-        AiFunctionPromptMapping existingMapping = this.getOne(new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(
-                AiFunctionPromptMapping::getFunctionCode,
-                functionCode));
+        AiFunctionPromptMapping existingMapping = this.getOne(
+                new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
+                                                                     functionCode));
 
         if (existingMapping != null) {
             existingMapping.setPromptCode(promptCode);
@@ -63,9 +63,8 @@ public class FunctionPromptMappingServiceImpl
 
     @Override
     public List<AiFunctionPromptMapping> listAllMappingsWithPrompt() {
-        List<AiFunctionPromptMapping> mappings =
-                this.list(new LambdaQueryWrapper<AiFunctionPromptMapping>().orderByAsc(
-                        AiFunctionPromptMapping::getFunctionCode));
+        List<AiFunctionPromptMapping> mappings = this.list(
+                new LambdaQueryWrapper<AiFunctionPromptMapping>().orderByAsc(AiFunctionPromptMapping::getFunctionCode));
 
         // 填充提示词模板信息
         for (AiFunctionPromptMapping mapping : mappings) {

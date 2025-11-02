@@ -36,9 +36,9 @@ public class AiFunctionModelMappingServiceImpl
             return null;
         }
 
-        AiFunctionModelMapping mapping = this.getOne(new LambdaQueryWrapper<AiFunctionModelMapping>().eq(
-                AiFunctionModelMapping::getFunctionType,
-                functionType.getCode()));
+        AiFunctionModelMapping mapping = this.getOne(
+                new LambdaQueryWrapper<AiFunctionModelMapping>().eq(AiFunctionModelMapping::getFunctionType,
+                                                                    functionType.getCode()));
 
         return mapping != null ? mapping.getModelId() : null;
     }
@@ -51,9 +51,9 @@ public class AiFunctionModelMappingServiceImpl
         }
 
         // 查找现有映射
-        AiFunctionModelMapping existingMapping = this.getOne(new LambdaQueryWrapper<AiFunctionModelMapping>().eq(
-                AiFunctionModelMapping::getFunctionType,
-                functionType.getCode()));
+        AiFunctionModelMapping existingMapping = this.getOne(
+                new LambdaQueryWrapper<AiFunctionModelMapping>().eq(AiFunctionModelMapping::getFunctionType,
+                                                                    functionType.getCode()));
 
         if (existingMapping != null) {
             // 更新现有映射
