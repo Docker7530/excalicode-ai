@@ -16,12 +16,11 @@ import com.excalicode.platform.core.api.cosmic.FunctionalProcessesResponse;
 import com.excalicode.platform.core.api.cosmic.ProcessBreakdownRequest;
 import com.excalicode.platform.core.api.cosmic.ProcessBreakdownResponse;
 import com.excalicode.platform.core.api.cosmic.ProcessTableExportRequest;
-import com.excalicode.platform.core.config.CosmicProcessingConfig;
 import com.excalicode.platform.core.model.cosmic.CosmicProcess;
 import com.excalicode.platform.core.model.cosmic.CosmicProcessStep;
 import com.excalicode.platform.core.model.cosmic.DuplicateCheckResult;
 import com.excalicode.platform.core.model.cosmic.DuplicateItem;
-import jakarta.annotation.PreDestroy;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -46,7 +45,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +52,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CosmicService {
 
     private static final String COSMIC_IMPORT_SHEET = "功能点拆分表";
@@ -65,28 +64,11 @@ public class CosmicService {
     private static final int COLUMN_DATA_GROUP = 7;
     private static final int COLUMN_DATA_ATTRIBUTES = 8;
     private static final Set<String> SUPPORTED_DATA_MOVEMENT_TYPES = Set.of("E", "R", "W", "X");
+
     private final AiFunctionExecutor aiFunctionExecutor;
-    private final CosmicProcessingConfig config;
     private final ExcelService excelService;
     private final PrdService prdService;
     private final ExecutorService executorService;
-
-    public CosmicService(AiFunctionExecutor aiFunctionExecutor,
-                         CosmicProcessingConfig config,
-                         ExcelService excelService,
-                         PrdService prdService) {
-        this.aiFunctionExecutor = aiFunctionExecutor;
-        this.config = config;
-        this.excelService = excelService;
-        this.prdService = prdService;
-        this.executorService = Executors.newFixedThreadPool(config.getConcurrency());
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        log.info("Shutting down CosmicService executor");
-        executorService.shutdown();
-    }
 
     /**
      * 流式返回需求扩写结果
@@ -501,46 +483,22 @@ public class CosmicService {
     }
 
     private CosmicProcessStep generateDataGroupAndAttributes(CosmicProcess baseProcess, CosmicProcessStep stepBase) {
-        int retries = 0;
-        Exception lastException = null;
+        DataGroupAttributeResponse response = callPhase2AI(baseProcess, stepBase);
 
-        while (retries <= config.getMaxRetries()) {
-            try {
-                DataGroupAttributeResponse response = callPhase2AI(baseProcess, stepBase);
-
-                String dataGroup = trimToEmpty(response.getDataGroup());
-                if (!StringUtils.hasText(dataGroup)) {
-                    throw new BusinessException(String.format("阶段2: 功能过程 \"%s\" 的子过程数据组为空",
-                                                              baseProcess.getFunctionalProcess()));
-                }
-
-                String dataAttributes = trimToEmpty(response.getDataAttributes());
-
-                return CosmicProcessStep.builder()
-                        .subProcessDesc(stepBase.getSubProcessDesc())
-                        .dataMovementType(stepBase.getDataMovementType())
-                        .dataGroup(dataGroup)
-                        .dataAttributes(dataAttributes)
-                        .build();
-
-            } catch (Exception e) {
-                lastException = e;
-                retries++;
-                if (retries <= config.getMaxRetries()) {
-                    log.warn("阶段2调用失败, 重试 {}/{}: {}", retries, config.getMaxRetries(), e.getMessage());
-                    try {
-                        Thread.sleep(config.getRetryDelayMillis() * retries);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        throw new BusinessException("重试被中断", ie);
-                    }
-                }
-            }
+        String dataGroup = trimToEmpty(response.getDataGroup());
+        if (!StringUtils.hasText(dataGroup)) {
+            throw new BusinessException(
+                    String.format("阶段2: 功能过程 \"%s\" 的子过程数据组为空", baseProcess.getFunctionalProcess()));
         }
 
-        throw new BusinessException(
-                String.format("阶段2: 生成数据组和数据属性失败(已重试%d次): %s", config.getMaxRetries(),
-                              lastException != null ? lastException.getMessage() : "未知错误"), lastException);
+        String dataAttributes = trimToEmpty(response.getDataAttributes());
+
+        return CosmicProcessStep.builder()
+                .subProcessDesc(stepBase.getSubProcessDesc())
+                .dataMovementType(stepBase.getDataMovementType())
+                .dataGroup(dataGroup)
+                .dataAttributes(dataAttributes)
+                .build();
     }
 
     private DataGroupAttributeResponse callPhase2AI(CosmicProcess baseProcess, CosmicProcessStep stepBase) {
@@ -560,33 +518,21 @@ public class CosmicService {
     }
 
     private void checkAndFixDuplicates(List<CosmicProcess> processes) {
-        int round = 0;
-        boolean hasDuplicates = true;
+        log.info("开始重复项检测");
 
-        while (round < config.getMaxFixRounds()) {
-            round++;
-            log.info("开始第 {} 轮重复项检测", round);
+        DuplicateCheckResult checkResult = detectDuplicates(processes);
 
-            DuplicateCheckResult checkResult = detectDuplicates(processes);
-
-            if (!checkResult.hasDuplicates()) {
-                log.info("未检测到重复项,复检通过");
-                hasDuplicates = false;
-                break;
-            }
-
-            log.warn("第 {} 轮检测到重复项 - 子过程描述: {}, 数据组: {}, 数据属性: {}", round,
-                     checkResult.getDuplicateSubProcessDescs().size(), checkResult.getDuplicateDataGroups().size(),
-                     checkResult.getDuplicateDataAttributes().size());
-
-            fixDuplicatesInPlace(processes, checkResult);
+        if (!checkResult.hasDuplicates()) {
+            log.info("未检测到重复项");
+            return;
         }
 
-        if (hasDuplicates) {
-            log.error("经过 {} 轮修复后仍存在重复项,建议人工审查", config.getMaxFixRounds());
-        } else {
-            log.info("重复项修复完成,共执行 {} 轮", round);
-        }
+        log.warn("检测到重复项 - 子过程描述: {}, 数据组: {}, 数据属性: {}",
+                 checkResult.getDuplicateSubProcessDescs().size(), checkResult.getDuplicateDataGroups().size(),
+                 checkResult.getDuplicateDataAttributes().size());
+
+        fixDuplicatesInPlace(processes, checkResult);
+        log.info("重复项修复完成");
     }
 
     private DuplicateCheckResult detectDuplicates(List<CosmicProcess> processes) {
