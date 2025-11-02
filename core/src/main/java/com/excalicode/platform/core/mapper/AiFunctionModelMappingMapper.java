@@ -6,9 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 /**
  * AI 功能-模型映射 Mapper 接口
- * 继承 BaseMapper 即可获得基础 CRUD 能力
  */
 @Mapper
 public interface AiFunctionModelMappingMapper
-        extends BaseMapper<AiFunctionModelMapping> {
-}
+        extends BaseMapper<AiFunctionModelMapping> {}
