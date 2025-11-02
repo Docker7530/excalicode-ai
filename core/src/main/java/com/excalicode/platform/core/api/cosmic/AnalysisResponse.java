@@ -1,8 +1,6 @@
 package com.excalicode.platform.core.api.cosmic;
 
 import com.excalicode.platform.core.model.cosmic.CosmicProcess;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +20,6 @@ public class AnalysisResponse {
     /**
      * COSMIC 过程列表 分析生成的所有 COSMIC 功能过程
      */
-    @NotEmpty(message = "COSMIC过程列表不能为空")
-    @Valid
     private List<CosmicProcess> processes;
 
 }
