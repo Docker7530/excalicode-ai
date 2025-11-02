@@ -1,9 +1,9 @@
-package com.excalicode.platform.core.service.impl;
+package com.excalicode.platform.core.service.entity.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.entity.SysUser;
 import com.excalicode.platform.core.mapper.SysUserMapper;
-import com.excalicode.platform.core.service.SysUserService;
+import com.excalicode.platform.core.service.entity.SysUserService;
 import org.springframework.stereotype.Service;
 
 /**

@@ -2,7 +2,7 @@ package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.core.api.ai.PromptTemplateRequest;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
-import com.excalicode.platform.core.service.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

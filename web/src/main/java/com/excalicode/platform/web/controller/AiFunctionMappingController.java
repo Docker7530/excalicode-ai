@@ -3,7 +3,7 @@ package com.excalicode.platform.web.controller;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.core.api.ai.SetFunctionMappingRequest;
 import com.excalicode.platform.core.entity.AiFunctionModelMapping;
-import com.excalicode.platform.core.service.AiFunctionModelMappingService;
+import com.excalicode.platform.core.service.entity.AiFunctionModelMappingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

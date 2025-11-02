@@ -5,7 +5,7 @@ import com.excalicode.platform.core.api.user.SysUserResponse;
 import com.excalicode.platform.core.api.user.UserCreateRequest;
 import com.excalicode.platform.core.api.user.UserUpdateRequest;
 import com.excalicode.platform.core.entity.SysUser;
-import com.excalicode.platform.core.service.SysUserService;
+import com.excalicode.platform.core.service.entity.SysUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

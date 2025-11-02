@@ -1,11 +1,11 @@
-package com.excalicode.platform.core.service.impl;
+package com.excalicode.platform.core.service.entity.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.config.CacheConfig;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.mapper.AiPromptTemplateMapper;
-import com.excalicode.platform.core.service.PromptTemplateService;
+import com.excalicode.platform.core.service.entity.PromptTemplateService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

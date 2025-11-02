@@ -1,7 +1,7 @@
 package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.core.entity.AiProvider;
-import com.excalicode.platform.core.service.AiProviderService;
+import com.excalicode.platform.core.service.entity.AiProviderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

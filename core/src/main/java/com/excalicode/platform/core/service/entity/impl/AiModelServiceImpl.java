@@ -1,10 +1,10 @@
-package com.excalicode.platform.core.service.impl;
+package com.excalicode.platform.core.service.entity.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.entity.AiModel;
 import com.excalicode.platform.core.mapper.AiModelMapper;
-import com.excalicode.platform.core.service.AiModelService;
+import com.excalicode.platform.core.service.entity.AiModelService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

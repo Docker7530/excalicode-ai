@@ -1,4 +1,4 @@
-package com.excalicode.platform.core.service;
+package com.excalicode.platform.core.service.entity;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.excalicode.platform.core.entity.AiModel;

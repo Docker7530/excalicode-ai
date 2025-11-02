@@ -2,7 +2,7 @@ package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.core.api.ai.SetFunctionPromptMappingRequest;
 import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
-import com.excalicode.platform.core.service.FunctionPromptMappingService;
+import com.excalicode.platform.core.service.entity.FunctionPromptMappingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

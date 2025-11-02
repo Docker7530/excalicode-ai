@@ -1,12 +1,12 @@
-package com.excalicode.platform.core.service.impl;
+package com.excalicode.platform.core.service.entity.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.excalicode.platform.core.entity.AiModel;
 import com.excalicode.platform.core.entity.AiProvider;
 import com.excalicode.platform.core.mapper.AiProviderMapper;
-import com.excalicode.platform.core.service.AiModelService;
-import com.excalicode.platform.core.service.AiProviderService;
+import com.excalicode.platform.core.service.entity.AiModelService;
+import com.excalicode.platform.core.service.entity.AiProviderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
