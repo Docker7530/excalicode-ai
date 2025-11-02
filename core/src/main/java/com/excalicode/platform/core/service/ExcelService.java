@@ -1,8 +1,8 @@
 package com.excalicode.platform.core.service;
 
 import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.dto.CosmicProcessDto;
-import com.excalicode.platform.core.dto.CosmicProcessStepDto;
+import com.excalicode.platform.core.model.cosmic.CosmicProcess;
+import com.excalicode.platform.core.model.cosmic.CosmicProcessStep;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -43,7 +43,7 @@ public class ExcelService {
     private static final short HEADER_FONT_SIZE = 12;
     private static final short ROW_HEIGHT = 22 * 20; // 行高单位：1/20个点
 
-    public byte[] generateExcelReport(List<CosmicProcessDto> processes) {
+    public byte[] generateExcelReport(List<CosmicProcess> processes) {
         if (processes == null || processes.isEmpty()) {
             throw new BusinessException("COSMIC过程列表不能为空");
         }
@@ -94,7 +94,7 @@ public class ExcelService {
     }
 
     private void fillData(Sheet sheet,
-                          List<CosmicProcessDto> processes,
+                          List<CosmicProcess> processes,
                           CellStyle dataStyle,
                           CellStyle centerDataStyle) {
         int rowNum = 1;
@@ -104,13 +104,13 @@ public class ExcelService {
         int triggerEventStartRow = 1;
         int functionalProcessStartRow = 1;
 
-        for (CosmicProcessDto process : processes) {
+        for (CosmicProcess process : processes) {
             String triggerEvent = process.getTriggerEvent();
             String functionalProcess = process.getFunctionalProcess();
 
-            List<CosmicProcessStepDto> steps = process.getProcessSteps();
+            List<CosmicProcessStep> steps = process.getProcessSteps();
             boolean firstStepOfProcess = true;
-            for (CosmicProcessStepDto step : steps) {
+            for (CosmicProcessStep step : steps) {
                 Row row = sheet.createRow(rowNum);
                 row.setHeight(ROW_HEIGHT);
 

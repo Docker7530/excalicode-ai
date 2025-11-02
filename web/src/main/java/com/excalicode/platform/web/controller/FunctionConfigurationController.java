@@ -1,8 +1,8 @@
 package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.core.dto.FunctionConfigurationItemDto;
-import com.excalicode.platform.core.dto.FunctionConfigurationResponse;
+import com.excalicode.platform.core.api.ai.FunctionConfigurationItem;
+import com.excalicode.platform.core.api.ai.FunctionConfigurationResponse;
 import com.excalicode.platform.core.entity.AiFunctionModelMapping;
 import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import com.excalicode.platform.core.service.AiFunctionModelMappingService;
@@ -46,7 +46,7 @@ public class FunctionConfigurationController {
 
         Map<String, AiFunctionModelMapping> modelMappingMap = buildModelMappingMap();
         Map<String, AiFunctionPromptMapping> promptMappingMap = buildPromptMappingMap();
-        List<FunctionConfigurationItemDto> functions =
+        List<FunctionConfigurationItem> functions =
                 buildFunctionConfigurationItems(modelMappingMap, promptMappingMap);
 
         FunctionConfigurationResponse response = new FunctionConfigurationResponse();
@@ -77,12 +77,12 @@ public class FunctionConfigurationController {
         return result;
     }
 
-    private List<FunctionConfigurationItemDto> buildFunctionConfigurationItems(
+    private List<FunctionConfigurationItem> buildFunctionConfigurationItems(
             Map<String, AiFunctionModelMapping> modelMappingMap,
             Map<String, AiFunctionPromptMapping> promptMappingMap) {
-        List<FunctionConfigurationItemDto> items = new ArrayList<>();
+        List<FunctionConfigurationItem> items = new ArrayList<>();
         Arrays.stream(AiFunctionType.values()).forEach(type -> {
-            FunctionConfigurationItemDto item = new FunctionConfigurationItemDto();
+            FunctionConfigurationItem item = new FunctionConfigurationItem();
             item.setFunctionCode(type.getCode());
             item.setFunctionDescription(type.getDescription());
             item.setModelMapping(modelMappingMap.get(type.getCode()));

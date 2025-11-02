@@ -1,7 +1,7 @@
 package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.common.enums.AiFunctionType;
-import com.excalicode.platform.core.dto.SetFunctionMappingRequest;
+import com.excalicode.platform.core.api.ai.SetFunctionMappingRequest;
 import com.excalicode.platform.core.entity.AiFunctionModelMapping;
 import com.excalicode.platform.core.service.AiFunctionModelMappingService;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
 package com.excalicode.platform.web.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.excalicode.platform.core.dto.LoginRequest;
-import com.excalicode.platform.core.dto.LoginResponse;
+import com.excalicode.platform.core.api.auth.LoginRequest;
+import com.excalicode.platform.core.api.auth.LoginResponse;
 import com.excalicode.platform.core.entity.SysUser;
 import com.excalicode.platform.core.mapper.SysUserMapper;
 import com.excalicode.platform.core.security.JwtUtil;

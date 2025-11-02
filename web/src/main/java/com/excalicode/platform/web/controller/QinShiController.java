@@ -1,9 +1,9 @@
 package com.excalicode.platform.web.controller;
 
-import com.excalicode.platform.core.dto.VacationCorrectRequestDto;
-import com.excalicode.platform.core.dto.VacationDetailRecordDto;
-import com.excalicode.platform.core.dto.VacationRecordDto;
-import com.excalicode.platform.core.dto.VacationSplitResultDto;
+import com.excalicode.platform.core.api.vacation.VacationCorrectRequest;
+import com.excalicode.platform.core.api.vacation.VacationDetailRequest;
+import com.excalicode.platform.core.api.vacation.VacationRecordRequest;
+import com.excalicode.platform.core.api.vacation.VacationSplitResponse;
 import com.excalicode.platform.core.service.VacationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +32,9 @@ public class QinShiController {
      * 解析导出的请假 Excel 文件，拆分为单条请假记录
      */
     @PostMapping("/vacation/split")
-    public ResponseEntity<VacationSplitResultDto> splitVacationRecords(
+    public ResponseEntity<VacationSplitResponse> splitVacationRecords(
             @RequestParam("file") MultipartFile file) {
-        VacationSplitResultDto result = vacationService.parseVacationExcel(file);
+        VacationSplitResponse result = vacationService.parseVacationExcel(file);
         return ResponseEntity.ok(result);
     }
 
@@ -42,9 +42,9 @@ public class QinShiController {
      * 批量纠正请假记录的备注信息
      */
     @PostMapping("/vacation/correct")
-    public ResponseEntity<List<VacationRecordDto>> correctVacationRemarks(
-            @RequestBody VacationCorrectRequestDto request) {
-        List<VacationRecordDto> correctedRecords =
+    public ResponseEntity<List<VacationRecordRequest>> correctVacationRemarks(
+            @RequestBody VacationCorrectRequest request) {
+        List<VacationRecordRequest> correctedRecords =
                 vacationService.correctRemarks(request.getRecords());
         return ResponseEntity.ok(correctedRecords);
     }
@@ -53,9 +53,9 @@ public class QinShiController {
      * 生成请假明细表
      */
     @PostMapping("/vacation/generate-table")
-    public ResponseEntity<List<VacationDetailRecordDto>> generateVacationDetailTable(
-            @RequestBody VacationCorrectRequestDto request) {
-        List<VacationDetailRecordDto> detailRecords =
+    public ResponseEntity<List<VacationDetailRequest>> generateVacationDetailTable(
+            @RequestBody VacationCorrectRequest request) {
+        List<VacationDetailRequest> detailRecords =
                 vacationService.generateVacationDetailTable(request.getRecords());
         return ResponseEntity.ok(detailRecords);
     }

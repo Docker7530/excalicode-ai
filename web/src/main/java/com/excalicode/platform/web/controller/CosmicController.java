@@ -1,13 +1,13 @@
 package com.excalicode.platform.web.controller;
 
-import com.excalicode.platform.core.dto.AnalysisResultDto;
-import com.excalicode.platform.core.dto.CosmicAnalysisRequestDto;
-import com.excalicode.platform.core.dto.DocumentExportRequestDto;
-import com.excalicode.platform.core.dto.DocumentPreviewRequestDto;
-import com.excalicode.platform.core.dto.ProcessBreakdownRequestDto;
-import com.excalicode.platform.core.dto.ProcessBreakdownResultDto;
-import com.excalicode.platform.core.dto.ProcessTableExportRequestDto;
-import com.excalicode.platform.core.dto.RequirementEnhanceRequestDto;
+import com.excalicode.platform.core.api.cosmic.AnalysisResponse;
+import com.excalicode.platform.core.api.cosmic.CosmicAnalysisRequest;
+import com.excalicode.platform.core.api.cosmic.DocumentExportRequest;
+import com.excalicode.platform.core.api.cosmic.DocumentPreviewRequest;
+import com.excalicode.platform.core.api.cosmic.ProcessBreakdownRequest;
+import com.excalicode.platform.core.api.cosmic.ProcessBreakdownResponse;
+import com.excalicode.platform.core.api.cosmic.ProcessTableExportRequest;
+import com.excalicode.platform.core.api.cosmic.RequirementEnhanceRequest;
 import com.excalicode.platform.core.service.CosmicService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class CosmicController {
      * 扩写需求描述
      */
     @PostMapping(value = "/requirement/enhance", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> enhanceRequirement(@RequestBody @Valid RequirementEnhanceRequestDto request) {
+    public Flux<String> enhanceRequirement(@RequestBody @Valid RequirementEnhanceRequest request) {
         return cosmicService.streamEnhancedRequirement(request.getOriginalRequirement());
     }
 
@@ -53,8 +53,8 @@ public class CosmicController {
      * 生成功能过程
      */
     @PostMapping("/process/breakdown")
-    public ResponseEntity<ProcessBreakdownResultDto> breakdownProcess(@RequestBody @Valid ProcessBreakdownRequestDto request) {
-        ProcessBreakdownResultDto result = cosmicService.breakdownProcess(request);
+    public ResponseEntity<ProcessBreakdownResponse> breakdownProcess(@RequestBody @Valid ProcessBreakdownRequest request) {
+        ProcessBreakdownResponse result = cosmicService.breakdownProcess(request);
         return ResponseEntity.ok(result);
     }
 
@@ -62,8 +62,8 @@ public class CosmicController {
      * 导入功能过程
      */
     @PostMapping("/cosmic/process/import")
-    public ResponseEntity<ProcessBreakdownResultDto> importFunctionalProcesses(@RequestParam("file") MultipartFile file) {
-        ProcessBreakdownResultDto result = cosmicService.importFunctionalProcesses(file);
+    public ResponseEntity<ProcessBreakdownResponse> importFunctionalProcesses(@RequestParam("file") MultipartFile file) {
+        ProcessBreakdownResponse result = cosmicService.importFunctionalProcesses(file);
         return ResponseEntity.ok(result);
     }
 
@@ -71,8 +71,8 @@ public class CosmicController {
      * 导入 COSMIC 子过程
      */
     @PostMapping("/cosmic/subprocess/import")
-    public ResponseEntity<AnalysisResultDto> importCosmicProcesses(@RequestParam("file") MultipartFile file) {
-        AnalysisResultDto result = cosmicService.importCosmicProcesses(file);
+    public ResponseEntity<AnalysisResponse> importCosmicProcesses(@RequestParam("file") MultipartFile file) {
+        AnalysisResponse result = cosmicService.importCosmicProcesses(file);
         return ResponseEntity.ok(result);
     }
 
@@ -81,8 +81,8 @@ public class CosmicController {
      * 使用一次性生成所有字段的方式。
      */
     @PostMapping("/cosmic/analyze")
-    public ResponseEntity<AnalysisResultDto> analyzeRequirement(@RequestBody @Valid CosmicAnalysisRequestDto request) {
-        AnalysisResultDto result = cosmicService.analyzeRequirement(request);
+    public ResponseEntity<AnalysisResponse> analyzeRequirement(@RequestBody @Valid CosmicAnalysisRequest request) {
+        AnalysisResponse result = cosmicService.analyzeRequirement(request);
         return ResponseEntity.ok(result);
     }
 
@@ -94,8 +94,8 @@ public class CosmicController {
      * 解决大量功能过程时的截断问题(20个功能过程只生成10个) 并发处理提升性能 自动修复重复项,提高质量
      */
     @PostMapping("/cosmic/analyze-v2")
-    public ResponseEntity<AnalysisResultDto> analyzeRequirementV2(@RequestBody @Valid CosmicAnalysisRequestDto request) {
-        AnalysisResultDto result = cosmicService.analyzeRequirementV2(request);
+    public ResponseEntity<AnalysisResponse> analyzeRequirementV2(@RequestBody @Valid CosmicAnalysisRequest request) {
+        AnalysisResponse result = cosmicService.analyzeRequirementV2(request);
         return ResponseEntity.ok(result);
     }
 
@@ -103,7 +103,7 @@ public class CosmicController {
      * 导出子功能过程表格为 Excel 文件
      */
     @PostMapping("/cosmic/table/export")
-    public ResponseEntity<Resource> exportProcessTable(@RequestBody @Valid ProcessTableExportRequestDto request) {
+    public ResponseEntity<Resource> exportProcessTable(@RequestBody @Valid ProcessTableExportRequest request) {
         byte[] excelData = cosmicService.exportProcessTableAsBytes(request);
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss"));
         String filename = URLEncoder.encode("COSMIC_" + timestamp + ".xlsx", StandardCharsets.UTF_8);
@@ -118,7 +118,7 @@ public class CosmicController {
      * 生成文档预览内容
      */
     @PostMapping("/cosmic/documents/preview")
-    public ResponseEntity<String> generateDocumentPreview(@RequestBody @Valid DocumentPreviewRequestDto request) {
+    public ResponseEntity<String> generateDocumentPreview(@RequestBody @Valid DocumentPreviewRequest request) {
         String content = cosmicService.generateDocumentPreview(request);
         return ResponseEntity.ok(content);
     }
@@ -127,7 +127,7 @@ public class CosmicController {
      * 导出需求文档为 Word 文件
      */
     @PostMapping("/cosmic/documents/export")
-    public ResponseEntity<Resource> exportRequirementDocument(@RequestBody @Valid DocumentExportRequestDto request) {
+    public ResponseEntity<Resource> exportRequirementDocument(@RequestBody @Valid DocumentExportRequest request) {
         byte[] docxData = cosmicService.generateRequirementDocumentAsBytes(request);
         String filename = URLEncoder.encode("需求文档.docx", StandardCharsets.UTF_8);
 

@@ -25,10 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.excalicode.platform.common.enums.AiFunctionType;
 import com.excalicode.platform.common.exception.BusinessException;
 import com.excalicode.platform.core.ai.AiFunctionExecutor;
-import com.excalicode.platform.core.dto.VacationDetailItem;
-import com.excalicode.platform.core.dto.VacationDetailRecordDto;
-import com.excalicode.platform.core.dto.VacationRecordDto;
-import com.excalicode.platform.core.dto.VacationSplitResultDto;
+import com.excalicode.platform.core.api.vacation.VacationDetailItem;
+import com.excalicode.platform.core.api.vacation.VacationDetailRequest;
+import com.excalicode.platform.core.api.vacation.VacationRecordRequest;
+import com.excalicode.platform.core.api.vacation.VacationSplitResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class VacationService {
      *
      * @return 休假记录拆分结果
      */
-    public VacationSplitResultDto parseVacationExcel(MultipartFile file) {
+    public VacationSplitResponse parseVacationExcel(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("上传的文件不能为空");
         }
@@ -91,8 +91,8 @@ public class VacationService {
             validateRequiredColumns(columnIndexMap);
 
             // 解析数据行
-            List<VacationRecordDto> allRecords = new ArrayList<>();
-            List<VacationRecordDto> validRecords = new ArrayList<>();
+            List<VacationRecordRequest> allRecords = new ArrayList<>();
+            List<VacationRecordRequest> validRecords = new ArrayList<>();
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
@@ -100,7 +100,7 @@ public class VacationService {
                     continue;
                 }
 
-                VacationRecordDto record = parseRow(row, columnIndexMap);
+                VacationRecordRequest record = parseRow(row, columnIndexMap);
                 allRecords.add(record);
 
                 // 只返回备注不为空的记录
@@ -111,7 +111,7 @@ public class VacationService {
 
             log.info("解析Excel完成,总记录数:{},有效记录数:{}", allRecords.size(), validRecords.size());
 
-            return VacationSplitResultDto.builder()
+            return VacationSplitResponse.builder()
                     .records(validRecords)
                     .totalCount(allRecords.size())
                     .validCount(validRecords.size())
@@ -174,8 +174,8 @@ public class VacationService {
     /**
      * 解析数据行
      */
-    private VacationRecordDto parseRow(Row row, Map<String, Integer> columnIndexMap) {
-        return VacationRecordDto.builder()
+    private VacationRecordRequest parseRow(Row row, Map<String, Integer> columnIndexMap) {
+        return VacationRecordRequest.builder()
                 .idCard(getCellValue(row, columnIndexMap.get("idCard")))
                 .name(getCellValue(row, columnIndexMap.get("name")))
                 .department(getCellValue(row, columnIndexMap.get("department")))
@@ -262,14 +262,14 @@ public class VacationService {
      *
      * @return 修正后的休假记录列表
      */
-    public List<VacationRecordDto> correctRemarks(List<VacationRecordDto> records) {
+    public List<VacationRecordRequest> correctRemarks(List<VacationRecordRequest> records) {
         if (records == null || records.isEmpty()) {
             return records;
         }
 
         log.info("开始批量修正备注，共{}条记录", records.size());
 
-        List<VacationRecordDto> candidates = records.stream()
+        List<VacationRecordRequest> candidates = records.stream()
                 .filter(record -> record.getRemark() != null && !record.getRemark().trim().isEmpty())
                 .toList();
 
@@ -279,7 +279,7 @@ public class VacationService {
         }
 
         List<CompletableFuture<Void>> futures = new ArrayList<>(candidates.size());
-        for (VacationRecordDto record : candidates) {
+        for (VacationRecordRequest record : candidates) {
             futures.add(CompletableFuture.runAsync(() -> {
                 boolean acquired = false;
                 try {
@@ -480,16 +480,16 @@ public class VacationService {
      *
      * @return 休假详细记录列表
      */
-    public List<VacationDetailRecordDto> generateVacationDetailTable(List<VacationRecordDto> records) {
+    public List<VacationDetailRequest> generateVacationDetailTable(List<VacationRecordRequest> records) {
         if (records == null || records.isEmpty()) {
             return new ArrayList<>();
         }
 
         log.info("开始生成休假数据表，共{}条记录", records.size());
 
-        List<VacationDetailRecordDto> detailRecords = new ArrayList<>();
+        List<VacationDetailRequest> detailRecords = new ArrayList<>();
 
-        for (VacationRecordDto record : records) {
+        for (VacationRecordRequest record : records) {
             // 如果没有修正后的备注，跳过
             if (record.getCorrectedRemark() == null || record.getCorrectedRemark().trim().isEmpty()) {
                 log.warn("记录缺少修正备注，跳过：{} - {}", record.getName(), record.getIdCard());
@@ -504,7 +504,7 @@ public class VacationService {
                 String vacationType = item.getVacationType();
                 String finalVacationDays = shouldUseFixedOneDay(vacationType) ? "1" : item.getVacationDays();
 
-                VacationDetailRecordDto detailRecord = VacationDetailRecordDto.builder()
+                VacationDetailRequest detailRecord = VacationDetailRequest.builder()
                         .idCard(record.getIdCard())
                         .name(record.getName())
                         .department(record.getDepartment())

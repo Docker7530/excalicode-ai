@@ -1,6 +1,6 @@
 package com.excalicode.platform.web.controller;
 
-import com.excalicode.platform.core.dto.SetFunctionPromptMappingRequest;
+import com.excalicode.platform.core.api.ai.SetFunctionPromptMappingRequest;
 import com.excalicode.platform.core.entity.AiFunctionPromptMapping;
 import com.excalicode.platform.core.service.FunctionPromptMappingService;
 import lombok.RequiredArgsConstructor;

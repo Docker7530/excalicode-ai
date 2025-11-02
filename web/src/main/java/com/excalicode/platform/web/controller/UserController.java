@@ -1,9 +1,9 @@
 package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.common.exception.BusinessException;
-import com.excalicode.platform.core.dto.SysUserResponse;
-import com.excalicode.platform.core.dto.UserCreateRequest;
-import com.excalicode.platform.core.dto.UserUpdateRequest;
+import com.excalicode.platform.core.api.user.SysUserResponse;
+import com.excalicode.platform.core.api.user.UserCreateRequest;
+import com.excalicode.platform.core.api.user.UserUpdateRequest;
 import com.excalicode.platform.core.entity.SysUser;
 import com.excalicode.platform.core.service.SysUserService;
 import jakarta.validation.Valid;

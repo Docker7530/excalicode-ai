@@ -1,6 +1,6 @@
 package com.excalicode.platform.web.controller;
 
-import com.excalicode.platform.core.dto.PromptTemplateRequest;
+import com.excalicode.platform.core.api.ai.PromptTemplateRequest;
 import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
