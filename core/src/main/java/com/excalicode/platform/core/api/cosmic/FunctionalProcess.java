@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.api.cosmic;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,10 +16,9 @@ import lombok.NoArgsConstructor;
 public class FunctionalProcess {
 
     /**
-     * 功能过程描述 简洁的功能过程描述，格式：主体 + 动作 + 客体
+     * 功能过程描述 简洁的功能过程描述,格式:主体 + 动作 + 客体
      */
-    @JsonProperty(required = true)
-    @JsonPropertyDescription("简洁的功能过程描述，格式：主体 + 动作 + 客体")
+    @JsonPropertyDescription("简洁的功能过程描述,格式:主体 + 动作 + 客体")
     private String description;
 
 }

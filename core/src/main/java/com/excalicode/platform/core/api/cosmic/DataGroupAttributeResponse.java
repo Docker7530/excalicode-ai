@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.api.cosmic;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -9,10 +8,8 @@ import lombok.Data;
 @Data
 public class DataGroupAttributeResponse {
 
-    @JsonProperty(required = true)
     private String dataGroup;
 
-    @JsonProperty(required = true)
     private String dataAttributes;
 
 }

@@ -1,6 +1,5 @@
 package com.excalicode.platform.core.api.cosmic;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -9,7 +8,6 @@ import lombok.Data;
 @Data
 public class FixDuplicateResponse {
 
-    @JsonProperty(required = true)
     private String fixed;
 
 }
