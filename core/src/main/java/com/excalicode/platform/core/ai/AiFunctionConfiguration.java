@@ -7,7 +7,5 @@ import org.springframework.ai.chat.model.ChatModel;
 /**
  * AI 功能执行所需的聚合配置。
  */
-public record AiFunctionConfiguration(AiFunctionType functionType, String promptCode,
-                                      String systemPrompt, ChatModel chatModel, boolean supportsJsonSchema,
-                                      AiModel model) {
-}
+public record AiFunctionConfiguration(AiFunctionType functionType, String promptCode, String systemPrompt,
+                                      ChatModel chatModel, boolean supportsJsonSchema, AiModel model) {}

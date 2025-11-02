@@ -43,12 +43,6 @@ public class AiPromptTemplate {
     private String content;
 
     /**
-     * 提示词说明
-     */
-    @TableField("description")
-    private String description;
-
-    /**
      * 创建时间, 插入时自动填充
      */
     @TableField(value = "created_time", fill = FieldFill.INSERT)

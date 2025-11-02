@@ -51,9 +51,6 @@
               <span class="prompt-name">{{ template.name }}</span>
               <ElTag size="small" type="info">{{ template.code }}</ElTag>
             </div>
-            <div class="prompt-description">
-              {{ template.description || '暂无描述' }}
-            </div>
             <div class="prompt-meta">
               <span class="meta-item"
                 >更新于 {{ formatDate(template.updatedTime) }}</span
@@ -117,15 +114,6 @@
                   </ElFormItem>
                 </ElCol>
               </ElRow>
-
-              <ElFormItem label="说明">
-                <ElInput
-                  v-model="formData.description"
-                  placeholder="提示词说明"
-                  maxlength="500"
-                  show-word-limit
-                />
-              </ElFormItem>
             </ElForm>
 
             <!-- Vditor 编辑器 - 占据剩余全部空间 -->
@@ -190,7 +178,6 @@ const formData = reactive({
   code: '',
   name: '',
   content: '',
-  description: '',
 });
 
 // 计算属性
@@ -201,8 +188,7 @@ const filteredTemplates = computed(() => {
   return templates.value.filter(
     (t) =>
       t.name.includes(searchKeyword.value) ||
-      t.code.includes(searchKeyword.value) ||
-      t.description?.includes(searchKeyword.value),
+      t.code.includes(searchKeyword.value),
   );
 });
 
@@ -275,7 +261,6 @@ const handleSelectTemplate = (template) => {
     code: template.code,
     name: template.name,
     content: template.content,
-    description: template.description,
   });
 
   // 更新编辑器内容
@@ -294,7 +279,6 @@ const handleCreate = () => {
     code: '',
     name: '',
     content: '',
-    description: '',
   });
 
   // 清空编辑器内容
@@ -509,16 +493,6 @@ onBeforeUnmount(() => {
             text-overflow: ellipsis;
             white-space: nowrap;
           }
-        }
-
-        .prompt-description {
-          font-size: 12px;
-          color: #909399;
-          margin-bottom: 8px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          line-height: 1.5;
         }
 
         .prompt-meta {

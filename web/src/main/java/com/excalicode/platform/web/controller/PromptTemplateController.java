@@ -85,7 +85,6 @@ public class PromptTemplateController {
         template.setCode(request.getCode());
         template.setName(request.getName());
         template.setContent(request.getContent());
-        template.setDescription(request.getDescription());
 
         boolean success = promptTemplateService.saveOrUpdatePrompt(template);
         if (success) {
@@ -110,7 +109,6 @@ public class PromptTemplateController {
         template.setCode(request.getCode());
         template.setName(request.getName());
         template.setContent(request.getContent());
-        template.setDescription(request.getDescription());
 
         boolean success = promptTemplateService.saveOrUpdatePrompt(template);
         if (success) {

@@ -75,24 +75,18 @@ public class AiFunctionConfigurationService {
                     log.warn("模型 {} 映射的厂商 {} 不存在，回退到默认 ChatModel", modelId, model.getProviderId());
                 } else {
                     chatModel = createChatModel(provider, model);
-                    supportsJsonSchema =
-                            model.getSupportsJsonSchema() == null || model.getSupportsJsonSchema();
+                    supportsJsonSchema = model.getSupportsJsonSchema() == null || model.getSupportsJsonSchema();
                 }
             }
         }
 
-        return new AiFunctionConfiguration(functionType,
-                                           promptCode,
-                                           promptContent,
-                                           chatModel,
-                                           supportsJsonSchema,
+        return new AiFunctionConfiguration(functionType, promptCode, promptContent, chatModel, supportsJsonSchema,
                                            model);
     }
 
     private ChatModel createChatModel(AiProvider provider, AiModel model) {
-        if (!StringUtils.hasText(provider.getBaseUrl())
-                || !StringUtils.hasText(provider.getApiKey())
-                || !StringUtils.hasText(model.getModelName())) {
+        if (!StringUtils.hasText(provider.getBaseUrl()) || !StringUtils.hasText(
+                provider.getApiKey()) || !StringUtils.hasText(model.getModelName())) {
             log.warn("厂商或模型配置缺失，使用默认 ChatModel。provider={}, model={}", provider.getId(), model.getId());
             return defaultChatModel;
         }

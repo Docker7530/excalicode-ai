@@ -38,8 +38,6 @@ public class PromptTemplateServiceImpl
 
         return this.list(new LambdaQueryWrapper<AiPromptTemplate>().like(AiPromptTemplate::getName, keyword)
                                  .or()
-                                 .like(AiPromptTemplate::getDescription, keyword)
-                                 .or()
                                  .like(AiPromptTemplate::getCode, keyword)
                                  .orderByDesc(AiPromptTemplate::getUpdatedTime));
     }

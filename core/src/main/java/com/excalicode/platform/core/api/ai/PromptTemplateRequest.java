@@ -27,9 +27,4 @@ public class PromptTemplateRequest {
      * Markdown 格式的提示词内容
      */
     private String content;
-
-    /**
-     * 提示词说明
-     */
-    private String description;
 }
