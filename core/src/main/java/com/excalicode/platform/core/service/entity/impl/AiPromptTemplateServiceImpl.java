@@ -49,19 +49,15 @@ public class AiPromptTemplateServiceImpl
             return false;
         }
 
-        // 如果有 ID，则更新；否则检查 code 是否已存在
         if (promptTemplate.getId() != null) {
             return this.updateById(promptTemplate);
         }
 
-        // 检查 code 是否已存在
         AiPromptTemplate existing = this.getByCode(promptTemplate.getCode());
         if (existing != null) {
-            // 更新现有记录
             promptTemplate.setId(existing.getId());
             return this.updateById(promptTemplate);
         } else {
-            // 创建新记录
             return this.save(promptTemplate);
         }
     }

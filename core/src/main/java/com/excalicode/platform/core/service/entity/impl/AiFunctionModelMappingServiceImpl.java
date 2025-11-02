@@ -50,17 +50,14 @@ public class AiFunctionModelMappingServiceImpl
             return false;
         }
 
-        // 查找现有映射
         AiFunctionModelMapping existingMapping = this.getOne(
                 new LambdaQueryWrapper<AiFunctionModelMapping>().eq(AiFunctionModelMapping::getFunctionType,
                                                                     functionType.getCode()));
 
         if (existingMapping != null) {
-            // 更新现有映射
             existingMapping.setModelId(modelId);
             return this.updateById(existingMapping);
         } else {
-            // 创建新映射
             AiFunctionModelMapping newMapping = new AiFunctionModelMapping();
             newMapping.setFunctionType(functionType.getCode());
             newMapping.setModelId(modelId);
@@ -72,7 +69,6 @@ public class AiFunctionModelMappingServiceImpl
     public List<AiFunctionModelMapping> listAllMappingsWithModel() {
         List<AiFunctionModelMapping> mappings = this.list();
 
-        // 填充模型和厂商信息
         for (AiFunctionModelMapping mapping : mappings) {
             AiModel model = aiModelService.getById(mapping.getModelId());
             if (model != null) {
