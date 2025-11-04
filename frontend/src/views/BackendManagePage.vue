@@ -48,6 +48,13 @@
           </div>
           <h2 class="card-title">功能配置管理</h2>
         </div>
+
+        <div class="module-card cache-card" @click="navigateToCacheManage">
+          <div class="card-icon">
+            <ElIcon :size="72"><Coin /></ElIcon>
+          </div>
+          <h2 class="card-title">缓存管理</h2>
+        </div>
       </div>
     </div>
 
@@ -74,6 +81,7 @@
 <script setup>
 import {
   ArrowLeft,
+  Coin,
   Connection,
   Document,
   InfoFilled,
@@ -97,6 +105,10 @@ const navigateToPromptTemplate = () => {
 
 const navigateToFunctionConfiguration = () => {
   router.push('/function-configuration');
+};
+
+const navigateToCacheManage = () => {
+  router.push('/cache-manage');
 };
 </script>
 
@@ -288,6 +300,10 @@ const navigateToFunctionConfiguration = () => {
   background: linear-gradient(90deg, #67c23a, #85ce61);
 }
 
+.cache-card::before {
+  background: linear-gradient(90deg, #f093fb, #f5576c);
+}
+
 .card-icon {
   width: 120px;
   height: 120px;
@@ -307,6 +323,10 @@ const navigateToFunctionConfiguration = () => {
 
 .configuration-card .card-icon {
   color: #67c23a;
+}
+
+.cache-card .card-icon {
+  color: #f093fb;
 }
 
 .card-title {

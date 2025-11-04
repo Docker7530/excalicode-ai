@@ -73,6 +73,13 @@ export const ENDPOINTS = Object.freeze({
   FUNCTION_CONFIGURATION: {
     LIST: '/api/function-configuration',
   },
+
+  CACHE_MANAGE: {
+    STATS: '/api/cache-manage/stats',
+    DETAIL: (cacheName) => `/api/cache-manage/detail/${cacheName}`,
+    CLEAR: (cacheName) => `/api/cache-manage/${cacheName}`,
+    EVICT_KEY: (cacheName, key) => `/api/cache-manage/${cacheName}/key/${key}`,
+  },
 });
 
 export default ENDPOINTS;

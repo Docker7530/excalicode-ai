@@ -78,6 +78,15 @@ const routes = [
     },
   },
   {
+    path: '/cache-manage',
+    name: 'CacheManage',
+    component: () => import('@/views/CacheManagePage.vue'),
+    meta: {
+      title: '缓存管理 - EXCALICODE AI',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/user-manage',
     name: 'UserManage',
     component: () => import('@/views/UserManagePage.vue'),
