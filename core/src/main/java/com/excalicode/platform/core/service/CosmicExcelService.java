@@ -130,9 +130,9 @@ public class CosmicExcelService {
         int totalRows = rowNum - 1;
         if (totalRows > 1) {
             sheet.addMergedRegion(new CellRangeAddress(1, totalRows, ColumnDef.CUSTOMER_REQ.ordinal(),
-                                                       ColumnDef.CUSTOMER_REQ.ordinal()));
+                    ColumnDef.CUSTOMER_REQ.ordinal()));
             sheet.addMergedRegion(new CellRangeAddress(1, totalRows, ColumnDef.FUNCTIONAL_USER.ordinal(),
-                                                       ColumnDef.FUNCTIONAL_USER.ordinal()));
+                    ColumnDef.FUNCTIONAL_USER.ordinal()));
             sheet.addMergedRegion(
                     new CellRangeAddress(1, totalRows, ColumnDef.USER_REQ.ordinal(), ColumnDef.USER_REQ.ordinal()));
         }
@@ -191,35 +191,28 @@ public class CosmicExcelService {
 
     // 列定义:用数据结构消除硬编码的列索引
     private enum ColumnDef {
-        CUSTOMER_REQ("客户需求", 25, StyleType.LEFT),
-        FUNCTIONAL_USER("功能用户", 25, StyleType.LEFT),
-        USER_REQ("功能用户需求", 25, StyleType.LEFT),
-        TRIGGER_EVENT("触发事件", 25, StyleType.LEFT),
-        FUNCTIONAL_PROCESS("功能过程", 25, StyleType.LEFT),
-        SUB_PROCESS("子过程描述", 40, StyleType.LEFT),
-        DATA_MOVEMENT("数据移动类型", 15, StyleType.CENTER),
-        DATA_GROUP("数据组", 30, StyleType.LEFT),
-        DATA_ATTRS("数据属性", 60, StyleType.LEFT),
-        CFP("CFP", 15, StyleType.CENTER);
+        CUSTOMER_REQ("客户需求", 25),
+        FUNCTIONAL_USER("功能用户", 25),
+        USER_REQ("功能用户需求", 25),
+        TRIGGER_EVENT("触发事件", 25),
+        FUNCTIONAL_PROCESS("功能过程", 25),
+        SUB_PROCESS("子过程描述", 40),
+        DATA_MOVEMENT("数据移动类型", 15),
+        DATA_GROUP("数据组", 30),
+        DATA_ATTRS("数据属性", 60),
+        CFP("CFP", 15);
 
         final String header;
-        final int width;        // 字符数
-        final StyleType styleType;
+        final int width; // 字符数
 
-        ColumnDef(String header, int widthInChars, StyleType styleType) {
+        ColumnDef(String header, int widthInChars) {
             this.header = header;
             this.width = widthInChars * 256; // 转换为POI的宽度单位
-            this.styleType = styleType;
         }
 
         static ColumnDef[] all() {
             return values();
         }
-    }
-
-    private enum StyleType {
-        LEFT,
-        CENTER
     }
 
     /**
