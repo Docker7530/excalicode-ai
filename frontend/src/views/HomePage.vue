@@ -105,6 +105,68 @@
               </ElButton>
             </div>
           </div>
+
+          <div
+            v-if="isAdmin"
+            class="feature-card task-card"
+            @click="navigateToTaskAllocation"
+          >
+            <div class="card-header">
+              <div class="card-icon task-icon">
+                <ElIcon :size="48">
+                  <Collection />
+                </ElIcon>
+              </div>
+              <div class="card-badge task-badge">任务调度</div>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">任务分配</h3>
+              <ul class="card-features">
+                <li>Excel 批量导入任务</li>
+                <li>快速为执行人分派</li>
+                <li>实时追踪执行状态</li>
+              </ul>
+            </div>
+            <div class="card-action">
+              <ElButton type="success" size="large" round class="action-button">
+                <ElIcon class="button-icon">
+                  <ArrowRight />
+                </ElIcon>
+                发布任务
+              </ElButton>
+            </div>
+          </div>
+
+          <div
+            v-if="isRegularUser"
+            class="feature-card my-task-card"
+            @click="navigateToMyTasks"
+          >
+            <div class="card-header">
+              <div class="card-icon my-task-icon">
+                <ElIcon :size="48">
+                  <List />
+                </ElIcon>
+              </div>
+              <div class="card-badge my-task-badge">个人任务</div>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">我的任务</h3>
+              <ul class="card-features">
+                <li>查看分配给我的任务</li>
+                <li>随时标记完成状态</li>
+                <li>掌握个人工作进度</li>
+              </ul>
+            </div>
+            <div class="card-action">
+              <ElButton type="primary" size="large" round class="action-button">
+                <ElIcon class="button-icon">
+                  <ArrowRight />
+                </ElIcon>
+                查看任务
+              </ElButton>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -165,6 +227,7 @@
 </template>
 
 <script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 import {
   ArrowRight,
@@ -175,9 +238,14 @@ import {
   Setting,
   Star,
   Tools,
+  Collection,
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
+const role = ref(localStorage.getItem('role') || 'USER');
+
+const isAdmin = computed(() => role.value === 'ADMIN');
+const isRegularUser = computed(() => role.value !== 'ADMIN');
 
 const navigateToRequirement = () => {
   router.push('/requirement-analysis');
@@ -190,6 +258,27 @@ const navigateToVacation = () => {
 const navigateToBackend = () => {
   router.push('/backend-manage');
 };
+
+const navigateToTaskAllocation = () => {
+  router.push('/tasks/allocation');
+};
+
+const navigateToMyTasks = () => {
+  router.push('/tasks/my');
+};
+
+const refreshRole = () => {
+  role.value = localStorage.getItem('role') || 'USER';
+};
+
+onMounted(() => {
+  refreshRole();
+  window.addEventListener('storage', refreshRole);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', refreshRole);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -343,6 +432,16 @@ const navigateToBackend = () => {
     color: #909399;
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   }
+
+  &.task-icon {
+    color: #22c55e;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  }
+
+  &.my-task-icon {
+    color: #409eff;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  }
 }
 
 .card-badge {
@@ -356,6 +455,14 @@ const navigateToBackend = () => {
   &.admin-badge {
     background: linear-gradient(135deg, #667eea, #764ba2);
   }
+
+  &.task-badge {
+    background: linear-gradient(135deg, #34d399, #10b981);
+  }
+
+  &.my-task-badge {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  }
 }
 
 .admin-card {
@@ -367,6 +474,30 @@ const navigateToBackend = () => {
 
   &:hover {
     border-color: rgba(102, 126, 234, 0.3);
+  }
+}
+
+.task-card {
+  border: 2px solid rgba(34, 197, 94, 0.15);
+
+  &::before {
+    background: linear-gradient(90deg, #34d399, #10b981);
+  }
+
+  &:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+}
+
+.my-task-card {
+  border: 2px solid rgba(96, 165, 250, 0.15);
+
+  &::before {
+    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  }
+
+  &:hover {
+    border-color: rgba(59, 130, 246, 0.35);
   }
 }
 

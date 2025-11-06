@@ -78,7 +78,7 @@
       </div>
     </div>
 
-    <div class="config-section" v-loading="loading">
+    <div v-loading="loading" class="config-section">
       <ElTable :data="configurations" class="config-table" border>
         <ElTableColumn label="功能" min-width="220">
           <template #default="{ row }">
@@ -201,7 +201,6 @@
             />
           </ElSelect>
         </ElFormItem>
-
       </ElForm>
 
       <template #footer>

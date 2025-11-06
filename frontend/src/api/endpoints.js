@@ -80,6 +80,19 @@ export const ENDPOINTS = Object.freeze({
     CLEAR: (cacheName) => `/api/cache-manage/${cacheName}`,
     EVICT_KEY: (cacheName, key) => `/api/cache-manage/${cacheName}/key/${key}`,
   },
+
+  TASK: {
+    ADMIN_IMPORT: '/api/admin/task-batches/import',
+    ADMIN_PUBLISH: '/api/admin/task-batches',
+    ADMIN_BATCHES: '/api/admin/task-batches',
+    ADMIN_BATCH_DETAIL: (batchId) => `/api/admin/task-batches/${batchId}`,
+    ADMIN_UPDATE_ASSIGNEE: (batchId, taskId) =>
+      `/api/admin/task-batches/${batchId}/tasks/${taskId}/assignee`,
+    ADMIN_ASSIGNEES: '/api/admin/task-assignees',
+    MY_BATCHES: '/api/tasks/my',
+    MY_BATCH_DETAIL: (batchId) => `/api/tasks/my/${batchId}`,
+    UPDATE_STATUS: (taskId) => `/api/tasks/${taskId}/status`,
+  },
 });
 
 export default ENDPOINTS;

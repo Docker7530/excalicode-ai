@@ -18,4 +18,9 @@ public class SysUserServiceImpl
     public boolean existsByUsername(String username) {
         return lambdaQuery().eq(SysUser::getUsername, username).exists();
     }
+
+    @Override
+    public SysUser findByUsername(String username) {
+        return lambdaQuery().eq(SysUser::getUsername, username).one();
+    }
 }

@@ -10,6 +10,7 @@
 
 - COSMIC 全流程：需求扩写 → 功能过程拆解 → 子过程生成（两种策略）→ 表格导出 → Word 文档预览与终稿导出。
 - Excel 互操作：支持导入功能过程模板、COSMIC 子过程表，自动清洗并支持批量下载。
+- 任务调度：管理员可批量导入任务并分配执行人，USER 角色可在“我的任务”中实时同步状态。
 - 模型治理：管理员界面可维护 AI 厂商 / 模型清单，并为不同业务功能绑定最合适的模型，实时生效。
 - 安全控制：JWT 登录、BCrypt 存储、方法级鉴权、Caffeine 缓存提示词、本地 .env 加载敏感配置。
 
@@ -118,6 +119,15 @@ npm run dev
 | 管理     | GET  | `/api/ai-provider/list`        | 查看厂商+模型       |
 | 管理     | POST | `/api/ai-function/set`         | 功能 → 模型映射     |
 | 管理     | REST | `/api/admin/users/**`          | 管理员 CRUD      |
+| 管理     | POST | `/api/admin/task-batches/import` | Excel 导入任务草稿 |
+| 管理     | POST | `/api/admin/task-batches`        | 发布大任务批次并生成子任务 |
+| 管理     | GET  | `/api/admin/task-batches`        | 批次总览列表 |
+| 管理     | GET  | `/api/admin/task-batches/{id}`   | 查看批次详情与子任务 |
+| 管理     | PUT  | `/api/admin/task-batches/{batchId}/tasks/{taskId}/assignee` | 更新子任务执行人 |
+| 管理     | GET  | `/api/admin/task-assignees`      | 获取可分配用户 |
+| 用户     | GET  | `/api/tasks/my`                  | 用户查看参与的大任务批次 |
+| 用户     | GET  | `/api/tasks/my/{batchId}`        | 查看某批次内分配给自己的子任务 |
+| 用户     | PATCH | `/api/tasks/{taskId}/status`     | 更新任务状态（未完成/已完成） |
 
 > 管理端接口默认需要 `ADMIN` 角色；其余业务端接口需登录携带 `Authorization: Bearer <token>`。
 
@@ -126,6 +136,13 @@ npm run dev
 - 提示词定义位于 `common/src/main/resources/prompts`，由 `AiFunctionConfigurationService` 结合 Spring Cache 自动加载。
 - `AiFunctionType` 定义各业务功能（需求扩写、功能拆解、备注修正等），配合数据库映射表可分配不同模型。
 - 备注修正请求依靠信号量控制并发，辅以限流重试兜底，规避厂商速率限制。
+
+## 任务分配与执行流程
+
+1. ADMIN 在“任务分配”中上传包含 `需求标题`、`需求描述`、`计入工作量(人天)` 的 Excel。系统校验列头与空值，并以两行预览展示描述，鼠标悬浮可查看全文。
+2. 填写批次标题、说明，为每条草稿指定 USER 执行人后即可发布；发布会创建 `project_task_batch` + `project_task` 双表记录，状态默认为未完成。
+3. 管理端批次总览展示完成度、工作量和发布时间，可随时打开批次详情重新指派执行人；重新分配后状态自动重置为“未完成”。
+4. USER 端先看到参与的大任务批次，点击进入后仅展示分配给自己的子任务，并可将状态在“未完成 / 已完成”之间切换，结果即时同步到管理员视图。
 
 ## 开发注意事项
 

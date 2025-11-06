@@ -96,6 +96,25 @@ const routes = [
       requiredRole: 'ADMIN',
     },
   },
+  {
+    path: '/tasks/allocation',
+    name: 'TaskAllocation',
+    component: () => import('@/views/TaskAllocationPage.vue'),
+    meta: {
+      title: '任务分配 - EXCALICODE AI',
+      requiresAuth: true,
+      requiredRole: 'ADMIN',
+    },
+  },
+  {
+    path: '/tasks/my',
+    name: 'MyTasks',
+    component: () => import('@/views/MyTasksPage.vue'),
+    meta: {
+      title: '我的任务 - EXCALICODE AI',
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = createRouter({

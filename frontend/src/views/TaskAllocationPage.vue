@@ -1,0 +1,594 @@
+<template>
+  <div class="task-allocation-page">
+    <AppHeader />
+    <div class="page-layout">
+      <div class="left-panel">
+        <ElCard class="card">
+          <template #header>
+            <div class="card-header">
+              <ElIcon><UploadFilled /></ElIcon>
+              <span>导入任务模板</span>
+            </div>
+          </template>
+          <div class="import-controls">
+            <ElUpload
+              :auto-upload="false"
+              :show-file-list="false"
+              accept=".xlsx,.xls"
+              :on-change="handleFileChange"
+            >
+              <ElButton type="primary" :loading="importing"
+                >上传 Excel</ElButton
+              >
+            </ElUpload>
+            <p class="hint">
+              模板需包含「需求标题」「需求描述」「计入工作量(人天)」三列。导入后可为每条记录指定执行人并发布。
+            </p>
+          </div>
+          <ElForm
+            v-if="drafts.length"
+            :model="batchForm"
+            label-width="88px"
+            class="batch-form"
+          >
+            <ElFormItem label="批次标题" required>
+              <ElInput
+                v-model="batchForm.title"
+                placeholder="请输入大任务标题，如：四季度需求拆解"
+                maxlength="100"
+                show-word-limit
+              />
+            </ElFormItem>
+            <ElFormItem label="批次说明">
+              <ElInput
+                v-model="batchForm.description"
+                placeholder="可选：补充背景或注意事项"
+                type="textarea"
+                :rows="2"
+                maxlength="200"
+                show-word-limit
+              />
+            </ElFormItem>
+          </ElForm>
+
+          <div v-if="drafts.length" class="draft-table-wrapper">
+            <div class="table-caption">
+              批次包含 {{ drafts.length }} 条任务，请填写执行人：
+            </div>
+            <ElTable :data="drafts" border>
+              <ElTableColumn
+                prop="rowIndex"
+                label="行号"
+                width="80"
+                align="center"
+              />
+              <ElTableColumn prop="title" label="任务标题" min-width="180">
+                <template #default="{ row }">
+                  <ElTooltip :content="row.title" placement="top">
+                    <span class="text-ellipsis">{{ row.title }}</span>
+                  </ElTooltip>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn
+                prop="description"
+                label="任务描述"
+                min-width="220"
+              >
+                <template #default="{ row }">
+                  <ElTooltip :content="row.description" placement="top">
+                    <span class="text-ellipsis multiline">{{
+                      row.description
+                    }}</span>
+                  </ElTooltip>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn
+                prop="workloadManDay"
+                label="工作量(人天)"
+                width="140"
+                align="center"
+              />
+              <ElTableColumn label="执行人" width="220">
+                <template #default="{ row }">
+                  <ElSelect
+                    v-model="assignmentMap[row.rowIndex]"
+                    placeholder="选择执行人"
+                    clearable
+                    style="width: 180px"
+                  >
+                    <ElOption
+                      v-for="user in assignees"
+                      :key="user.id"
+                      :label="user.username"
+                      :value="user.id"
+                    />
+                  </ElSelect>
+                </template>
+              </ElTableColumn>
+            </ElTable>
+          </div>
+
+          <div v-if="drafts.length" class="actions">
+            <ElButton
+              type="primary"
+              :loading="publishing"
+              :disabled="!canPublish"
+              @click="handlePublish"
+            >
+              发布任务批次
+            </ElButton>
+            <ElButton text @click="resetDrafts">清空草稿</ElButton>
+          </div>
+        </ElCard>
+      </div>
+
+      <div class="right-panel">
+        <ElCard class="card">
+          <template #header>
+            <div class="card-header">
+              <ElIcon><List /></ElIcon>
+              <span>任务批次总览</span>
+            </div>
+          </template>
+          <ElTable v-loading="loadingBatches" :data="batchList" border>
+            <ElTableColumn prop="title" label="批次标题" min-width="200">
+              <template #default="{ row }">
+                <div class="batch-title">
+                  <span>{{ row.title }}</span>
+                  <ElTag
+                    v-if="
+                      row.totalTasks === row.completedTasks &&
+                      row.totalTasks > 0
+                    "
+                    size="small"
+                    type="success"
+                  >
+                    已完成
+                  </ElTag>
+                </div>
+                <div v-if="row.description" class="batch-desc">
+                  {{ row.description }}
+                </div>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="完成度" width="140" align="center">
+              <template #default="{ row }">
+                <span>{{ row.completedTasks }}/{{ row.totalTasks }}</span>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn
+              prop="totalWorkload"
+              label="总工作量"
+              width="140"
+              align="center"
+            >
+              <template #default="{ row }">
+                {{ formatWorkload(row.totalWorkload) }} 人天
+              </template>
+            </ElTableColumn>
+            <ElTableColumn prop="publishedTime" label="发布时间" width="180" />
+            <ElTableColumn prop="createdByName" label="发布人" width="120" />
+            <ElTableColumn label="操作" width="140" align="center">
+              <template #default="{ row }">
+                <ElButton
+                  type="primary"
+                  text
+                  size="small"
+                  @click="openBatchDetail(row.id)"
+                >
+                  查看详情
+                </ElButton>
+              </template>
+            </ElTableColumn>
+          </ElTable>
+        </ElCard>
+      </div>
+    </div>
+
+    <ElDrawer
+      v-model="detailVisible"
+      size="720px"
+      :with-header="false"
+      custom-class="detail-drawer"
+    >
+      <template #default>
+        <div v-if="activeBatch" class="detail-container">
+          <div class="detail-header">
+            <div>
+              <h2 class="detail-title">{{ activeBatch.title }}</h2>
+              <p v-if="activeBatch.description" class="detail-desc">
+                {{ activeBatch.description }}
+              </p>
+            </div>
+            <div class="detail-meta">
+              <span
+                >任务数：{{ activeBatch.completedTasks }}/{{
+                  activeBatch.totalTasks
+                }}</span
+              >
+              <span
+                >总工作量：{{
+                  formatWorkload(activeBatch.totalWorkload)
+                }}
+                人天</span
+              >
+              <span>发布时间：{{ formatDate(activeBatch.publishedTime) }}</span>
+            </div>
+          </div>
+
+          <ElTable :data="activeBatch.tasks" border stripe>
+            <ElTableColumn prop="title" label="任务标题" min-width="200">
+              <template #default="{ row }">
+                <ElTooltip :content="row.title" placement="top">
+                  <span class="text-ellipsis">{{ row.title }}</span>
+                </ElTooltip>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn prop="description" label="任务描述" min-width="240">
+              <template #default="{ row }">
+                <ElTooltip :content="row.description" placement="top">
+                  <span class="text-ellipsis multiline">{{
+                    row.description
+                  }}</span>
+                </ElTooltip>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn
+              prop="workloadManDay"
+              label="工作量"
+              width="120"
+              align="center"
+            >
+              <template #default="{ row }">
+                {{ row.workloadManDay }} 人天
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="执行人" width="220">
+              <template #default="{ row }">
+                <ElSelect
+                  v-model="row.assigneeId"
+                  placeholder="选择执行人"
+                  style="width: 180px"
+                  @change="(value) => handleDetailAssigneeChange(row, value)"
+                >
+                  <ElOption
+                    v-for="user in assignees"
+                    :key="user.id"
+                    :label="user.username"
+                    :value="user.id"
+                  />
+                </ElSelect>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="状态" width="140" align="center">
+              <template #default="{ row }">
+                <ElTag
+                  :type="row.status === 'COMPLETED' ? 'success' : 'info'"
+                  >{{ row.statusLabel }}</ElTag
+                >
+              </template>
+            </ElTableColumn>
+          </ElTable>
+        </div>
+        <ElEmpty v-else description="暂无数据" />
+      </template>
+    </ElDrawer>
+  </div>
+</template>
+
+<script setup>
+import { computed, onMounted, reactive, ref } from 'vue';
+import { ElMessage } from 'element-plus';
+import {
+  importTaskDrafts,
+  publishTaskBatch,
+  fetchTaskBatches,
+  fetchTaskBatchDetail,
+  updateTaskAssignee,
+  fetchAssignableUsers,
+} from '@/api/task.js';
+import AppHeader from '@/components/AppHeader.vue';
+import { List, UploadFilled } from '@element-plus/icons-vue';
+
+const drafts = ref([]);
+const batchForm = reactive({ title: '', description: '' });
+const assignmentMap = reactive({});
+const assignees = ref([]);
+const importing = ref(false);
+const publishing = ref(false);
+
+const batchList = ref([]);
+const loadingBatches = ref(false);
+const activeBatch = ref(null);
+const detailVisible = ref(false);
+
+const resetDrafts = () => {
+  drafts.value = [];
+  batchForm.title = '';
+  batchForm.description = '';
+  Object.keys(assignmentMap).forEach((key) => delete assignmentMap[key]);
+};
+
+const loadAssignees = async () => {
+  try {
+    const data = await fetchAssignableUsers();
+    assignees.value = data ?? [];
+  } catch (error) {
+    ElMessage.error(error?.message ?? '获取执行人列表失败');
+  }
+};
+
+const loadBatches = async () => {
+  try {
+    loadingBatches.value = true;
+    const data = await fetchTaskBatches();
+    batchList.value = (data ?? []).map((item) => ({
+      ...item,
+      publishedTime: formatDate(item.publishedTime),
+    }));
+  } catch (error) {
+    ElMessage.error(error?.message ?? '获取任务批次失败');
+  } finally {
+    loadingBatches.value = false;
+  }
+};
+
+const handleFileChange = async (uploadFile) => {
+  try {
+    importing.value = true;
+    const raw = uploadFile?.raw ?? uploadFile;
+    const draftsResult = await importTaskDrafts(raw);
+    drafts.value = draftsResult ?? [];
+    Object.keys(assignmentMap).forEach((key) => delete assignmentMap[key]);
+    ElMessage.success(`成功导入 ${drafts.value.length} 条任务，请填写批次信息`);
+  } catch (error) {
+    ElMessage.error(error?.message ?? '导入失败');
+  } finally {
+    importing.value = false;
+  }
+};
+
+const canPublish = computed(() => {
+  if (!drafts.value.length) return false;
+  if (!batchForm.title.trim()) return false;
+  return drafts.value.every((draft) => assignmentMap[draft.rowIndex]);
+});
+
+const handlePublish = async () => {
+  if (!canPublish.value) {
+    ElMessage.warning('请完善批次标题和执行人信息');
+    return;
+  }
+  const payload = {
+    batchTitle: batchForm.title.trim(),
+    batchDescription: batchForm.description?.trim() || null,
+    tasks: drafts.value.map((draft) => ({
+      rowIndex: draft.rowIndex,
+      title: draft.title,
+      description: draft.description,
+      workloadManDay: draft.workloadManDay,
+      assigneeId: assignmentMap[draft.rowIndex],
+    })),
+  };
+  try {
+    publishing.value = true;
+    const detail = await publishTaskBatch(payload);
+    ElMessage.success('任务批次发布成功');
+    resetDrafts();
+    await loadBatches();
+    if (detail) {
+      activeBatch.value = normalizeBatchDetail(detail);
+      detailVisible.value = true;
+    }
+  } catch (error) {
+    ElMessage.error(error?.message ?? '发布失败');
+  } finally {
+    publishing.value = false;
+  }
+};
+
+const openBatchDetail = async (batchId) => {
+  try {
+    detailVisible.value = true;
+    activeBatch.value = null;
+    const detail = await fetchTaskBatchDetail(batchId);
+    activeBatch.value = normalizeBatchDetail(detail);
+  } catch (error) {
+    detailVisible.value = false;
+    ElMessage.error(error?.message ?? '获取批次详情失败');
+  }
+};
+
+const handleDetailAssigneeChange = async (task, newAssigneeId) => {
+  if (!newAssigneeId) {
+    ElMessage.warning('执行人不能为空');
+    return;
+  }
+  const previous = task.assigneeId;
+  try {
+    const updated = await updateTaskAssignee(
+      task.batchId,
+      task.id,
+      newAssigneeId,
+    );
+    Object.assign(task, updated);
+    ElMessage.success('执行人已更新');
+    await loadBatches();
+  } catch (error) {
+    task.assigneeId = previous;
+    ElMessage.error(error?.message ?? '执行人更新失败');
+  }
+};
+
+const normalizeBatchDetail = (detail) => {
+  if (!detail) return null;
+  return {
+    ...detail,
+    publishedTime: formatDate(detail.publishedTime),
+    tasks: (detail.tasks ?? []).map((task) => ({
+      ...task,
+      publishedTime: formatDate(task.publishedTime),
+      updatedTime: formatDate(task.updatedTime),
+    })),
+  };
+};
+
+const formatDate = (value) => {
+  if (!value) return '-';
+  return value.replace('T', ' ').split('.')[0] ?? value;
+};
+
+const formatWorkload = (value) => {
+  if (!value && value !== 0) return '0';
+  return Number(value).toFixed(2);
+};
+
+onMounted(async () => {
+  await Promise.all([loadAssignees(), loadBatches()]);
+});
+</script>
+
+<style scoped lang="scss">
+.task-allocation-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+  padding: 80px 24px 40px;
+  position: relative;
+  z-index: 0;
+}
+
+.page-layout {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) minmax(520px, 1fr);
+  gap: 24px;
+
+  @media (max-width: 1280px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(79, 70, 229, 0.12);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #334155;
+}
+
+.import-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.batch-form {
+  margin-top: 16px;
+}
+
+.draft-table-wrapper {
+  margin-top: 12px;
+}
+
+.table-caption {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.text-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.multiline {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+
+.right-panel .card {
+  height: 100%;
+}
+
+.batch-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.batch-desc {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.detail-drawer {
+  padding: 0 0 24px 0;
+}
+
+.detail-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detail-desc {
+  margin: 4px 0 0;
+  color: #475569;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.detail-container :deep(.el-table) {
+  --el-table-header-bg-color: #f8fafc;
+}
+</style>

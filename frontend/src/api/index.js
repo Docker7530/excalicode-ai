@@ -10,6 +10,7 @@ import api, { request } from './request.js';
 import * as authService from './auth.js';
 import cosmicService from './cosmic.js';
 import * as userService from './user.js';
+import * as taskService from './task.js';
 
 /**
  * 统一的 API 服务对象
@@ -27,10 +28,21 @@ const apiServices = Object.freeze({
 
   // 系统用户管理服务
   user: userService,
+
+  // 任务管理服务
+  task: taskService,
 });
 
 // 默认导出统一API服务
 export default apiServices;
 
 // 分别导出各个服务，便于按需导入
-export { api, apiServices, authService, cosmicService, request, userService };
+export {
+  api,
+  apiServices,
+  authService,
+  cosmicService,
+  request,
+  taskService,
+  userService,
+};

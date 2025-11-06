@@ -95,3 +95,43 @@ CREATE TABLE IF NOT EXISTS ai_function_prompt_mapping (
     INDEX idx_prompt_code (prompt_code),
     INDEX idx_deleted (deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='功能-提示词映射表';
+
+-- 任务批次表（大任务）
+CREATE TABLE IF NOT EXISTS project_task_batch (
+    id BIGINT AUTO_INCREMENT COMMENT '主键ID',
+    title VARCHAR(200) NOT NULL COMMENT '批次/大任务标题',
+    description TEXT NULL COMMENT '批次说明',
+    created_by BIGINT NOT NULL COMMENT '创建人ID',
+    published_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发布时间',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (id),
+    INDEX idx_batch_creator (created_by),
+    INDEX idx_batch_deleted (deleted),
+    CONSTRAINT fk_batch_creator FOREIGN KEY (created_by) REFERENCES sys_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务批次表';
+
+-- 任务表（子任务）
+CREATE TABLE IF NOT EXISTS project_task (
+    id BIGINT AUTO_INCREMENT COMMENT '主键ID',
+    batch_id BIGINT NOT NULL COMMENT '所属批次ID',
+    title VARCHAR(200) NOT NULL COMMENT '任务标题',
+    description TEXT NOT NULL COMMENT '任务描述',
+    workload_man_day DECIMAL(10, 2) NOT NULL COMMENT '计入工作量(人天)',
+    status VARCHAR(20) NOT NULL DEFAULT 'NOT_STARTED' COMMENT '任务状态: NOT_STARTED, COMPLETED',
+    assignee_id BIGINT NOT NULL COMMENT '执行人ID',
+    published_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '任务发布时间',
+    created_by BIGINT NOT NULL COMMENT '发布人ID',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (id),
+    INDEX idx_batch_id (batch_id),
+    INDEX idx_assignee_id (assignee_id),
+    INDEX idx_status (status),
+    INDEX idx_deleted (deleted),
+    CONSTRAINT fk_task_batch FOREIGN KEY (batch_id) REFERENCES project_task_batch(id),
+    CONSTRAINT fk_task_assignee FOREIGN KEY (assignee_id) REFERENCES sys_user(id),
+    CONSTRAINT fk_task_creator FOREIGN KEY (created_by) REFERENCES sys_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务分派表';
