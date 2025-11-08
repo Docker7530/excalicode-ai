@@ -7,7 +7,6 @@
       "cwd": "${workspaceFolder}",
       "mainClass": "com.excalicode.platform.web.ExcalicodePlatformApplication",
       "projectName": "web",
-      "args": "",
       "envFile": "${workspaceFolder}/.env"
     },
     {
@@ -15,8 +14,7 @@
       "name": "前端",
       "request": "launch",
       "command": "npm run dev",
-      "cwd": "${workspaceFolder}/frontend",
-      "preLaunchTask": "install-frontend"
+      "cwd": "${workspaceFolder}/frontend"
     }
   ],
   "compounds": [
