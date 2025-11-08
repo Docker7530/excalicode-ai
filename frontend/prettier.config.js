@@ -1,5 +1,8 @@
-/** @type {import("prettier").Config} */
-module.exports = {
+/**
+ * @see https://prettier.io/docs/configuration
+ * @type {import("prettier").Config}
+ */
+const config = {
   // 每行最大长度，建议 80 更利于代码审查
   printWidth: 80,
 
@@ -36,3 +39,5 @@ module.exports = {
   // 嵌套对象或数组过长时尽量自动格式化成多行
   proseWrap: 'preserve',
 };
+
+export default config;
