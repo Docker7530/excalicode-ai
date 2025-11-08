@@ -1,5 +1,4 @@
 {
   "prettier.configPath": "frontend/prettier.config.cjs",
   "prettier.prettierPath": "frontend/node_modules/prettier/index.cjs",
-  "java.format.settings.url": ".vscode/java-formatter.xml"
 }
