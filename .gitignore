@@ -74,7 +74,6 @@ lerna-debug.log*
 # =======================================================
 /.claude/
 /CLAUDE.md
-/AGENTS.md
 frontend/components.d.ts
 frontend/auto-imports.d.ts
 frontend/.eslintrc-auto-import.json
