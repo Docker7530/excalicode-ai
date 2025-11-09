@@ -50,8 +50,7 @@
     "src/**/*.vue",
     "*.d.ts",
     "auto-imports.d.ts",
-    "components.d.ts",
-    ".eslintrc-auto-import.json"
+    "components.d.ts"
   ],
 
   "exclude": ["node_modules", "dist", "**/*.spec.js", "**/*.test.js"],

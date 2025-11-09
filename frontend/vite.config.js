@@ -28,11 +28,6 @@ export default defineConfig({
         },
       ],
       dts: true,
-      eslintrc: {
-        enabled: true,
-        filepath: './.eslintrc-auto-import.json',
-        globalsPropValue: true,
-      },
     }),
     Components({
       resolvers: [

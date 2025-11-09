@@ -38,7 +38,7 @@ const normalizeBlobPayload = async (blob) => {
   try {
     const text = await blob.text();
     return JSON.parse(text);
-  } catch (_error) {
+  } catch {
     try {
       const text = await blob.text();
       return text ? { detail: text } : null;

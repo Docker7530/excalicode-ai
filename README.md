@@ -150,3 +150,4 @@ pnpm run dev
 - 如需扩展新的 AI 功能：新增提示词 → 枚举项 → DTO → `CosmicService`/`VacationService` 实现 → 暴露 REST 接口 → 前端接入。
 - SSE 接口 (`/api/requirement/enhance`) 默认推送纯文本片段，前端通过 `onChunk` 累积呈现，注意断流与取消处理。
 - 前端默认将构建产物部署在独立静态服务器；若要由后端承载，可将 `frontend/dist` 拷贝至 `web/src/main/resources/static`。
+- 前端代码规范统一由 `oxlint` / `oxfmt` 保证，提交前请执行 `pnpm lint:check` 与 `pnpm format:check`（自动修复可用 `pnpm lint`、`pnpm format`）。

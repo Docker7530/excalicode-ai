@@ -1,0 +1,108 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "plugins": [
+    "oxc",
+    "typescript",
+    "unicorn",
+    "promise",
+    "node",
+    "vitest",
+    "jsdoc"
+  ],
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "suspicious": "warn",
+    "style": "warn",
+    "nursery": "off",
+    "restriction": "off"
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "*.d.ts",
+    "auto-imports.d.ts",
+    "components.d.ts",
+    "coverage/**",
+    "**/__snapshots__/**"
+  ],
+  "globals": {
+    "__DEV__": "readonly",
+    "defineProps": "readonly",
+    "defineEmits": "readonly",
+    "defineExpose": "readonly",
+    "defineSlots": "readonly",
+    "defineModel": "readonly",
+    "defineOptions": "readonly",
+    "withDefaults": "readonly",
+    "ElMessage": "readonly",
+    "ElMessageBox": "readonly",
+    "ElNotification": "readonly",
+    "ElLoading": "readonly"
+  },
+  "rules": {
+    "no-console": [
+      "warn",
+      { "allow": ["warn", "error"] }
+    ],
+    "no-debugger": "error",
+    "no-alert": "warn",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-unused-vars": [
+      "warn",
+      {
+        "args": "after-used",
+        "ignoreRestSiblings": true,
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "none"
+      }
+    ],
+    "no-undef": "off",
+    "eqeqeq": [
+      "error",
+      { "null": "ignore" }
+    ],
+    "prefer-const": "warn",
+    "no-var": "error",
+    "promise/no-return-in-finally": "error",
+    "promise/no-new-statics": "error",
+    "promise/no-nesting": "warn",
+    "node/no-unsupported-features/es-builtins": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+    "jsdoc/check-alignment": "warn",
+    "jsdoc/check-param-names": "warn",
+    "unicorn/prefer-ternary": "off",
+    "unicorn/no-null": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/**/*.spec.{js,ts}",
+        "src/**/*.test.{js,ts}",
+        "tests/**/*"
+      ],
+      "env": {
+        "vitest/globals": true
+      },
+      "rules": {
+        "vitest/expect-expect": "off"
+      }
+    },
+    {
+      "files": [
+        "vite.config.js",
+        "scripts/**/*.js"
+      ],
+      "env": {
+        "node": true
+      }
+    }
+  ]
+}
