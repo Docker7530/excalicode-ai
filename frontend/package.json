@@ -5,8 +5,9 @@
   "author": "ExcaliCode Team",
   "license": "MIT",
   "type": "module",
+  "packageManager": "pnpm@10.20.0",
   "scripts": {
-    "predev": "npm install",
+    "predev": "pnpm install",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

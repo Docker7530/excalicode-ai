@@ -13,7 +13,7 @@
       "type": "node-terminal",
       "name": "前端",
       "request": "launch",
-      "command": "npm run dev",
+      "command": "pnpm run dev",
       "cwd": "${workspaceFolder}/frontend"
     }
   ],

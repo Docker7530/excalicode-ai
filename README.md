@@ -45,7 +45,7 @@ excalicode-ai/
 
 - JDK 21+
 - Maven 3.9+
-- Node.js 18+（建议 20 LTS）与 npm
+- Node.js 18+（建议 20 LTS）与 pnpm（`corepack enable pnpm`）
 - MySQL 8.x（字符集 `utf8mb4`）
 - 可用的 SiliconFlow API Key（或自定义 OpenAI 兼容模型）
 
@@ -84,8 +84,8 @@ mvn -pl web -am spring-boot:run
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 - Dev Server 默认 `http://localhost:3000`，代理 `/web` 到后端。
@@ -94,7 +94,7 @@ npm run dev
 ### 5. 构建与发布
 
 - 后端：`mvn clean package`，产出 `web/target/excalicode.jar`。
-- 前端：`npm run build`，产出 `frontend/dist`，可由 Nginx/静态服务器托管或挂载到后端静态目录。
+- 前端：`pnpm run build`，产出 `frontend/dist`，可由 Nginx/静态服务器托管或挂载到后端静态目录。
 
 ## 环境变量说明
 
