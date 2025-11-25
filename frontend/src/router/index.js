@@ -69,15 +69,6 @@ const routes = [
     },
   },
   {
-    path: '/backend-manage',
-    name: 'BackendManage',
-    component: () => import('@/views/BackendManagePage.vue'),
-    meta: {
-      title: '后台管理 - EXCALICODE AI',
-      requiresAuth: true,
-    },
-  },
-  {
     path: '/cache-manage',
     name: 'CacheManage',
     component: () => import('@/views/CacheManagePage.vue'),

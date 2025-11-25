@@ -64,32 +64,101 @@
             </div>
           </div>
 
-          <div class="feature-card admin-card" @click="navigateToBackend">
-            <div class="card-header">
-              <div class="card-icon admin-icon">
-                <ElIcon :size="48">
-                  <Setting />
-                </ElIcon>
+          <template v-if="isAdmin">
+            <div class="feature-card provider-card" @click="navigateToProvider">
+              <div class="card-header">
+                <div class="card-icon provider-icon">
+                  <ElIcon :size="48">
+                    <OfficeBuilding />
+                  </ElIcon>
+                </div>
+                <div class="card-badge provider-badge">系统管理</div>
               </div>
-              <div class="card-badge admin-badge">系统管理</div>
+              <div class="card-content">
+                <h3 class="card-title">AI 模型厂商管理</h3>
+              </div>
+              <div class="card-action">
+                <ElButton type="primary" size="large" round class="action-button">
+                  <ElIcon class="button-icon">
+                    <ArrowRight />
+                  </ElIcon>
+                  管理厂商
+                </ElButton>
+              </div>
             </div>
-            <div class="card-content">
-              <h3 class="card-title">后台管理</h3>
+
+            <div
+              class="feature-card prompt-template-card"
+              @click="navigateToPromptTemplate"
+            >
+              <div class="card-header">
+                <div class="card-icon prompt-template-icon">
+                  <ElIcon :size="48">
+                    <Document />
+                  </ElIcon>
+                </div>
+                <div class="card-badge prompt-template-badge">提示词</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">提示词模板管理</h3>
+              </div>
+              <div class="card-action">
+                <ElButton type="warning" size="large" round class="action-button">
+                  <ElIcon class="button-icon">
+                    <ArrowRight />
+                  </ElIcon>
+                  编辑模板
+                </ElButton>
+              </div>
             </div>
-            <div class="card-action">
-              <ElButton
-                type="info"
-                size="large"
-                round
-                class="action-button admin-button"
-              >
-                <ElIcon class="button-icon">
-                  <Tools />
-                </ElIcon>
-                管理配置
-              </ElButton>
+
+            <div
+              class="feature-card function-config-card"
+              @click="navigateToFunctionConfiguration"
+            >
+              <div class="card-header">
+                <div class="card-icon function-config-icon">
+                  <ElIcon :size="48">
+                    <Connection />
+                  </ElIcon>
+                </div>
+                <div class="card-badge function-config-badge">功能配置</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">功能配置管理</h3>
+              </div>
+              <div class="card-action">
+                <ElButton type="success" size="large" round class="action-button">
+                  <ElIcon class="button-icon">
+                    <ArrowRight />
+                  </ElIcon>
+                  配置映射
+                </ElButton>
+              </div>
             </div>
-          </div>
+
+            <div class="feature-card cache-manage-card" @click="navigateToCacheManage">
+              <div class="card-header">
+                <div class="card-icon cache-manage-icon">
+                  <ElIcon :size="48">
+                    <Coin />
+                  </ElIcon>
+                </div>
+                <div class="card-badge cache-manage-badge">系统维护</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">缓存管理</h3>
+              </div>
+              <div class="card-action">
+                <ElButton type="info" size="large" round class="action-button">
+                  <ElIcon class="button-icon">
+                    <ArrowRight />
+                  </ElIcon>
+                  清理缓存
+                </ElButton>
+              </div>
+            </div>
+          </template>
 
           <div
             v-if="isAdmin"
@@ -206,14 +275,16 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 import {
   ArrowRight,
+  Coin,
+  Collection,
+  Connection,
   Document,
   Lightning,
   List,
   Monitor,
-  Setting,
+  OfficeBuilding,
   Star,
   Tools,
-  Collection,
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -230,8 +301,20 @@ const navigateToVacation = () => {
   router.push('/vacation-split');
 };
 
-const navigateToBackend = () => {
-  router.push('/backend-manage');
+const navigateToProvider = () => {
+  router.push('/ai-provider-manage');
+};
+
+const navigateToPromptTemplate = () => {
+  router.push('/prompt-template-manage');
+};
+
+const navigateToFunctionConfiguration = () => {
+  router.push('/function-configuration');
+};
+
+const navigateToCacheManage = () => {
+  router.push('/cache-manage');
 };
 
 const navigateToTaskAllocation = () => {
@@ -403,11 +486,6 @@ onBeforeUnmount(() => {
     color: #e6a23c;
   }
 
-  &.admin-icon {
-    color: #909399;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  }
-
   &.task-icon {
     color: #22c55e;
     background: linear-gradient(135deg, #ecfdf5, #d1fae5);
@@ -416,6 +494,26 @@ onBeforeUnmount(() => {
   &.my-task-icon {
     color: #409eff;
     background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  }
+
+  &.provider-icon {
+    color: #409eff;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  }
+
+  &.prompt-template-icon {
+    color: #e6a23c;
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  }
+
+  &.function-config-icon {
+    color: #16a34a;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  }
+
+  &.cache-manage-icon {
+    color: #f472b6;
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
   }
 }
 
@@ -427,10 +525,6 @@ onBeforeUnmount(() => {
   font-size: 0.875rem;
   font-weight: 500;
 
-  &.admin-badge {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-  }
-
   &.task-badge {
     background: linear-gradient(135deg, #34d399, #10b981);
   }
@@ -438,17 +532,69 @@ onBeforeUnmount(() => {
   &.my-task-badge {
     background: linear-gradient(135deg, #60a5fa, #3b82f6);
   }
+
+  &.provider-badge {
+    background: linear-gradient(135deg, #409eff, #5cacee);
+  }
+
+  &.prompt-template-badge {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  }
+
+  &.function-config-badge {
+    background: linear-gradient(135deg, #34d399, #10b981);
+  }
+
+  &.cache-manage-badge {
+    background: linear-gradient(135deg, #f472b6, #ec4899);
+  }
 }
 
-.admin-card {
-  border: 2px solid rgba(102, 126, 234, 0.1);
+.provider-card {
+  border: 2px solid rgba(64, 158, 255, 0.15);
 
   &::before {
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, #409eff, #5cacee);
   }
 
   &:hover {
-    border-color: rgba(102, 126, 234, 0.3);
+    border-color: rgba(64, 158, 255, 0.4);
+  }
+}
+
+.prompt-template-card {
+  border: 2px solid rgba(245, 158, 11, 0.15);
+
+  &::before {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  }
+
+  &:hover {
+    border-color: rgba(251, 191, 36, 0.45);
+  }
+}
+
+.function-config-card {
+  border: 2px solid rgba(52, 211, 153, 0.2);
+
+  &::before {
+    background: linear-gradient(90deg, #34d399, #10b981);
+  }
+
+  &:hover {
+    border-color: rgba(16, 185, 129, 0.45);
+  }
+}
+
+.cache-manage-card {
+  border: 2px solid rgba(244, 114, 182, 0.2);
+
+  &::before {
+    background: linear-gradient(90deg, #f472b6, #ec4899);
+  }
+
+  &:hover {
+    border-color: rgba(236, 72, 153, 0.45);
   }
 }
 
@@ -473,16 +619,6 @@ onBeforeUnmount(() => {
 
   &:hover {
     border-color: rgba(59, 130, 246, 0.35);
-  }
-}
-
-.admin-button {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
-  border: none !important;
-
-  &:hover {
-    background: linear-gradient(135deg, #764ba2, #667eea) !important;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
   }
 }
 
