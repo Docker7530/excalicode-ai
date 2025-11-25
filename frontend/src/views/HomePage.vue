@@ -33,14 +33,14 @@
           </div>
 
           <template v-if="isAdmin">
-            <div class="feature-card provider-card" @click="navigateToProvider">
+            <div class="feature-card" @click="navigateToProvider">
               <div class="card-content">
                 <h3 class="card-title">AI 模型厂商管理</h3>
               </div>
             </div>
 
             <div
-              class="feature-card prompt-template-card"
+              class="feature-card"
               @click="navigateToPromptTemplate"
             >
               <div class="card-content">
@@ -49,7 +49,7 @@
             </div>
 
             <div
-              class="feature-card function-config-card"
+              class="feature-card"
               @click="navigateToFunctionConfiguration"
             >
               <div class="card-content">
@@ -57,7 +57,7 @@
               </div>
             </div>
 
-            <div class="feature-card cache-manage-card" @click="navigateToCacheManage">
+            <div class="feature-card" @click="navigateToCacheManage">
               <div class="card-content">
                 <h3 class="card-title">缓存管理</h3>
               </div>
@@ -66,7 +66,7 @@
 
           <div
             v-if="isAdmin"
-            class="feature-card task-card"
+            class="feature-card"
             @click="navigateToTaskAllocation"
           >
             <div class="card-content">
@@ -76,7 +76,7 @@
 
           <div
             v-if="isRegularUser"
-            class="feature-card my-task-card"
+            class="feature-card"
             @click="navigateToMyTasks"
           >
             <div class="card-content">
@@ -223,8 +223,10 @@ onBeforeUnmount(() => {
     0 4px 6px rgba(0, 0, 0, 0.05),
     0 10px 15px rgba(0, 0, 0, 0.03);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid transparent;
+  transition:
+    all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s ease;
+  color: #1e293b;
   position: relative;
   display: flex;
   align-items: center;
@@ -232,27 +234,31 @@ onBeforeUnmount(() => {
   text-align: center;
   overflow: hidden;
   min-height: 180px;
+  border: 2px solid transparent;
 
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #409eff, #67c23a);
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #409eff, #67c23a);
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 0;
+    pointer-events: none;
   }
 
   &:hover {
     transform: translateY(-8px);
+    color: #ffffff;
     box-shadow:
       0 20px 25px rgba(0, 0, 0, 0.1),
       0 10px 10px rgba(0, 0, 0, 0.04);
 
     &::before {
-      transform: translateX(0);
+      opacity: 1;
+      transform: scale(1);
     }
   }
 
@@ -263,87 +269,17 @@ onBeforeUnmount(() => {
   }
 }
 
-.provider-card {
-  border: 2px solid rgba(64, 158, 255, 0.15);
-
-  &::before {
-    background: linear-gradient(90deg, #409eff, #5cacee);
-  }
-
-  &:hover {
-    border-color: rgba(64, 158, 255, 0.4);
-  }
-}
-
-.prompt-template-card {
-  border: 2px solid rgba(245, 158, 11, 0.15);
-
-  &::before {
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
-  }
-
-  &:hover {
-    border-color: rgba(251, 191, 36, 0.45);
-  }
-}
-
-.function-config-card {
-  border: 2px solid rgba(52, 211, 153, 0.2);
-
-  &::before {
-    background: linear-gradient(90deg, #34d399, #10b981);
-  }
-
-  &:hover {
-    border-color: rgba(16, 185, 129, 0.45);
-  }
-}
-
-.cache-manage-card {
-  border: 2px solid rgba(244, 114, 182, 0.2);
-
-  &::before {
-    background: linear-gradient(90deg, #f472b6, #ec4899);
-  }
-
-  &:hover {
-    border-color: rgba(236, 72, 153, 0.45);
-  }
-}
-
-.task-card {
-  border: 2px solid rgba(34, 197, 94, 0.15);
-
-  &::before {
-    background: linear-gradient(90deg, #34d399, #10b981);
-  }
-
-  &:hover {
-    border-color: rgba(16, 185, 129, 0.4);
-  }
-}
-
-.my-task-card {
-  border: 2px solid rgba(96, 165, 250, 0.15);
-
-  &::before {
-    background: linear-gradient(90deg, #60a5fa, #3b82f6);
-  }
-
-  &:hover {
-    border-color: rgba(59, 130, 246, 0.35);
-  }
-}
-
 .card-content {
   margin: 0;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .card-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1e293b;
+  color: inherit;
   margin: 0;
 }
 
