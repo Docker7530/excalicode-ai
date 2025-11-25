@@ -107,7 +107,7 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
   padding: 20px;
 }
 
@@ -163,13 +163,13 @@ const handleLogin = async () => {
   font-weight: 600;
   border-radius: 8px;
   margin-top: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
   border: none;
 
   &:hover {
-    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+    background: linear-gradient(135deg, #2f74d6 0%, #4ea226 100%);
     transform: translateY(-1px);
-    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 16px rgba(64, 158, 255, 0.25);
   }
 
   &:active {
