@@ -1,34 +1,31 @@
 package com.excalicode.platform.core.api.task;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Data;
 
-/**
- * 批次详情响应
- */
+/** 批次详情响应 */
 @Data
 public class TaskBatchDetailResponse {
 
-    private Long id;
+  private Long id;
 
-    private String title;
+  private String title;
 
-    private String description;
+  private String description;
 
-    private LocalDateTime publishedTime;
+  private LocalDateTime publishedTime;
 
-    private Long createdBy;
+  private Long createdBy;
 
-    private String createdByName;
+  private String createdByName;
 
-    private int totalTasks;
+  private int totalTasks;
 
-    private int completedTasks;
+  private int completedTasks;
 
-    private BigDecimal totalWorkload;
+  private BigDecimal totalWorkload;
 
-    private List<TaskResponse> tasks;
+  private List<TaskResponse> tasks;
 }

@@ -6,10 +6,7 @@ import com.excalicode.platform.core.mapper.ProjectTaskMapper;
 import com.excalicode.platform.core.service.entity.ProjectTaskService;
 import org.springframework.stereotype.Service;
 
-/**
- * 任务实体 Service 实现
- */
+/** 任务实体 Service 实现 */
 @Service
-public class ProjectTaskServiceImpl
-        extends ServiceImpl<ProjectTaskMapper, ProjectTask>
-        implements ProjectTaskService {}
+public class ProjectTaskServiceImpl extends ServiceImpl<ProjectTaskMapper, ProjectTask>
+    implements ProjectTaskService {}

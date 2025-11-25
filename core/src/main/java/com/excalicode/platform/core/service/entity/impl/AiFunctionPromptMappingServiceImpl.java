@@ -8,84 +8,89 @@ import com.excalicode.platform.core.entity.AiPromptTemplate;
 import com.excalicode.platform.core.mapper.AiFunctionPromptMappingMapper;
 import com.excalicode.platform.core.service.entity.AiFunctionPromptMappingService;
 import com.excalicode.platform.core.service.entity.AiPromptTemplateService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-/**
- * 功能-提示词映射 Service 实现类
- */
+/** 功能-提示词映射 Service 实现类 */
 @Service
 @RequiredArgsConstructor
 public class AiFunctionPromptMappingServiceImpl
-        extends ServiceImpl<AiFunctionPromptMappingMapper, AiFunctionPromptMapping>
-        implements AiFunctionPromptMappingService {
+    extends ServiceImpl<AiFunctionPromptMappingMapper, AiFunctionPromptMapping>
+    implements AiFunctionPromptMappingService {
 
-    private final AiPromptTemplateService aiPromptTemplateService;
+  private final AiPromptTemplateService aiPromptTemplateService;
 
-    @Override
-    public String getPromptCodeByFunctionCode(String functionCode) {
-        if (functionCode == null || functionCode.trim().isEmpty()) {
-            return null;
-        }
-
-        AiFunctionPromptMapping mapping = this.getOne(
-                new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
-                                                                     functionCode));
-
-        return mapping != null ? mapping.getPromptCode() : null;
+  @Override
+  public String getPromptCodeByFunctionCode(String functionCode) {
+    if (functionCode == null || functionCode.trim().isEmpty()) {
+      return null;
     }
 
-    @Override
-    @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
-    public boolean setFunctionPromptMapping(String functionCode, String promptCode) {
-        if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null || promptCode.trim()
-                .isEmpty()) {
-            return false;
-        }
+    AiFunctionPromptMapping mapping =
+        this.getOne(
+            new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                .eq(AiFunctionPromptMapping::getFunctionCode, functionCode));
 
-        AiFunctionPromptMapping existingMapping = this.getOne(
-                new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
-                                                                     functionCode));
+    return mapping != null ? mapping.getPromptCode() : null;
+  }
 
-        if (existingMapping != null) {
-            existingMapping.setPromptCode(promptCode);
-            return this.updateById(existingMapping);
-        }
-
-        AiFunctionPromptMapping newMapping = new AiFunctionPromptMapping();
-        newMapping.setFunctionCode(functionCode);
-        newMapping.setPromptCode(promptCode);
-        return this.save(newMapping);
+  @Override
+  @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
+  public boolean setFunctionPromptMapping(String functionCode, String promptCode) {
+    if (functionCode == null
+        || functionCode.trim().isEmpty()
+        || promptCode == null
+        || promptCode.trim().isEmpty()) {
+      return false;
     }
 
-    @Override
-    public List<AiFunctionPromptMapping> listAllMappingsWithPrompt() {
-        List<AiFunctionPromptMapping> mappings = this.list(
-                new LambdaQueryWrapper<AiFunctionPromptMapping>().orderByAsc(AiFunctionPromptMapping::getFunctionCode));
+    AiFunctionPromptMapping existingMapping =
+        this.getOne(
+            new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                .eq(AiFunctionPromptMapping::getFunctionCode, functionCode));
 
-        // 填充提示词模板信息
-        for (AiFunctionPromptMapping mapping : mappings) {
-            AiPromptTemplate promptTemplate = aiPromptTemplateService.getByCode(mapping.getPromptCode());
-            mapping.setPromptTemplate(promptTemplate);
-        }
-
-        return mappings;
+    if (existingMapping != null) {
+      existingMapping.setPromptCode(promptCode);
+      return this.updateById(existingMapping);
     }
 
-    @Override
-    @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
-    public boolean deleteFunctionPromptMapping(String functionCode, String promptCode) {
-        if (functionCode == null || functionCode.trim().isEmpty() || promptCode == null || promptCode.trim()
-                .isEmpty()) {
-            return false;
-        }
+    AiFunctionPromptMapping newMapping = new AiFunctionPromptMapping();
+    newMapping.setFunctionCode(functionCode);
+    newMapping.setPromptCode(promptCode);
+    return this.save(newMapping);
+  }
 
-        return this.remove(
-                new LambdaQueryWrapper<AiFunctionPromptMapping>().eq(AiFunctionPromptMapping::getFunctionCode,
-                                                                     functionCode)
-                        .eq(AiFunctionPromptMapping::getPromptCode, promptCode));
+  @Override
+  public List<AiFunctionPromptMapping> listAllMappingsWithPrompt() {
+    List<AiFunctionPromptMapping> mappings =
+        this.list(
+            new LambdaQueryWrapper<AiFunctionPromptMapping>()
+                .orderByAsc(AiFunctionPromptMapping::getFunctionCode));
+
+    // 填充提示词模板信息
+    for (AiFunctionPromptMapping mapping : mappings) {
+      AiPromptTemplate promptTemplate = aiPromptTemplateService.getByCode(mapping.getPromptCode());
+      mapping.setPromptTemplate(promptTemplate);
     }
+
+    return mappings;
+  }
+
+  @Override
+  @CacheEvict(value = CacheConfig.AI_FUNCTION_CONFIGS_CACHE, allEntries = true)
+  public boolean deleteFunctionPromptMapping(String functionCode, String promptCode) {
+    if (functionCode == null
+        || functionCode.trim().isEmpty()
+        || promptCode == null
+        || promptCode.trim().isEmpty()) {
+      return false;
+    }
+
+    return this.remove(
+        new LambdaQueryWrapper<AiFunctionPromptMapping>()
+            .eq(AiFunctionPromptMapping::getFunctionCode, functionCode)
+            .eq(AiFunctionPromptMapping::getPromptCode, promptCode));
+  }
 }

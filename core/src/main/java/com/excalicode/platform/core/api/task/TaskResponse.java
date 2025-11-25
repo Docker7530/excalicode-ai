@@ -1,42 +1,39 @@
 package com.excalicode.platform.core.api.task;
 
 import com.excalicode.platform.core.model.task.TaskStatus;
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Data;
 
-/**
- * 任务响应对象
- */
+/** 任务响应对象 */
 @Data
 public class TaskResponse {
 
-    private Long id;
+  private Long id;
 
-    private Long batchId;
+  private Long batchId;
 
-    private String title;
+  private String title;
 
-    private String description;
+  private String description;
 
-    private BigDecimal workloadManDay;
+  private BigDecimal workloadManDay;
 
-    private TaskStatus status;
+  private TaskStatus status;
 
-    private String statusLabel;
+  private String statusLabel;
 
-    private Long assigneeId;
+  private Long assigneeId;
 
-    private String assigneeName;
+  private String assigneeName;
 
-    private Long createdBy;
+  private Long createdBy;
 
-    private String createdByName;
+  private String createdByName;
 
-    private LocalDateTime publishedTime;
+  private LocalDateTime publishedTime;
 
-    private LocalDateTime createdTime;
+  private LocalDateTime createdTime;
 
-    private LocalDateTime updatedTime;
+  private LocalDateTime updatedTime;
 }
