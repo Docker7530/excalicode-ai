@@ -21,69 +21,21 @@
         <!-- 功能卡片 -->
         <div class="features-grid">
           <div class="feature-card" @click="navigateToRequirement">
-            <div class="card-header">
-              <div class="card-icon requirement-icon">
-                <ElIcon :size="48">
-                  <Document />
-                </ElIcon>
-              </div>
-              <div class="card-badge">核心功能</div>
-            </div>
             <div class="card-content">
-              <h3 class="card-title">COSMIC</h3>
-            </div>
-            <div class="card-action">
-              <ElButton type="primary" size="large" round class="action-button">
-                <ElIcon class="button-icon">
-                  <ArrowRight />
-                </ElIcon>
-                开始分析
-              </ElButton>
+              <h3 class="card-title">COSMIC 需求分析</h3>
             </div>
           </div>
 
           <div class="feature-card" @click="navigateToVacation">
-            <div class="card-header">
-              <div class="card-icon vacation-icon">
-                <ElIcon :size="48">
-                  <List />
-                </ElIcon>
-              </div>
-              <div class="card-badge">数据处理</div>
-            </div>
             <div class="card-content">
               <h3 class="card-title">员工休假记录拆分</h3>
-            </div>
-            <div class="card-action">
-              <ElButton type="warning" size="large" round class="action-button">
-                <ElIcon class="button-icon">
-                  <ArrowRight />
-                </ElIcon>
-                开始拆分
-              </ElButton>
             </div>
           </div>
 
           <template v-if="isAdmin">
             <div class="feature-card provider-card" @click="navigateToProvider">
-              <div class="card-header">
-                <div class="card-icon provider-icon">
-                  <ElIcon :size="48">
-                    <OfficeBuilding />
-                  </ElIcon>
-                </div>
-                <div class="card-badge provider-badge">系统管理</div>
-              </div>
               <div class="card-content">
                 <h3 class="card-title">AI 模型厂商管理</h3>
-              </div>
-              <div class="card-action">
-                <ElButton type="primary" size="large" round class="action-button">
-                  <ElIcon class="button-icon">
-                    <ArrowRight />
-                  </ElIcon>
-                  管理厂商
-                </ElButton>
               </div>
             </div>
 
@@ -91,24 +43,8 @@
               class="feature-card prompt-template-card"
               @click="navigateToPromptTemplate"
             >
-              <div class="card-header">
-                <div class="card-icon prompt-template-icon">
-                  <ElIcon :size="48">
-                    <Document />
-                  </ElIcon>
-                </div>
-                <div class="card-badge prompt-template-badge">提示词</div>
-              </div>
               <div class="card-content">
                 <h3 class="card-title">提示词模板管理</h3>
-              </div>
-              <div class="card-action">
-                <ElButton type="warning" size="large" round class="action-button">
-                  <ElIcon class="button-icon">
-                    <ArrowRight />
-                  </ElIcon>
-                  编辑模板
-                </ElButton>
               </div>
             </div>
 
@@ -116,46 +52,14 @@
               class="feature-card function-config-card"
               @click="navigateToFunctionConfiguration"
             >
-              <div class="card-header">
-                <div class="card-icon function-config-icon">
-                  <ElIcon :size="48">
-                    <Connection />
-                  </ElIcon>
-                </div>
-                <div class="card-badge function-config-badge">功能配置</div>
-              </div>
               <div class="card-content">
                 <h3 class="card-title">功能配置管理</h3>
-              </div>
-              <div class="card-action">
-                <ElButton type="success" size="large" round class="action-button">
-                  <ElIcon class="button-icon">
-                    <ArrowRight />
-                  </ElIcon>
-                  配置映射
-                </ElButton>
               </div>
             </div>
 
             <div class="feature-card cache-manage-card" @click="navigateToCacheManage">
-              <div class="card-header">
-                <div class="card-icon cache-manage-icon">
-                  <ElIcon :size="48">
-                    <Coin />
-                  </ElIcon>
-                </div>
-                <div class="card-badge cache-manage-badge">系统维护</div>
-              </div>
               <div class="card-content">
                 <h3 class="card-title">缓存管理</h3>
-              </div>
-              <div class="card-action">
-                <ElButton type="info" size="large" round class="action-button">
-                  <ElIcon class="button-icon">
-                    <ArrowRight />
-                  </ElIcon>
-                  清理缓存
-                </ElButton>
               </div>
             </div>
           </template>
@@ -165,24 +69,8 @@
             class="feature-card task-card"
             @click="navigateToTaskAllocation"
           >
-            <div class="card-header">
-              <div class="card-icon task-icon">
-                <ElIcon :size="48">
-                  <Collection />
-                </ElIcon>
-              </div>
-              <div class="card-badge task-badge">任务调度</div>
-            </div>
             <div class="card-content">
               <h3 class="card-title">任务分配</h3>
-            </div>
-            <div class="card-action">
-              <ElButton type="success" size="large" round class="action-button">
-                <ElIcon class="button-icon">
-                  <ArrowRight />
-                </ElIcon>
-                发布任务
-              </ElButton>
             </div>
           </div>
 
@@ -191,24 +79,8 @@
             class="feature-card my-task-card"
             @click="navigateToMyTasks"
           >
-            <div class="card-header">
-              <div class="card-icon my-task-icon">
-                <ElIcon :size="48">
-                  <List />
-                </ElIcon>
-              </div>
-              <div class="card-badge my-task-badge">个人任务</div>
-            </div>
             <div class="card-content">
               <h3 class="card-title">我的任务</h3>
-            </div>
-            <div class="card-action">
-              <ElButton type="primary" size="large" round class="action-button">
-                <ElIcon class="button-icon">
-                  <ArrowRight />
-                </ElIcon>
-                查看任务
-              </ElButton>
             </div>
           </div>
         </div>
@@ -221,15 +93,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
-import {
-  ArrowRight,
-  Coin,
-  Collection,
-  Connection,
-  Document,
-  List,
-  OfficeBuilding,
-} from '@element-plus/icons-vue';
 
 const router = useRouter();
 const role = ref(localStorage.getItem('role') || 'USER');
@@ -363,7 +226,12 @@ onBeforeUnmount(() => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   overflow: hidden;
+  min-height: 180px;
 
   &::before {
     content: '';
@@ -391,94 +259,7 @@ onBeforeUnmount(() => {
   @media (max-width: 768px) {
     padding: 32px 24px;
     border-radius: 16px;
-  }
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
-.card-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-
-  &.requirement-icon {
-    color: #409eff;
-  }
-
-  &.vacation-icon {
-    color: #e6a23c;
-  }
-
-  &.task-icon {
-    color: #22c55e;
-    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-  }
-
-  &.my-task-icon {
-    color: #409eff;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  }
-
-  &.provider-icon {
-    color: #409eff;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  }
-
-  &.prompt-template-icon {
-    color: #e6a23c;
-    background: linear-gradient(135deg, #fff7ed, #ffedd5);
-  }
-
-  &.function-config-icon {
-    color: #16a34a;
-    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-  }
-
-  &.cache-manage-icon {
-    color: #f472b6;
-    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
-  }
-}
-
-.card-badge {
-  background: linear-gradient(135deg, #409eff, #67c23a);
-  color: white;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 500;
-
-  &.task-badge {
-    background: linear-gradient(135deg, #34d399, #10b981);
-  }
-
-  &.my-task-badge {
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  }
-
-  &.provider-badge {
-    background: linear-gradient(135deg, #409eff, #5cacee);
-  }
-
-  &.prompt-template-badge {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  }
-
-  &.function-config-badge {
-    background: linear-gradient(135deg, #34d399, #10b981);
-  }
-
-  &.cache-manage-badge {
-    background: linear-gradient(135deg, #f472b6, #ec4899);
+    min-height: 140px;
   }
 }
 
@@ -555,36 +336,15 @@ onBeforeUnmount(() => {
 }
 
 .card-content {
-  margin-bottom: 32px;
+  margin: 0;
+  width: 100%;
 }
 
 .card-title {
   font-size: 1.75rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 24px 0;
-}
-
-.card-action {
-  text-align: center;
-}
-
-.action-button {
-  width: 100%;
-  height: 56px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  border: none;
-  transition: all 0.3s ease;
-
-  .button-icon {
-    margin-right: 8px;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(64, 158, 255, 0.3);
-  }
+  margin: 0;
 }
 
 </style>
