@@ -215,58 +215,6 @@
       </div>
     </div>
 
-    <!-- 特性介绍区域 -->
-    <div class="highlights-section">
-      <div class="highlights-container">
-        <h2 class="section-title">为什么选择 EXCALICODE AI？</h2>
-        <div class="highlights-grid">
-          <div class="highlight-item">
-            <div class="highlight-icon">
-              <ElIcon :size="32" color="#67C23A">
-                <Star />
-              </ElIcon>
-            </div>
-            <h4 class="highlight-title">专业精准</h4>
-            <p class="highlight-text">
-              基于COSMIC国际标准，确保需求分析的专业性与准确性
-            </p>
-          </div>
-          <div class="highlight-item">
-            <div class="highlight-icon">
-              <ElIcon :size="32" color="#E6A23C">
-                <Lightning />
-              </ElIcon>
-            </div>
-            <h4 class="highlight-title">高效智能</h4>
-            <p class="highlight-text">
-              AI技术加持，大幅提升需求分析速度，节省项目时间成本
-            </p>
-          </div>
-          <div class="highlight-item">
-            <div class="highlight-icon">
-              <ElIcon :size="32" color="#F56C6C">
-                <Tools />
-              </ElIcon>
-            </div>
-            <h4 class="highlight-title">一站式服务</h4>
-            <p class="highlight-text">
-              从需求分析到文档生成，提供完整的需求管理解决方案
-            </p>
-          </div>
-          <div class="highlight-item">
-            <div class="highlight-icon">
-              <ElIcon :size="32" color="#909399">
-                <Monitor />
-              </ElIcon>
-            </div>
-            <h4 class="highlight-title">现代体验</h4>
-            <p class="highlight-text">
-              简洁优雅的界面设计，提供流畅的用户交互体验
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -279,12 +227,8 @@ import {
   Collection,
   Connection,
   Document,
-  Lightning,
   List,
-  Monitor,
   OfficeBuilding,
-  Star,
-  Tools,
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -392,18 +336,6 @@ onBeforeUnmount(() => {
 
   @media (max-width: 768px) {
     font-size: 1.25rem;
-  }
-}
-
-.hero-description {
-  font-size: 1.125rem;
-  color: #64748b;
-  line-height: 1.7;
-  max-width: 800px;
-  margin: 0 auto;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
   }
 }
 
@@ -655,72 +587,4 @@ onBeforeUnmount(() => {
   }
 }
 
-.highlights-section {
-  background: #ffffff;
-  padding: 100px 0;
-
-  @media (max-width: 768px) {
-    padding: 80px 0;
-  }
-}
-
-.highlights-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  text-align: center;
-}
-
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 80px 0;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-    margin-bottom: 60px;
-  }
-}
-
-.highlights-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 48px;
-}
-
-.highlight-item {
-  text-align: center;
-}
-
-.highlight-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 20px;
-  background: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px;
-  transition: all 0.3s ease;
-}
-
-.highlight-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 12px 0;
-}
-
-.highlight-text {
-  font-size: 0.975rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.highlight-item:hover .highlight-icon {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-}
 </style>
