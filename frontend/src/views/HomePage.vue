@@ -31,11 +31,6 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">COSMIC</h3>
-              <ul class="card-features">
-                <li>AI驱动的需求理解与拆解</li>
-                <li>COSMIC功能点自动计算</li>
-                <li>专业文档一键生成</li>
-              </ul>
             </div>
             <div class="card-action">
               <ElButton type="primary" size="large" round class="action-button">
@@ -58,11 +53,6 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">员工休假记录拆分</h3>
-              <ul class="card-features">
-                <li>智能识别Excel列信息</li>
-                <li>自动筛选有效记录</li>
-                <li>一键导出结果数据</li>
-              </ul>
             </div>
             <div class="card-action">
               <ElButton type="warning" size="large" round class="action-button">
@@ -85,11 +75,6 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">后台管理</h3>
-              <ul class="card-features">
-                <li>AI 模型厂商配置</li>
-                <li>功能-模型映射管理</li>
-                <li>智能模型动态切换</li>
-              </ul>
             </div>
             <div class="card-action">
               <ElButton
@@ -121,11 +106,6 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">任务分配</h3>
-              <ul class="card-features">
-                <li>Excel 批量导入任务</li>
-                <li>快速为执行人分派</li>
-                <li>实时追踪执行状态</li>
-              </ul>
             </div>
             <div class="card-action">
               <ElButton type="success" size="large" round class="action-button">
@@ -152,11 +132,6 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">我的任务</h3>
-              <ul class="card-features">
-                <li>查看分配给我的任务</li>
-                <li>随时标记完成状态</li>
-                <li>掌握个人工作进度</li>
-              </ul>
             </div>
             <div class="card-action">
               <ElButton type="primary" size="large" round class="action-button">
@@ -520,28 +495,6 @@ onBeforeUnmount(() => {
   font-weight: 700;
   color: #1e293b;
   margin: 0 0 24px 0;
-}
-
-.card-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  li {
-    font-size: 0.875rem;
-    color: #475569;
-    padding: 8px 0;
-    position: relative;
-    padding-left: 20px;
-
-    &::before {
-      content: '✦';
-      position: absolute;
-      left: 0;
-      color: #67c23a;
-      font-weight: 600;
-    }
-  }
 }
 
 .card-action {
