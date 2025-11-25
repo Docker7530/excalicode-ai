@@ -32,6 +32,16 @@
             </div>
           </div>
 
+          <div
+            v-if="isAdmin"
+            class="feature-card"
+            @click="navigateToTaskAllocation"
+          >
+            <div class="card-content">
+              <h3 class="card-title">任务分配</h3>
+            </div>
+          </div>
+
           <template v-if="isAdmin">
             <div class="feature-card" @click="navigateToProvider">
               <div class="card-content">
@@ -63,16 +73,6 @@
               </div>
             </div>
           </template>
-
-          <div
-            v-if="isAdmin"
-            class="feature-card"
-            @click="navigateToTaskAllocation"
-          >
-            <div class="card-content">
-              <h3 class="card-title">任务分配</h3>
-            </div>
-          </div>
 
           <div
             v-if="isRegularUser"
