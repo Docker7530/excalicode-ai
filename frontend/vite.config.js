@@ -52,10 +52,6 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'esbuild',
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
