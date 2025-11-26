@@ -7,31 +7,15 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 
 export default defineConfig({
   plugins: [
-    vue({
-      script: {
-        defineModel: true,
-        propsDestructure: true,
-      },
-    }),
+    vue(),
     AutoImport({
+      imports: ['vue', 'vue-router'],
       resolvers: [ElementPlusResolver()],
-      imports: [
-        'vue',
-        'vue-router',
-        {
-          'element-plus': [
-            'ElMessage',
-            'ElMessageBox',
-            'ElNotification',
-            'ElLoading',
-          ],
-        },
-      ],
-      dts: true,
+      dts: 'src/auto-imports.d.ts',
       eslintrc: {
         enabled: true,
-        filepath: './.eslintrc-auto-import.json',
-        globalsPropValue: true,
+        filepath: './src/.eslintrc-auto-import.json',
+        globalsPropValue: 'readonly',
       },
     }),
     Components({
@@ -40,7 +24,7 @@ export default defineConfig({
           importStyle: 'sass',
         }),
       ],
-      dts: true,
+      dts: 'src/components.d.ts',
       directoryAsNamespace: true,
     }),
   ],
@@ -48,11 +32,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@components': resolve(__dirname, 'src/components'),
-      '@views': resolve(__dirname, 'src/views'),
-      '@styles': resolve(__dirname, 'src/styles'),
-      '@api': resolve(__dirname, 'src/api'),
-      '@assets': resolve(__dirname, 'src/assets'),
     },
   },
 
@@ -68,13 +47,6 @@ export default defineConfig({
         target: 'http://localhost:9527',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/web/, ''),
-        timeout: 600000,
-        configure: (proxy) => {
-          proxy.on('error', (err) => console.error('proxy error', err));
-          proxy.on('proxyReq', (proxyReq, req) => {
-            console.warn('Sending Request to the Target:', req.method, req.url);
-          });
-        },
       },
     },
   },
@@ -83,42 +55,28 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    minify: 'terser',
-    target: 'esnext',
-    cssTarget: 'chrome80',
+    minify: 'esbuild',
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vue-vendor': ['vue', 'vue-router'],
-          utils: ['axios'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
       },
     },
-    reportCompressedSize: false,
-    chunkSizeWarningLimit: 1500,
   },
 
   css: {
     preprocessorOptions: {
       scss: {
         additionalData: '@use "@/styles/_variables.scss" as *;',
+        api: 'modern-compiler',
       },
     },
-    codeSplit: true,
   },
-
-  optimizeDeps: {
-    include: ['vue', 'vue-router', '@element-plus/icons-vue', 'axios'],
-    exclude: [],
-  },
-
-  experimental: {
-    hmrPartialAccept: true,
-  },
-
-  logLevel: 'info',
-  clearScreen: false,
 });

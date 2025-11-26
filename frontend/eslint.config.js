@@ -3,23 +3,13 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import pluginPrettier from 'eslint-plugin-prettier';
 import pluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
-import autoImport from './.eslintrc-auto-import.json' with { type: 'json' };
-
-const normalizeGlobals = (rawGlobals = {}) =>
-  Object.fromEntries(
-    Object.entries(rawGlobals).map(([key, value]) => [
-      key,
-      value ? 'readonly' : value,
-    ]),
-  );
-
-const autoImportGlobals = normalizeGlobals(autoImport.globals);
+import autoImport from './src/.eslintrc-auto-import.json' with { type: 'json' };
 
 const sharedGlobals = {
   ...globals.browser,
   ...globals.node,
   ...globals.es2021,
-  ...autoImportGlobals,
+  ...autoImport.globals,
   structuredClone: 'readonly',
   AbortController: 'readonly',
   FormData: 'readonly',
@@ -33,6 +23,8 @@ export default [
       'node_modules/**',
       '*.d.ts',
       '.eslintrc-auto-import.json',
+      'src/*.d.ts',
+      'src/.eslintrc-auto-import.json',
       'pnpm-lock.yaml',
       '.vscode/**',
     ],
