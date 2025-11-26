@@ -6,7 +6,7 @@
   "eslint.workingDirectories": [
     { "directory": "frontend", "changeProcessCWD": true }
   ],
-  "eslint.validate": ["javascript", "typescript"],
+  "eslint.validate": ["javascript", "typescript", "vue"],
 
   // =========================
   // Prettier 设置
