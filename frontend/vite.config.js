@@ -70,9 +70,9 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/web/, ''),
         timeout: 600000,
         configure: (proxy) => {
-          proxy.on('error', (err) => console.log('proxy error', err));
+          proxy.on('error', (err) => console.error('proxy error', err));
           proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
+            console.warn('Sending Request to the Target:', req.method, req.url);
           });
         },
       },
