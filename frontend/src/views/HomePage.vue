@@ -49,19 +49,13 @@
               </div>
             </div>
 
-            <div
-              class="feature-card"
-              @click="navigateToPromptTemplate"
-            >
+            <div class="feature-card" @click="navigateToPromptTemplate">
               <div class="card-content">
                 <h3 class="card-title">提示词模板管理</h3>
               </div>
             </div>
 
-            <div
-              class="feature-card"
-              @click="navigateToFunctionConfiguration"
-            >
+            <div class="feature-card" @click="navigateToFunctionConfiguration">
               <div class="card-content">
                 <h3 class="card-title">功能配置管理</h3>
               </div>
@@ -86,7 +80,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -244,7 +237,9 @@ onBeforeUnmount(() => {
     background: linear-gradient(135deg, #409eff, #67c23a);
     opacity: 0;
     transform: scale(1.05);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
     z-index: 0;
     pointer-events: none;
   }
@@ -282,5 +277,4 @@ onBeforeUnmount(() => {
   color: inherit;
   margin: 0;
 }
-
 </style>
