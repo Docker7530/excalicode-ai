@@ -36,20 +36,20 @@ export default [
       'node_modules/**',
       '*.d.ts',
       '.eslintrc-auto-import.json',
-      'package-lock.json',
-      'yarn.lock',
       'pnpm-lock.yaml',
       '.vscode/**',
     ],
   },
 
-  // 官方推荐
+  // 基础 JS 推荐规则
   js.configs.recommended,
+
+  // Vue 推荐规则
   ...pluginVue.configs['flat/recommended'],
 
-  // JS 基础
+  // JS
   {
-    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx,vue}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -78,7 +78,7 @@ export default [
     },
   },
 
-  // Vue 专用
+  // Vue
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -105,7 +105,7 @@ export default [
     },
   },
 
-  // Prettier
+  // Prettier — 放最后，让它覆盖可能冲突的 ESLint 规则
   eslintConfigPrettier,
   {
     plugins: { prettier: pluginPrettier },
