@@ -15,18 +15,15 @@ const normalizeGlobals = (rawGlobals = {}) =>
 
 const autoImportGlobals = normalizeGlobals(autoImport.globals);
 
-const sharedGlobals = Object.assign(
-  {},
-  globals.browser,
-  globals.node,
-  globals.es2021,
-  autoImportGlobals,
-  {
-    structuredClone: 'readonly',
-    AbortController: 'readonly',
-    FormData: 'readonly',
-  },
-);
+const sharedGlobals = {
+  ...globals.browser,
+  ...globals.node,
+  ...globals.es2021,
+  ...autoImportGlobals,
+  structuredClone: 'readonly',
+  AbortController: 'readonly',
+  FormData: 'readonly',
+};
 
 export default [
   // 忽略文件
