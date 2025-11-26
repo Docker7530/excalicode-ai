@@ -206,9 +206,6 @@ const initVditor = () => {
       cache: {
         enable: false,
       },
-      after: () => {
-        console.log('Vditor 初始化完成');
-      },
       input: (value) => {
         formData.content = value;
       },
