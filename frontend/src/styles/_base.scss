@@ -1,0 +1,147 @@
+/**
+ * 基础样式重置和全局样式
+ * 提供一致的基础视觉体验
+ */
+
+@use './variables' as *;
+@use 'sass:color';
+
+// ==================== 重置样式 ====================
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+  color: $primary-color;
+  background-color: $background-primary;
+  transition:
+    color $transition-base,
+    background-color $transition-base;
+}
+
+// ==================== 无障碍优化 ====================
+// 专注状态指示器
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: $border-radius-sm;
+}
+
+// ==================== 滚动条样式 ====================
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-medium;
+  border-radius: $border-radius-full;
+
+  &:hover {
+    background: $border-heavy;
+  }
+}
+
+// ==================== 选择文本样式 ====================
+::selection {
+  background-color: rgba($accent-color, 0.2);
+  color: $primary-color;
+}
+
+// ==================== 基础元素样式 ====================
+// 标题层级
+h1 {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-lg;
+  color: $primary-color;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-md;
+  color: $primary-color;
+}
+
+h3 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-md;
+  color: $primary-color;
+}
+
+h4 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-sm;
+  color: $secondary-color;
+}
+
+h5 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-sm;
+  color: $secondary-color;
+}
+
+h6 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-xs;
+  color: $tertiary-color;
+}
+
+// 段落文本
+p {
+  margin-bottom: $spacing-md;
+  color: $secondary-color;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// 链接样式
+a {
+  color: $accent-color;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover,
+  &:focus {
+    color: color.adjust($accent-color, $lightness: -15%);
+    text-decoration: underline;
+  }
+
+  &:active {
+    color: color.adjust($accent-color, $lightness: -25%);
+  }
+}

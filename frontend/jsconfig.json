@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    // 对齐 Vite 7 的配置，支持最新 ECMAScript 特性
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+
+    // Vue 3 JSX 支持
+    "jsx": "preserve",
+
+    // 使用 Bundler 模式解析（Vite/Rollup 推荐）
+    "moduleResolution": "Bundler",
+
+    // 模块相关配置
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+
+    // JavaScript 项目配置
+    "allowJs": true,
+    "checkJs": false,
+
+    // 性能优化
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    // 互操作性
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // 路径别名（与 vite.config.js 保持一致）
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    // 类型定义
+    "types": ["vite/client", "element-plus/global", "node"]
+  },
+
+  "include": [
+    "src/**/*",
+    "src/**/*.vue",
+    "*.d.ts",
+    "auto-imports.d.ts",
+    "components.d.ts",
+    ".eslintrc-auto-import.json"
+  ],
+
+  "exclude": ["node_modules", "dist", "**/*.spec.js", "**/*.test.js"],
+
+  // Vue 3 编译器选项
+  "vueCompilerOptions": {
+    "target": 3.5,
+    "extensions": [".vue"]
+  }
+}

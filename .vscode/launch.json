@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "后端",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.excalicode.platform.web.ExcalicodePlatformApplication",
+      "projectName": "web",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "node-terminal",
+      "name": "前端",
+      "request": "launch",
+      "command": "pnpm run dev",
+      "cwd": "${workspaceFolder}/frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "全栈",
+      "configurations": ["前端", "后端"]
+    }
+  ]
+}

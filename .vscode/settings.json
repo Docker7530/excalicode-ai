@@ -1,0 +1,17 @@
+{
+  // =========================
+  // ESLint 设置
+  // =========================
+  "eslint.enable": true,
+  "eslint.workingDirectories": [
+    { "directory": "frontend", "changeProcessCWD": true }
+  ],
+  "eslint.validate": ["javascript", "typescript", "vue"],
+
+  // =========================
+  // Prettier 设置
+  // =========================
+  "prettier.enable": true,
+  "prettier.configPath": "frontend/prettier.config.js",
+  "prettier.requireConfig": true
+}

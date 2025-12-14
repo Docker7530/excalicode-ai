@@ -1,0 +1,90 @@
+# 依赖
+# ===================================
+node_modules
+
+# 构建产物与编译文件
+# ===================================
+dist
+dist-ssr
+build/
+target/
+.apt_generated
+
+# 特定的构建目录
+!**/src/main/**/build/
+!**/src/test/**/build/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# 日志
+# ===================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 编辑器
+# ===================================
+### IntelliJ IDEA ###
+.idea
+*.iml
+*.ipr
+*.iws
+
+### VS Code ###
+!.vscode/extensions.json
+
+### Eclipse / STS ###
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### Visual Studio ###
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+### Vim ###
+*.sw?
+
+# 操作系统
+# ===================================
+.DS_Store
+*.local
+
+# 项目特定
+# ===================================
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# 自定义
+# ===================================
+/.claude/
+/CLAUDE.md
+/AGENTS.md
+frontend/src/components.d.ts
+frontend/src/auto-imports.d.ts
+frontend/src/.eslintrc-auto-import.json
+
+# 环境变量和敏感信息
+# ===================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*-key.pem
+*-cert.pem

@@ -1,0 +1,17 @@
+# 构建产物
+dist/
+build/
+coverage/
+
+# 依赖
+node_modules/
+
+# 生成的 JS / bundle / min 文件
+**/*.min.js
+**/*.bundle.js
+
+# 日志文件
+*.log
+
+# 特定生成文件夹
+public/assets/generated/

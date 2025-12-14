@@ -1,0 +1,132 @@
+/**
+ * SCSS 变量定义
+ * 统一管理项目中的设计令牌，确保一致的视觉风格
+ */
+
+// ==================== 色彩系统 ====================
+// 主色调 - 极简黑白灰色系，营造高端科技感
+$primary-color: #000000; // 纯黑 - 主要文字和按钮
+$secondary-color: #666666; // 中性灰 - 辅助文字
+$tertiary-color: #999999; // 浅灰 - 占位文字
+$accent-color: #0066cc; // 强调蓝 - 链接和高亮
+
+// 背景色系
+$background-primary: #ffffff; // 纯白背景
+$background-secondary: #fafafa; // 浅灰背景
+$background-tertiary: #f5f5f5; // 区块背景
+$background-overlay: rgba(0, 0, 0, 0.05); // 遮罩层
+
+// 边框和分割线
+$border-light: #f0f0f0; // 轻分割线
+$border-medium: #e0e0e0; // 标准边框
+$border-heavy: #cccccc; // 重边框
+
+// 状态色彩
+$success-color: #00cc66; // 成功绿
+$warning-color: #ff9900; // 警告橙
+$error-color: #ff4444; // 错误红
+$info-color: #0099ff; // 信息蓝
+
+// ==================== 字体系统 ====================
+// 字体栈 - 优先系统字体，确保最佳渲染效果
+$font-family-base:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+  Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+  'Segoe UI Symbol';
+$font-family-mono:
+  'SF Mono', Monaco, Inconsolata, 'Roboto Mono', 'Source Code Pro', Menlo,
+  Consolas, 'Courier New', monospace;
+
+// 字号系统 - 基于1.25倍率的和谐比例
+$font-size-xs: 0.75rem; // 12px - 辅助信息
+$font-size-sm: 0.875rem; // 14px - 常规文本
+$font-size-base: 1rem; // 16px - 基础文本
+$font-size-lg: 1.125rem; // 18px - 子标题
+$font-size-xl: 1.25rem; // 20px - 小标题
+$font-size-2xl: 1.5rem; // 24px - 标题
+$font-size-3xl: 1.875rem; // 30px - 大标题
+$font-size-4xl: 2.25rem; // 36px - 主标题
+
+// 字重
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// 行高
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ==================== 间距系统 ====================
+// 基于8px网格的间距系统，确保像素完美对齐
+$spacing-xs: 0.25rem; // 4px
+$spacing-sm: 0.5rem; // 8px
+$spacing-md: 1rem; // 16px
+$spacing-lg: 1.5rem; // 24px
+$spacing-xl: 2rem; // 32px
+$spacing-2xl: 3rem; // 48px
+$spacing-3xl: 4rem; // 64px
+$spacing-4xl: 6rem; // 96px
+
+// ==================== 圆角系统 ====================
+$border-radius-sm: 0.125rem; // 2px - 细微圆角
+$border-radius-md: 0.375rem; // 6px - 标准圆角
+$border-radius-lg: 0.5rem; // 8px - 卡片圆角
+$border-radius-xl: 0.75rem; // 12px - 大圆角
+$border-radius-2xl: 1rem; // 16px - 特大圆角
+$border-radius-full: 9999px; // 全圆角
+
+// ==================== 阴影系统 ====================
+// 层次化阴影，营造深度和立体感
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl:
+  0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+// ==================== 过渡动画 ====================
+$transition-fast: 150ms ease-out;
+$transition-base: 250ms ease-out;
+$transition-slow: 350ms ease-out;
+
+// 缓动函数
+$ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+$ease-out-circ: cubic-bezier(0.08, 0.82, 0.17, 1);
+
+// ==================== Z-Index 层级 ====================
+$z-dropdown: 1000;
+$z-sticky: 1010;
+$z-fixed: 1020;
+$z-modal-backdrop: 1030;
+$z-modal: 1040;
+$z-popover: 1050;
+$z-tooltip: 1060;
+
+// ==================== 断点系统 ====================
+// 响应式设计断点
+$breakpoint-xs: 480px; // 超小手机
+$breakpoint-sm: 640px; // 手机
+$breakpoint-md: 768px; // 平板
+$breakpoint-lg: 1024px; // 笔记本
+$breakpoint-xl: 1280px; // 台式机
+$breakpoint-2xl: 1536px; // 大屏幕
+
+// ==================== 容器宽度 ====================
+$container-sm: 640px;
+$container-md: 768px;
+$container-lg: 1024px;
+$container-xl: 1280px;
+$container-2xl: 1400px;
+
+// ==================== 内容区域 ====================
+$content-max-width: 1200px;
+$sidebar-width: 280px;
+$header-height: 64px;

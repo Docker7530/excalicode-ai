@@ -1,0 +1,14 @@
+/**
+ * 主样式文件
+ * 统一导入所有样式模块，建立完整的样式系统
+ */
+
+@use './variables' as *;
+@use './base';
+
+// ==================== 全局应用样式 ====================
+#app {
+  width: 100%;
+  min-height: 100vh;
+  background: $background-primary;
+}
