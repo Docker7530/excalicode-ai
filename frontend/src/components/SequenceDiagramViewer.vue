@@ -94,8 +94,20 @@ const renderDiagram = async () => {
 };
 
 const copyMermaid = async () => {
+  const source = props.diagram?.trim() || '';
+  if (!source) {
+    ElMessage.warning('暂无可复制的 Mermaid 语法');
+    return;
+  }
+
   try {
-    await navigator.clipboard.writeText(props.diagram.trim());
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(source);
+      ElMessage.success('Mermaid 语法已复制');
+      return;
+    }
+
+    legacyCopyText(source);
     ElMessage.success('Mermaid 语法已复制');
   } catch (error) {
     ElMessage.error(error?.message || '复制失败，请手动复制');
@@ -113,6 +125,14 @@ const copyDiagramAsImage = async () => {
   copyingImage.value = true;
 
   try {
+    const supportError = getClipboardImageSupportError();
+    if (supportError) {
+      const blob = await convertSvgToPngBlob(svgElement);
+      downloadBlob(blob, 'sequence-diagram.png');
+      ElMessage.warning(`${supportError}，已改为下载图片`);
+      return;
+    }
+
     const blob = await convertSvgToPngBlob(svgElement);
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     ElMessage.success('时序图图片已复制');
@@ -122,6 +142,46 @@ const copyDiagramAsImage = async () => {
   } finally {
     copyingImage.value = false;
   }
+};
+
+const getClipboardImageSupportError = () => {
+  if (!window.isSecureContext) {
+    return '当前页面不是安全上下文（需要 HTTPS 或 localhost）';
+  }
+  if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function') {
+    return '浏览器不支持复制图片（navigator.clipboard.write 不可用）';
+  }
+  if (typeof ClipboardItem === 'undefined') {
+    return '浏览器不支持复制图片（ClipboardItem 不可用）';
+  }
+  return '';
+};
+
+const legacyCopyText = (text) => {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', 'readonly');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  textarea.style.top = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  const ok = document.execCommand('copy');
+  document.body.removeChild(textarea);
+  if (!ok) {
+    throw new Error('复制失败，请手动复制');
+  }
+};
+
+const downloadBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const convertSvgToPngBlob = (svgElement) =>
@@ -143,6 +203,11 @@ const convertSvgToPngBlob = (svgElement) =>
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error('Canvas 初始化失败'));
+        return;
+      }
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(image, 0, 0, width, height);
