@@ -8,7 +8,7 @@
 
 <template>
   <div class="home-page">
-    <AppHeader :show-home-button="false" />
+    <AppHeader :show-home-button="false" show-github-button />
     <!-- Hero 区域 -->
     <div class="hero-section">
       <div class="hero-container">
