@@ -72,3 +72,8 @@ export const VALIDATION = {
     DATA_ATTRIBUTES_MAX_LENGTH: 200,
   },
 };
+
+// ==================== 项目链接 ====================
+export const PROJECT_LINKS = {
+  GITHUB_REPO: 'https://github.com/docker7530/excalicode-ai',
+};
