@@ -15,9 +15,7 @@ public class RequirementKnowledgeDocument {
   String documentId;
   String title;
   String content;
-  String source;
   @Builder.Default List<String> tags = List.of();
-  @Builder.Default RequirementKnowledgeType type = RequirementKnowledgeType.MANUAL;
 
   public RequirementKnowledgeDocument normalized() {
     String finalId =

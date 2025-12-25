@@ -6,7 +6,6 @@ import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeFolderFile;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
-import com.excalicode.platform.core.model.rag.RequirementKnowledgeType;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -35,13 +34,11 @@ public class RequirementKnowledgeService {
 
   private static final String METADATA_DOCUMENT_ID = "documentId";
   private static final String METADATA_TITLE = "title";
-  private static final String METADATA_SOURCE = "source";
   private static final String METADATA_TAGS = "tags";
-  private static final String METADATA_TYPE = "type";
   private static final String METADATA_CHUNK_INDEX = "chunkIndex";
   private static final Set<String> SUPPORTED_FOLDER_EXTENSIONS =
       Set.of("md", "markdown", "txt", "json");
-  private static final String DEFAULT_FOLDER_SOURCE = "folder-upload";
+  private static final String DEFAULT_FOLDER_NAME = "folder-upload";
 
   private final VectorStore vectorStore;
   private final RequirementRagProperties properties;
@@ -190,11 +187,9 @@ public class RequirementKnowledgeService {
       Map<String, Object> metadata = new HashMap<>();
       metadata.put(METADATA_DOCUMENT_ID, document.getDocumentId());
       putIfText(metadata, METADATA_TITLE, document.getTitle());
-      putIfText(metadata, METADATA_SOURCE, document.getSource());
       if (!CollectionUtils.isEmpty(document.getSafeTags())) {
         metadata.put(METADATA_TAGS, document.getSafeTags());
       }
-      metadata.put(METADATA_TYPE, document.getType().name());
       metadata.put(METADATA_CHUNK_INDEX, chunkIndex);
       Document ragDocument =
           new Document(document.getDocumentId() + "::" + chunkIndex, chunk, metadata);
@@ -206,13 +201,13 @@ public class RequirementKnowledgeService {
 
   private RequirementKnowledgeDocument buildDocumentFromFolderFile(
       String folderName, String normalizedPath, String extension, String content) {
-    String safeFolderName = StringUtils.hasText(folderName) ? folderName : DEFAULT_FOLDER_SOURCE;
+    String safeFolderName = StringUtils.hasText(folderName) ? folderName : DEFAULT_FOLDER_NAME;
     String identifierSeed = safeFolderName + "::" + normalizedPath;
     String documentId = DigestUtils.md5DigestAsHex(identifierSeed.getBytes(StandardCharsets.UTF_8));
 
     List<String> tags = new ArrayList<>();
-    tags.add(DEFAULT_FOLDER_SOURCE);
-    if (StringUtils.hasText(folderName) && !DEFAULT_FOLDER_SOURCE.equals(folderName)) {
+    tags.add(DEFAULT_FOLDER_NAME);
+    if (StringUtils.hasText(folderName) && !DEFAULT_FOLDER_NAME.equals(folderName)) {
       tags.add(folderName);
     }
     if (StringUtils.hasText(extension)) {
@@ -223,15 +218,13 @@ public class RequirementKnowledgeService {
         .documentId(documentId)
         .title(normalizedPath)
         .content(content)
-        .source(safeFolderName)
         .tags(tags)
-        .type(RequirementKnowledgeType.FOLDER_IMPORT)
         .build();
   }
 
   private String normalizeFolderName(String folderName) {
     if (!StringUtils.hasText(folderName)) {
-      return DEFAULT_FOLDER_SOURCE;
+      return DEFAULT_FOLDER_NAME;
     }
     String trimmed = folderName.trim().replace('\\', '/');
     if (trimmed.contains("/")) {
@@ -240,7 +233,7 @@ public class RequirementKnowledgeService {
     if (trimmed.length() > 64) {
       trimmed = trimmed.substring(0, 64);
     }
-    return StringUtils.hasText(trimmed) ? trimmed : DEFAULT_FOLDER_SOURCE;
+    return StringUtils.hasText(trimmed) ? trimmed : DEFAULT_FOLDER_NAME;
   }
 
   private String sanitizeRelativePath(String rawPath, String fallback) {
@@ -407,41 +400,22 @@ public class RequirementKnowledgeService {
     Map<String, Object> metadata = document.getMetadata();
     String documentId = (String) metadata.get(METADATA_DOCUMENT_ID);
     String title = (String) metadata.get(METADATA_TITLE);
-    String source = (String) metadata.get(METADATA_SOURCE);
 
     // 处理 chunkIndex
     Object rawChunkIndex = metadata.get(METADATA_CHUNK_INDEX);
     int chunkIndex = rawChunkIndex instanceof Number number ? number.intValue() : 0;
 
     // 处理其他复杂类型
-    RequirementKnowledgeType type = readType(metadata.get(METADATA_TYPE));
     List<String> tags = readTags(metadata.get(METADATA_TAGS));
 
     return RequirementKnowledgeMatch.builder()
         .documentId(documentId)
         .title(title)
         .chunkContent(document.getText())
-        .source(source)
         .tags(tags)
-        .type(type)
         .chunkIndex(chunkIndex)
         .similarityScore(document.getScore())
         .build();
-  }
-
-  /** 解析 metadata 中的知识类型，兼容字符串与枚举对象 */
-  private RequirementKnowledgeType readType(Object raw) {
-    if (raw instanceof RequirementKnowledgeType type) {
-      return type;
-    }
-    if (raw instanceof String str && StringUtils.hasText(str)) {
-      try {
-        return RequirementKnowledgeType.valueOf(str);
-      } catch (IllegalArgumentException ignore) {
-        return RequirementKnowledgeType.MANUAL;
-      }
-    }
-    return RequirementKnowledgeType.MANUAL;
   }
 
   /** metadata 中的标签字段可能为数组或逗号分隔字符串，需要统一解析 */

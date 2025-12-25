@@ -56,14 +56,6 @@
                   show-word-limit
                 />
               </ElFormItem>
-              <ElFormItem label="来源" prop="source">
-                <ElInput
-                  v-model.trim="upsertForm.source"
-                  placeholder="例如：需求池/案例库"
-                  maxlength="64"
-                  clearable
-                />
-              </ElFormItem>
               <ElFormItem label="标签" prop="tags">
                 <ElSelect
                   v-model="upsertForm.tags"
@@ -264,18 +256,6 @@
                         item.chunkIndex + 1 }
                       </p>
                     </div>
-                    <div class="meta-tags">
-                      <ElTag size="small" effect="plain">{{
-                        formatType(item.type)
-                      }}</ElTag>
-                      <ElTag
-                        v-if="item.source"
-                        size="small"
-                        type="info"
-                        effect="plain"
-                        >{{ item.source }}</ElTag
-                      >
-                    </div>
                   </header>
                   <div v-if="item.tags?.length" class="tag-group">
                     <ElTag
@@ -340,7 +320,6 @@ const upsertFormRef = ref(null);
 const upsertForm = reactive({
   documentId: '',
   title: '',
-  source: '',
   tags: [],
   content: '',
 });
@@ -353,7 +332,6 @@ const upserting = ref(false);
 const resetUpsertForm = () => {
   upsertForm.documentId = '';
   upsertForm.title = '';
-  upsertForm.source = '';
   upsertForm.tags = [];
   upsertForm.content = '';
 };
@@ -366,7 +344,6 @@ const handleUpsert = async () => {
     await upsertKnowledgeDocument({
       documentId: upsertForm.documentId || undefined,
       title: upsertForm.title,
-      source: upsertForm.source || undefined,
       tags: upsertForm.tags,
       content: upsertForm.content,
     });
@@ -405,13 +382,6 @@ const resultBanner = computed(() => {
 const formatTitle = (item, index) => {
   if (item?.title) return item.title;
   return `知识片段 ${index + 1}`;
-};
-
-const formatType = (type) => {
-  if (type === 'ENHANCED_RESULT') return '扩写案例';
-  if (type === 'MANUAL') return '人工录入';
-  if (type === 'FOLDER_IMPORT') return '批量导入';
-  return type || '未标记';
 };
 
 const copyChunk = async (text) => {
@@ -774,12 +744,6 @@ const handleFolderChange = async (event) => {
     font-size: 0.85rem;
     color: #94a3b8;
   }
-}
-
-.meta-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .tag-group {
