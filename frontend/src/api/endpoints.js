@@ -101,7 +101,6 @@ export const ENDPOINTS = Object.freeze({
   REQUIREMENT_KNOWLEDGE: {
     UPSERT: '/api/requirement/knowledge/documents',
     SEARCH: '/api/requirement/knowledge/search',
-    IMPORT_FOLDER: '/api/requirement/knowledge/folders/import',
   },
 
   SYS_SETTING: {

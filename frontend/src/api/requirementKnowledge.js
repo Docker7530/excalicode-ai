@@ -11,13 +11,7 @@ export const upsertKnowledgeDocument = (payload) =>
 export const searchKnowledgeDocuments = (payload) =>
   request.post(ENDPOINTS.REQUIREMENT_KNOWLEDGE.SEARCH, payload);
 
-export const importFolderKnowledge = (formData) =>
-  request.post(ENDPOINTS.REQUIREMENT_KNOWLEDGE.IMPORT_FOLDER, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-
 export default {
   upsertKnowledgeDocument,
   searchKnowledgeDocuments,
-  importFolderKnowledge,
 };

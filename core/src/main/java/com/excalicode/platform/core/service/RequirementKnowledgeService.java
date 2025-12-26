@@ -1,12 +1,9 @@
 package com.excalicode.platform.core.service;
 
-import com.excalicode.platform.core.api.rag.RequirementKnowledgeFolderImportResponse;
 import com.excalicode.platform.core.config.RequirementRagProperties;
 import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
-import com.excalicode.platform.core.model.rag.RequirementKnowledgeFolderFile;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +20,6 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 /** 基于 Redis Vector Store 的需求知识库服务 */
@@ -36,9 +32,6 @@ public class RequirementKnowledgeService {
   private static final String METADATA_TITLE = "title";
   private static final String METADATA_TAGS = "tags";
   private static final String METADATA_CHUNK_INDEX = "chunkIndex";
-  private static final Set<String> SUPPORTED_FOLDER_EXTENSIONS =
-      Set.of("md", "markdown", "txt", "json");
-  private static final String DEFAULT_FOLDER_NAME = "folder-upload";
 
   private final VectorStore vectorStore;
   private final RequirementRagProperties properties;
@@ -68,111 +61,6 @@ public class RequirementKnowledgeService {
     log.info("知识文档 {} 入库完成，片段数 {}", normalized.getDocumentId(), chunks.size());
   }
 
-  /** 遍历文件夹上传的文本文件，批量完成向量化 */
-  public RequirementKnowledgeFolderImportResponse importFolder(
-      String folderName, List<RequirementKnowledgeFolderFile> uploadedFiles) {
-    if (!properties.isEnabled()) {
-      throw new BusinessException("RAG 功能已关闭，无法执行批量导入");
-    }
-    List<RequirementKnowledgeFolderFile> safeFiles =
-        CollectionUtils.isEmpty(uploadedFiles) ? List.of() : uploadedFiles;
-    if (safeFiles.isEmpty()) {
-      throw new BusinessException("文件夹为空，未发现可处理的文本文件");
-    }
-
-    String normalizedFolderName = normalizeFolderName(folderName);
-    List<RequirementKnowledgeFolderImportResponse.FileImportResult> results =
-        new ArrayList<>(safeFiles.size());
-    int eligibleFiles = 0;
-    int ingestedFiles = 0;
-
-    for (RequirementKnowledgeFolderFile folderFile : safeFiles) {
-      if (folderFile == null) {
-        results.add(
-            RequirementKnowledgeFolderImportResponse.FileImportResult.builder()
-                .path("(unknown)")
-                .ingested(false)
-                .reason("空文件，已跳过")
-                .build());
-        continue;
-      }
-
-      String normalizedPath =
-          sanitizeRelativePath(folderFile.getRelativePath(), folderFile.getFileName());
-      if (!StringUtils.hasText(normalizedPath)) {
-        results.add(
-            RequirementKnowledgeFolderImportResponse.FileImportResult.builder()
-                .path(folderFile.getFileName())
-                .ingested(false)
-                .reason("无法识别文件路径")
-                .build());
-        continue;
-      }
-
-      String extension = resolveExtension(normalizedPath, folderFile.getFileName());
-      if (!isSupportedFolderExtension(extension)) {
-        results.add(
-            RequirementKnowledgeFolderImportResponse.FileImportResult.builder()
-                .path(normalizedPath)
-                .ingested(false)
-                .reason("仅支持 .md/.txt/.json 文件")
-                .build());
-        continue;
-      }
-
-      String content = folderFile.getContent();
-      if (!StringUtils.hasText(content)) {
-        results.add(
-            RequirementKnowledgeFolderImportResponse.FileImportResult.builder()
-                .path(normalizedPath)
-                .ingested(false)
-                .reason("文件内容为空")
-                .build());
-        continue;
-      }
-
-      eligibleFiles++;
-      try {
-        RequirementKnowledgeDocument document =
-            buildDocumentFromFolderFile(normalizedFolderName, normalizedPath, extension, content);
-        upsertDocument(document);
-        ingestedFiles++;
-        results.add(
-            RequirementKnowledgeFolderImportResponse.FileImportResult.builder()
-                .path(normalizedPath)
-                .documentId(document.getDocumentId())
-                .ingested(true)
-                .build());
-      } catch (Exception ex) {
-        log.warn("批量导入知识失败: path={}, reason={}", normalizedPath, ex.getMessage());
-        results.add(
-            RequirementKnowledgeFolderImportResponse.FileImportResult.builder()
-                .path(normalizedPath)
-                .ingested(false)
-                .reason(ex.getMessage())
-                .build());
-      }
-    }
-
-    int skippedFiles = results.size() - ingestedFiles;
-    log.info(
-        "批量导入需求知识: folder={}, 总计 {}，合格 {}，成功 {}，跳过 {}",
-        normalizedFolderName,
-        safeFiles.size(),
-        eligibleFiles,
-        ingestedFiles,
-        skippedFiles);
-
-    return RequirementKnowledgeFolderImportResponse.builder()
-        .folderName(normalizedFolderName)
-        .totalFiles(safeFiles.size())
-        .eligibleFiles(eligibleFiles)
-        .ingestedFiles(ingestedFiles)
-        .skippedFiles(skippedFiles)
-        .fileResults(results)
-        .build();
-  }
-
   /**
    * 将大段文本切片并补充 metadata，供向量库写入。
    *
@@ -197,82 +85,6 @@ public class RequirementKnowledgeService {
       chunkIndex++;
     }
     return documents;
-  }
-
-  private RequirementKnowledgeDocument buildDocumentFromFolderFile(
-      String folderName, String normalizedPath, String extension, String content) {
-    String safeFolderName = StringUtils.hasText(folderName) ? folderName : DEFAULT_FOLDER_NAME;
-    String identifierSeed = safeFolderName + "::" + normalizedPath;
-    String documentId = DigestUtils.md5DigestAsHex(identifierSeed.getBytes(StandardCharsets.UTF_8));
-
-    List<String> tags = new ArrayList<>();
-    tags.add(DEFAULT_FOLDER_NAME);
-    if (StringUtils.hasText(folderName) && !DEFAULT_FOLDER_NAME.equals(folderName)) {
-      tags.add(folderName);
-    }
-    if (StringUtils.hasText(extension)) {
-      tags.add(extension);
-    }
-
-    return RequirementKnowledgeDocument.builder()
-        .documentId(documentId)
-        .title(normalizedPath)
-        .content(content)
-        .tags(tags)
-        .build();
-  }
-
-  private String normalizeFolderName(String folderName) {
-    if (!StringUtils.hasText(folderName)) {
-      return DEFAULT_FOLDER_NAME;
-    }
-    String trimmed = folderName.trim().replace('\\', '/');
-    if (trimmed.contains("/")) {
-      trimmed = trimmed.substring(trimmed.lastIndexOf('/') + 1);
-    }
-    if (trimmed.length() > 64) {
-      trimmed = trimmed.substring(0, 64);
-    }
-    return StringUtils.hasText(trimmed) ? trimmed : DEFAULT_FOLDER_NAME;
-  }
-
-  private String sanitizeRelativePath(String rawPath, String fallback) {
-    String candidate = StringUtils.hasText(rawPath) ? rawPath : fallback;
-    if (!StringUtils.hasText(candidate)) {
-      return "";
-    }
-    String cleaned = StringUtils.cleanPath(candidate).replace('\\', '/');
-    while (cleaned.startsWith("/")) {
-      cleaned = cleaned.substring(1);
-    }
-    if (cleaned.startsWith("..")) {
-      return StringUtils.hasText(fallback) ? fallback : "";
-    }
-    return cleaned;
-  }
-
-  private String resolveExtension(String path, String fallbackName) {
-    String target = StringUtils.hasText(path) ? path : fallbackName;
-    if (!StringUtils.hasText(target)) {
-      return "";
-    }
-    String fileName = target;
-    int slashIndex = fileName.lastIndexOf('/');
-    if (slashIndex >= 0 && slashIndex < fileName.length() - 1) {
-      fileName = fileName.substring(slashIndex + 1);
-    }
-    int dotIndex = fileName.lastIndexOf('.');
-    if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
-      return "";
-    }
-    return fileName.substring(dotIndex + 1).toLowerCase();
-  }
-
-  private boolean isSupportedFolderExtension(String extension) {
-    if (!StringUtils.hasText(extension)) {
-      return false;
-    }
-    return SUPPORTED_FOLDER_EXTENSIONS.contains(extension.toLowerCase());
   }
 
   private void putIfText(Map<String, Object> metadata, String key, String value) {
