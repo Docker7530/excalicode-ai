@@ -10,6 +10,7 @@ import com.excalicode.platform.core.service.entity.RequirementKnowledgeEntryServ
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +41,7 @@ public class RequirementKnowledgeEntryServiceImpl
   @Override
   public RequirementKnowledgeEntry saveDraft(RequirementKnowledgeDocument document) {
     RequirementKnowledgeDocument normalized =
-        java.util.Objects.requireNonNull(document, "document 不能为空").normalized();
+        Objects.requireNonNull(document, "document 不能为空").normalized();
     if (!StringUtils.hasText(normalized.getDocumentId())) {
       throw new BusinessException("documentId 不能为空");
     }

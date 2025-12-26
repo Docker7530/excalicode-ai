@@ -104,7 +104,7 @@ public class RequirementKnowledgeService {
     }
     String normalized = content.replace("\r", "").trim();
     int chunkSize = Math.max(200, properties.getChunkSize());
-    int overlap = Math.clamp(0, properties.getChunkOverlap(), chunkSize - 1);
+    int overlap = Math.max(200, properties.getChunkOverlap());
 
     List<String> chunks = new ArrayList<>();
     int start = 0;
