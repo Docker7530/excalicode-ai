@@ -96,6 +96,161 @@
               </ElButton>
             </div>
           </ElCard>
+
+          <ElCard class="card entries-card">
+            <template #header>
+              <div class="entries-header">
+                <div>
+                  <h3 class="entries-title">已保存条目</h3>
+                  <p class="entries-subtitle">
+                    这里保存的是数据库草稿；需要参与检索请手动点「向量化」
+                  </p>
+                </div>
+                <div class="entries-actions">
+                  <ElButton
+                    :icon="RefreshRight"
+                    :loading="entriesLoading"
+                    @click="fetchEntries"
+                  >
+                    刷新
+                  </ElButton>
+                </div>
+              </div>
+            </template>
+
+            <ElTable
+              v-loading="entriesLoading"
+              :data="knowledgeEntries"
+              row-key="documentId"
+              class="entries-table"
+              empty-text="暂无数据"
+            >
+              <ElTableColumn prop="documentId" label="文档ID" width="260" />
+              <ElTableColumn label="标题" min-width="240" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <ElButton link type="primary" @click="openEdit(row)">
+                    {{ row.title }}
+                  </ElButton>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn label="标签" min-width="180">
+                <template #default="{ row }">
+                  <div v-if="row.tags?.length" class="table-tags">
+                    <ElTag
+                      v-for="tag in row.tags"
+                      :key="tag"
+                      size="small"
+                      effect="light"
+                    >
+                      {{ tag }}
+                    </ElTag>
+                  </div>
+                  <span v-else class="table-empty">-</span>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn label="向量" width="90">
+                <template #default="{ row }">
+                  <ElTag
+                    size="small"
+                    :type="row.vectorized === 1 ? 'success' : 'info'"
+                  >
+                    {{ row.vectorized === 1 ? '已向量' : '未向量' }}
+                  </ElTag>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn prop="updatedTime" label="更新时间" width="170" />
+              <ElTableColumn label="操作" width="260" fixed="right">
+                <template #default="{ row }">
+                  <ElButton
+                    size="small"
+                    type="primary"
+                    plain
+                    :loading="vectorizingId === row.documentId"
+                    @click="handleVectorize(row)"
+                  >
+                    向量化
+                  </ElButton>
+                  <ElButton
+                    size="small"
+                    type="warning"
+                    plain
+                    :loading="deletingVectorId === row.documentId"
+                    @click="handleDeleteVector(row)"
+                  >
+                    删除向量
+                  </ElButton>
+                  <ElButton
+                    size="small"
+                    type="danger"
+                    plain
+                    :loading="deletingEntryId === row.documentId"
+                    @click="handleDeleteEntry(row)"
+                  >
+                    删除数据
+                  </ElButton>
+                </template>
+              </ElTableColumn>
+            </ElTable>
+          </ElCard>
+
+          <ElDialog
+            v-model="editDialogVisible"
+            title="编辑知识条目"
+            width="760px"
+          >
+            <ElAlert
+              type="warning"
+              :closable="false"
+              class="edit-alert"
+              title="只修改数据库内容，不会自动更新向量；如需检索请重新向量化"
+            />
+            <ElForm
+              ref="editFormRef"
+              :model="editForm"
+              :rules="editRules"
+              label-width="96px"
+            >
+              <ElFormItem label="文档 ID">
+                <ElInput v-model="editForm.documentId" disabled />
+              </ElFormItem>
+              <ElFormItem label="标题" prop="title">
+                <ElInput
+                  v-model.trim="editForm.title"
+                  maxlength="128"
+                  show-word-limit
+                />
+              </ElFormItem>
+              <ElFormItem label="标签">
+                <ElSelect
+                  v-model="editForm.tags"
+                  placeholder="输入后回车新增标签"
+                  clearable
+                  class="tag-select"
+                  multiple
+                  filterable
+                  allow-create
+                  default-first-option
+                />
+              </ElFormItem>
+              <ElFormItem label="正文" prop="content">
+                <ElInput
+                  v-model="editForm.content"
+                  type="textarea"
+                  :rows="10"
+                />
+              </ElFormItem>
+            </ElForm>
+            <template #footer>
+              <ElButton @click="editDialogVisible = false">取消</ElButton>
+              <ElButton
+                type="primary"
+                :loading="savingEdit"
+                @click="handleSaveEdit"
+              >
+                保存
+              </ElButton>
+            </template>
+          </ElDialog>
         </section>
         <section v-else key="search" class="panel-wrapper">
           <ElCard class="card search-card">
@@ -211,8 +366,13 @@
 <script setup>
 import AppHeader from '@/components/AppHeader.vue';
 import {
+  deleteKnowledgeEntry,
+  deleteKnowledgeVector,
+  listKnowledgeEntries,
   searchKnowledgeDocuments,
+  updateKnowledgeEntry,
   upsertKnowledgeDocument,
+  vectorizeKnowledgeEntry,
 } from '@/api/requirementKnowledge.js';
 import {
   DocumentAdd,
@@ -220,8 +380,8 @@ import {
   RefreshRight,
   Search,
 } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
-import { computed, reactive, ref } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { computed, onMounted, reactive, ref } from 'vue';
 
 const activePanel = ref('upsert');
 const switchPanel = (panel) => {
@@ -259,8 +419,9 @@ const handleUpsert = async () => {
       tags: upsertForm.tags,
       content: upsertForm.content,
     });
-    ElMessage.success('知识文档已入库');
+    ElMessage.success('已保存到数据库（未向量化）');
     resetUpsertForm();
+    await fetchEntries();
   } catch (error) {
     if (error?.name === 'ElFormError') {
       return;
@@ -274,6 +435,140 @@ const handleUpsert = async () => {
     upserting.value = false;
   }
 };
+
+const entriesLoading = ref(false);
+const knowledgeEntries = ref([]);
+
+const fetchEntries = async () => {
+  entriesLoading.value = true;
+  try {
+    const data = await listKnowledgeEntries();
+    knowledgeEntries.value = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('获取知识条目失败', error);
+    ElMessage.error(error?.message || '获取知识条目失败');
+  } finally {
+    entriesLoading.value = false;
+  }
+};
+
+const vectorizingId = ref('');
+const deletingVectorId = ref('');
+const deletingEntryId = ref('');
+
+const handleVectorize = async (row) => {
+  if (!row?.documentId) return;
+  try {
+    await ElMessageBox.confirm(
+      `确认对文档 ${row.documentId} 执行向量化？`,
+      '向量化确认',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
+    );
+    vectorizingId.value = row.documentId;
+    await vectorizeKnowledgeEntry(row.documentId);
+    ElMessage.success('向量化完成');
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('向量化失败', error);
+    ElMessage.error(error?.message || '向量化失败');
+  } finally {
+    vectorizingId.value = '';
+  }
+};
+
+const handleDeleteVector = async (row) => {
+  if (!row?.documentId) return;
+  try {
+    await ElMessageBox.confirm(
+      `确认删除文档 ${row.documentId} 的向量？数据库条目会保留。`,
+      '删除向量确认',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
+    );
+    deletingVectorId.value = row.documentId;
+    await deleteKnowledgeVector(row.documentId);
+    ElMessage.success('向量已删除');
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('删除向量失败', error);
+    ElMessage.error(error?.message || '删除向量失败');
+  } finally {
+    deletingVectorId.value = '';
+  }
+};
+
+const handleDeleteEntry = async (row) => {
+  if (!row?.documentId) return;
+  try {
+    await ElMessageBox.confirm(
+      `确认删除文档 ${row.documentId}？该操作会同时尝试删除向量。`,
+      '删除数据确认',
+      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' },
+    );
+    deletingEntryId.value = row.documentId;
+    await deleteKnowledgeEntry(row.documentId);
+    ElMessage.success('数据已删除');
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('删除数据失败', error);
+    ElMessage.error(error?.message || '删除数据失败');
+  } finally {
+    deletingEntryId.value = '';
+  }
+};
+
+const editDialogVisible = ref(false);
+const editFormRef = ref(null);
+const editForm = reactive({
+  documentId: '',
+  title: '',
+  tags: [],
+  content: '',
+});
+const editRules = {
+  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+  content: [{ required: true, message: '请输入正文内容', trigger: 'blur' }],
+};
+const savingEdit = ref(false);
+
+const openEdit = (row) => {
+  if (!row) return;
+  editForm.documentId = row.documentId;
+  editForm.title = row.title;
+  editForm.tags = Array.isArray(row.tags) ? [...row.tags] : [];
+  editForm.content = row.content;
+  editDialogVisible.value = true;
+};
+
+const handleSaveEdit = async () => {
+  if (!editFormRef.value) return;
+  try {
+    await editFormRef.value.validate();
+    savingEdit.value = true;
+    await updateKnowledgeEntry(editForm.documentId, {
+      title: editForm.title,
+      content: editForm.content,
+      tags: editForm.tags,
+    });
+    ElMessage.success('已保存（未向量化）');
+    editDialogVisible.value = false;
+    await fetchEntries();
+  } catch (error) {
+    if (error?.name === 'ElFormError') {
+      return;
+    }
+    console.error('保存失败', error);
+    ElMessage.error(error?.message || '保存失败');
+  } finally {
+    savingEdit.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchEntries();
+});
 
 const searchForm = reactive({
   query: '',
@@ -458,6 +753,55 @@ const handleSearch = async () => {
 
 .tag-select {
   width: 100%;
+}
+
+.entries-card {
+  margin-top: 20px;
+}
+
+.entries-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.entries-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.entries-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.entries-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.entries-table {
+  width: 100%;
+}
+
+.table-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.table-empty {
+  color: #94a3b8;
+}
+
+.edit-alert {
+  margin-bottom: 12px;
 }
 
 .result-tip {
