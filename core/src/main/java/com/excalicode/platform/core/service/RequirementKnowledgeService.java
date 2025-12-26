@@ -38,17 +38,8 @@ public class RequirementKnowledgeService {
   private final StringRedisTemplate stringRedisTemplate;
   private final DocumentRerankService documentRerankService;
 
-  /** 当前 RAG 功能是否启用 */
-  public boolean isEnabled() {
-    return properties.isEnabled();
-  }
-
   /** 删除指定 documentId 对应的向量片段（不影响数据库条目） */
   public void deleteDocumentVectors(String documentId) {
-    if (!properties.isEnabled()) {
-      log.warn("RAG 功能关闭，忽略删除向量");
-      return;
-    }
     if (!StringUtils.hasText(documentId)) {
       return;
     }
@@ -57,10 +48,6 @@ public class RequirementKnowledgeService {
 
   /** 向向量库写入或更新知识文档 */
   public void upsertDocument(RequirementKnowledgeDocument document) {
-    if (!properties.isEnabled()) {
-      log.warn("RAG 功能关闭，忽略知识入库");
-      return;
-    }
     RequirementKnowledgeDocument normalized =
         Objects.requireNonNull(document, "document 不能为空").normalized();
     if (!StringUtils.hasText(normalized.getContent())) {

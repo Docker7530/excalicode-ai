@@ -7,7 +7,6 @@ import com.excalicode.platform.core.api.rag.RequirementKnowledgeMatchResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeSearchRequest;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeUpsertRequest;
 import com.excalicode.platform.core.entity.RequirementKnowledgeEntry;
-import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
 import com.excalicode.platform.core.service.RequirementKnowledgeImportService;
@@ -53,10 +52,8 @@ public class RequirementKnowledgeController {
     RequirementKnowledgeDocument document = request.toDocument().normalized();
     log.info("保存需求知识草稿: title={}, docId={}", document.getTitle(), document.getDocumentId());
     RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.saveDraft(document);
-    if (requirementKnowledgeService.isEnabled()) {
-      // 草稿更新后向量必然过期：保证“未向量化”状态不会污染检索结果。
-      requirementKnowledgeService.deleteDocumentVectors(entry.getDocumentId());
-    }
+    // 草稿更新后向量必然过期：保证“未向量化”状态不会污染检索结果。
+    requirementKnowledgeService.deleteDocumentVectors(entry.getDocumentId());
     return ResponseEntity.ok(RequirementKnowledgeEntryResponse.fromEntity(entry));
   }
 
@@ -86,19 +83,14 @@ public class RequirementKnowledgeController {
     RequirementKnowledgeEntry updated =
         requirementKnowledgeEntryService.updateDraft(
             documentId, request.getTitle(), request.getContent(), request.getTags());
-    if (requirementKnowledgeService.isEnabled()) {
-      // 草稿更新后向量必然过期：保证“未向量化”状态不会污染检索结果。
-      requirementKnowledgeService.deleteDocumentVectors(documentId);
-    }
+    // 草稿更新后向量必然过期：保证“未向量化”状态不会污染检索结果。
+    requirementKnowledgeService.deleteDocumentVectors(documentId);
     return ResponseEntity.ok(RequirementKnowledgeEntryResponse.fromEntity(updated));
   }
 
   /** 将数据库条目向量化写入向量库 */
   @PostMapping("/entries/{documentId}/vectorize")
   public ResponseEntity<Void> vectorize(@PathVariable String documentId) {
-    if (!requirementKnowledgeService.isEnabled()) {
-      throw new BusinessException("RAG 功能关闭，无法向量化");
-    }
     RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.getByDocumentId(documentId);
     if (entry == null) {
       return ResponseEntity.notFound().build();
@@ -120,9 +112,6 @@ public class RequirementKnowledgeController {
   /** 删除向量（保留数据库条目） */
   @DeleteMapping("/entries/{documentId}/vector")
   public ResponseEntity<Void> deleteVector(@PathVariable String documentId) {
-    if (!requirementKnowledgeService.isEnabled()) {
-      throw new BusinessException("RAG 功能关闭，无法删除向量");
-    }
     RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.getByDocumentId(documentId);
     if (entry == null) {
       return ResponseEntity.notFound().build();
@@ -140,9 +129,7 @@ public class RequirementKnowledgeController {
     if (entry == null) {
       return ResponseEntity.notFound().build();
     }
-    if (requirementKnowledgeService.isEnabled()) {
-      requirementKnowledgeService.deleteDocumentVectors(documentId);
-    }
+    requirementKnowledgeService.deleteDocumentVectors(documentId);
     requirementKnowledgeEntryService.removeByDocumentId(documentId);
     return ResponseEntity.ok().build();
   }
