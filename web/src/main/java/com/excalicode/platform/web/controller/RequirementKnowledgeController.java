@@ -2,6 +2,7 @@ package com.excalicode.platform.web.controller;
 
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryUpdateRequest;
+import com.excalicode.platform.core.api.rag.RequirementKnowledgeImportResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeMatchResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeSearchRequest;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeUpsertRequest;
@@ -9,6 +10,7 @@ import com.excalicode.platform.core.entity.RequirementKnowledgeEntry;
 import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
+import com.excalicode.platform.core.service.RequirementKnowledgeImportService;
 import com.excalicode.platform.core.service.RequirementKnowledgeService;
 import com.excalicode.platform.core.service.entity.RequirementKnowledgeEntryService;
 import jakarta.validation.Valid;
@@ -25,7 +27,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /** 知识库管理接口 */
 @Slf4j
@@ -36,6 +40,7 @@ public class RequirementKnowledgeController {
 
   private final RequirementKnowledgeService requirementKnowledgeService;
   private final RequirementKnowledgeEntryService requirementKnowledgeEntryService;
+  private final RequirementKnowledgeImportService requirementKnowledgeImportService;
 
   /**
    * 提交知识条目（仅保存到数据库，不自动向量化）。
@@ -62,6 +67,14 @@ public class RequirementKnowledgeController {
     List<RequirementKnowledgeEntryResponse> responses =
         entries.stream().map(RequirementKnowledgeEntryResponse::fromEntity).toList();
     return ResponseEntity.ok(responses);
+  }
+
+  /** Excel 批量导入（documentId 自动生成，仅入库到数据库） */
+  @PostMapping("/entries/import")
+  public ResponseEntity<RequirementKnowledgeImportResponse> importEntries(
+      @RequestParam("file") MultipartFile file) {
+    log.info("批量导入需求知识条目: file={}", file != null ? file.getOriginalFilename() : null);
+    return ResponseEntity.ok(requirementKnowledgeImportService.importExcel(file));
   }
 
   /** 更新知识条目（只改数据库，不自动向量化） */

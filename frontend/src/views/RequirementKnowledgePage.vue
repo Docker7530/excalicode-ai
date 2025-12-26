@@ -107,6 +107,20 @@
                   </p>
                 </div>
                 <div class="entries-actions">
+                  <ElUpload
+                    :auto-upload="false"
+                    :show-file-list="false"
+                    accept=".xlsx,.xls"
+                    :on-change="handleImportChange"
+                  >
+                    <ElButton
+                      type="primary"
+                      :loading="importingEntries"
+                      :disabled="entriesLoading"
+                    >
+                      一键导入
+                    </ElButton>
+                  </ElUpload>
                   <ElButton
                     :icon="RefreshRight"
                     :loading="entriesLoading"
@@ -368,6 +382,7 @@ import AppHeader from '@/components/AppHeader.vue';
 import {
   deleteKnowledgeEntry,
   deleteKnowledgeVector,
+  importKnowledgeEntries,
   listKnowledgeEntries,
   searchKnowledgeDocuments,
   updateKnowledgeEntry,
@@ -438,6 +453,7 @@ const handleUpsert = async () => {
 
 const entriesLoading = ref(false);
 const knowledgeEntries = ref([]);
+const importingEntries = ref(false);
 
 const fetchEntries = async () => {
   entriesLoading.value = true;
@@ -449,6 +465,38 @@ const fetchEntries = async () => {
     ElMessage.error(error?.message || '获取知识条目失败');
   } finally {
     entriesLoading.value = false;
+  }
+};
+
+const handleImportChange = async (uploadFile) => {
+  const raw = uploadFile?.raw ?? uploadFile;
+  if (!raw) return;
+  try {
+    importingEntries.value = true;
+    const result = await importKnowledgeEntries(raw);
+    const successCount = result?.successCount ?? 0;
+    const failedCount = result?.failedCount ?? 0;
+    const skippedCount = result?.skippedCount ?? 0;
+
+    if (failedCount > 0) {
+      const messages = (result?.errors ?? [])
+        .slice(0, 3)
+        .map((item) => `第${item.rowIndex}行：${item.message}`)
+        .join('；');
+      ElMessage.warning(
+        `导入完成：成功${successCount}条，失败${failedCount}条，跳过${skippedCount}行。${messages}`,
+      );
+    } else {
+      ElMessage.success(
+        `导入完成：成功${successCount}条，跳过${skippedCount}行`,
+      );
+    }
+    await fetchEntries();
+  } catch (error) {
+    console.error('导入失败', error);
+    ElMessage.error(error?.message || '导入失败');
+  } finally {
+    importingEntries.value = false;
   }
 };
 

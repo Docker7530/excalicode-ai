@@ -102,6 +102,7 @@ export const ENDPOINTS = Object.freeze({
     UPSERT: '/api/requirement/knowledge/documents',
     SEARCH: '/api/requirement/knowledge/search',
     ENTRIES: '/api/requirement/knowledge/entries',
+    IMPORT: '/api/requirement/knowledge/entries/import',
     ENTRY_DETAIL: (documentId) =>
       `/api/requirement/knowledge/entries/${documentId}`,
     VECTORIZE: (documentId) =>

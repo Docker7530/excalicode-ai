@@ -18,6 +18,14 @@ export const updateKnowledgeEntry = (documentId, payload) =>
     payload,
   );
 
+export const importKnowledgeEntries = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return request.post(ENDPOINTS.REQUIREMENT_KNOWLEDGE.IMPORT, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
 export const vectorizeKnowledgeEntry = (documentId) =>
   request.post(ENDPOINTS.REQUIREMENT_KNOWLEDGE.VECTORIZE(documentId));
 
@@ -38,4 +46,5 @@ export default {
   deleteKnowledgeVector,
   deleteKnowledgeEntry,
   searchKnowledgeDocuments,
+  importKnowledgeEntries,
 };
