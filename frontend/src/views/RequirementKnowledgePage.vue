@@ -103,7 +103,7 @@
                 <div>
                   <h3 class="entries-title">已保存条目</h3>
                   <p class="entries-subtitle">
-                    这里保存的是数据库草稿；需要参与检索请手动点「向量化」
+                    这里保存的是数据库草稿；需要参与检索请手动点「向量化」或「一键向量」
                   </p>
                 </div>
                 <div class="entries-actions">
@@ -116,11 +116,19 @@
                     <ElButton
                       type="primary"
                       :loading="importingEntries"
-                      :disabled="entriesLoading"
+                      :disabled="entriesLoading || vectorizingAll"
                     >
                       一键导入
                     </ElButton>
                   </ElUpload>
+                  <ElButton
+                    type="success"
+                    :loading="vectorizingAll"
+                    :disabled="entriesLoading || importingEntries"
+                    @click="handleVectorizeAll"
+                  >
+                    一键向量
+                  </ElButton>
                   <ElButton
                     :icon="RefreshRight"
                     :loading="entriesLoading"
@@ -387,6 +395,7 @@ import {
   searchKnowledgeDocuments,
   updateKnowledgeEntry,
   upsertKnowledgeDocument,
+  vectorizeAllKnowledgeEntries,
   vectorizeKnowledgeEntry,
 } from '@/api/requirementKnowledge.js';
 import {
@@ -454,6 +463,7 @@ const handleUpsert = async () => {
 const entriesLoading = ref(false);
 const knowledgeEntries = ref([]);
 const importingEntries = ref(false);
+const vectorizingAll = ref(false);
 
 const fetchEntries = async () => {
   entriesLoading.value = true;
@@ -497,6 +507,43 @@ const handleImportChange = async (uploadFile) => {
     ElMessage.error(error?.message || '导入失败');
   } finally {
     importingEntries.value = false;
+  }
+};
+
+const handleVectorizeAll = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确认对数据库中所有未向量化的条目执行向量化？该操作可能耗时较久。',
+      '一键向量确认',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
+    );
+    vectorizingAll.value = true;
+    const result = await vectorizeAllKnowledgeEntries();
+    const targetCount = result?.targetCount ?? 0;
+    const successCount = result?.successCount ?? 0;
+    const failedCount = result?.failedCount ?? 0;
+
+    if (targetCount === 0) {
+      ElMessage.info('没有发现未向量化条目');
+    } else if (failedCount > 0) {
+      const messages = (result?.errors ?? [])
+        .slice(0, 3)
+        .map((item) => `${item.documentId || '-'}：${item.message}`)
+        .join('；');
+      ElMessage.warning(
+        `向量化完成：目标${targetCount}条，成功${successCount}条，失败${failedCount}条。${messages}`,
+      );
+    } else {
+      ElMessage.success(`向量化完成：成功${successCount}条`);
+    }
+
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('一键向量失败', error);
+    ElMessage.error(error?.message || '一键向量失败');
+  } finally {
+    vectorizingAll.value = false;
   }
 };
 

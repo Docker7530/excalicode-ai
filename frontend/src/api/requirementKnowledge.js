@@ -29,6 +29,9 @@ export const importKnowledgeEntries = (file) => {
 export const vectorizeKnowledgeEntry = (documentId) =>
   request.post(ENDPOINTS.REQUIREMENT_KNOWLEDGE.VECTORIZE(documentId));
 
+export const vectorizeAllKnowledgeEntries = () =>
+  request.post(ENDPOINTS.REQUIREMENT_KNOWLEDGE.VECTORIZE_ALL);
+
 export const deleteKnowledgeVector = (documentId) =>
   request.delete(ENDPOINTS.REQUIREMENT_KNOWLEDGE.DELETE_VECTOR(documentId));
 
@@ -43,6 +46,7 @@ export default {
   listKnowledgeEntries,
   updateKnowledgeEntry,
   vectorizeKnowledgeEntry,
+  vectorizeAllKnowledgeEntries,
   deleteKnowledgeVector,
   deleteKnowledgeEntry,
   searchKnowledgeDocuments,

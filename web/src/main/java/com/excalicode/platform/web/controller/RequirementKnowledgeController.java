@@ -1,5 +1,6 @@
 package com.excalicode.platform.web.controller;
 
+import com.excalicode.platform.core.api.rag.RequirementKnowledgeBatchVectorizeResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryUpdateRequest;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeImportResponse;
@@ -9,6 +10,7 @@ import com.excalicode.platform.core.api.rag.RequirementKnowledgeUpsertRequest;
 import com.excalicode.platform.core.entity.RequirementKnowledgeEntry;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
+import com.excalicode.platform.core.service.RequirementKnowledgeBatchVectorizeService;
 import com.excalicode.platform.core.service.RequirementKnowledgeImportService;
 import com.excalicode.platform.core.service.RequirementKnowledgeService;
 import com.excalicode.platform.core.service.entity.RequirementKnowledgeEntryService;
@@ -40,6 +42,7 @@ public class RequirementKnowledgeController {
   private final RequirementKnowledgeService requirementKnowledgeService;
   private final RequirementKnowledgeEntryService requirementKnowledgeEntryService;
   private final RequirementKnowledgeImportService requirementKnowledgeImportService;
+  private final RequirementKnowledgeBatchVectorizeService requirementKnowledgeBatchVectorizeService;
 
   /**
    * 提交知识条目（仅保存到数据库，不自动向量化）。
@@ -107,6 +110,12 @@ public class RequirementKnowledgeController {
     requirementKnowledgeService.upsertDocument(document);
     requirementKnowledgeEntryService.updateVectorState(documentId, true);
     return ResponseEntity.ok().build();
+  }
+
+  /** 一键向量化：将数据库中所有未向量化条目写入向量库 */
+  @PostMapping("/entries/vectorize")
+  public ResponseEntity<RequirementKnowledgeBatchVectorizeResponse> vectorizeAll() {
+    return ResponseEntity.ok(requirementKnowledgeBatchVectorizeService.vectorizeAllUnvectorized());
   }
 
   /** 删除向量（保留数据库条目） */
