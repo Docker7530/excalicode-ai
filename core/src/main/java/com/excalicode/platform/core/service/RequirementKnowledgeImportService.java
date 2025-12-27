@@ -5,8 +5,10 @@ import com.excalicode.platform.core.api.rag.RequirementKnowledgeImportResponse;
 import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.service.entity.RequirementKnowledgeEntryService;
+import com.google.common.base.Splitter;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,8 @@ public class RequirementKnowledgeImportService {
 
   private static final int MAX_ROWS = 2000;
   private static final int MAX_ERRORS = 20;
+
+  private static final Splitter TAG_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
   private static final String HEADER_TITLE = "标题";
   private static final String HEADER_TAGS = "标签";
@@ -160,17 +164,12 @@ public class RequirementKnowledgeImportService {
             .replace("，", ",")
             .replace("；", ",")
             .replace(";", ",");
-    String[] parts = normalized.split(",");
-    List<String> tags = new ArrayList<>();
-    for (String part : parts) {
-      if (StringUtils.hasText(part)) {
-        String tag = part.trim();
-        if (StringUtils.hasText(tag) && !tags.contains(tag)) {
-          tags.add(tag);
-        }
-      }
+
+    LinkedHashSet<String> unique = new LinkedHashSet<>();
+    for (String tag : TAG_SPLITTER.split(normalized)) {
+      unique.add(tag);
     }
-    return tags;
+    return new ArrayList<>(unique);
   }
 
   private String getCellString(Cell cell, DataFormatter formatter) {

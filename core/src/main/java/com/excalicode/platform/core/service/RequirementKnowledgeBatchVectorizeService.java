@@ -7,6 +7,7 @@ import com.excalicode.platform.core.entity.RequirementKnowledgeEntry;
 import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.service.entity.RequirementKnowledgeEntryService;
+import com.google.common.base.Splitter;
 import com.google.common.util.concurrent.RateLimiter;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ public class RequirementKnowledgeBatchVectorizeService {
 
   private static final int MAX_ERRORS = 20;
   private static final double UPSERTS_PER_MINUTE = 10.0d;
+
+  private static final Splitter TAG_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
   private final RequirementKnowledgeService requirementKnowledgeService;
   private final RequirementKnowledgeEntryService requirementKnowledgeEntryService;
@@ -136,13 +139,6 @@ public class RequirementKnowledgeBatchVectorizeService {
     if (!StringUtils.hasText(tags)) {
       return List.of();
     }
-    String[] parts = tags.split(",");
-    List<String> result = new ArrayList<>();
-    for (String part : parts) {
-      if (StringUtils.hasText(part)) {
-        result.add(part.trim());
-      }
-    }
-    return result;
+    return new ArrayList<>(TAG_SPLITTER.splitToList(tags));
   }
 }

@@ -4,6 +4,7 @@ import com.excalicode.platform.core.config.RequirementRagProperties;
 import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
+import com.google.common.base.Splitter;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,8 @@ public class RequirementKnowledgeService {
   private static final String METADATA_TITLE = "title";
   private static final String METADATA_TAGS = "tags";
   private static final String METADATA_CHUNK_INDEX = "chunkIndex";
+
+  private static final Splitter TAG_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
   private final VectorStore vectorStore;
   private final RequirementRagProperties properties;
@@ -246,14 +249,7 @@ public class RequirementKnowledgeService {
       return tags;
     }
     if (raw instanceof String str) {
-      String[] parts = str.split(",");
-      List<String> tags = new ArrayList<>();
-      for (String part : parts) {
-        if (StringUtils.hasText(part)) {
-          tags.add(part.trim());
-        }
-      }
-      return tags;
+      return new ArrayList<>(TAG_SPLITTER.splitToList(str));
     }
     return List.of();
   }
