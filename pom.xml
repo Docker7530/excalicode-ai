@@ -35,6 +35,7 @@
         <mybatis-plus.version>3.5.14</mybatis-plus.version>
         <dotenv.version>3.0.2</dotenv.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <guava.version>33.5.0-jre</guava.version>
     </properties>
 
     <dependencyManagement>
@@ -99,6 +100,11 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
