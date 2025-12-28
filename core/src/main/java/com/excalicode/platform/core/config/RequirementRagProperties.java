@@ -26,9 +26,6 @@ public class RequirementRagProperties {
   /** 段落重叠长度 */
   private int chunkOverlap;
 
-  /** 接收的最大上下文字符数 */
-  private int contextMaxChars;
-
   /** Redis 中 chunk id 的 key 前缀 */
   private String redisChunkKeyPrefix;
 

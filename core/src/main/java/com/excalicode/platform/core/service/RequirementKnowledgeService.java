@@ -270,7 +270,7 @@ public class RequirementKnowledgeService {
     return ordered;
   }
 
-  /** 为需求扩写构造可嵌入 Prompt 的上下文文本，自动控制长度、防止标题重复。 */
+  /** 为需求扩写构造可嵌入 Prompt 的上下文文本，防止标题重复。 */
   public String buildContext(String query) {
     List<RequirementKnowledgeMatch> matches = search(query, null, null);
     if (CollectionUtils.isEmpty(matches)) {
@@ -278,7 +278,6 @@ public class RequirementKnowledgeService {
     }
     StringBuilder builder = new StringBuilder();
     Set<String> usedTitles = new HashSet<>();
-    int maxChars = Math.max(500, properties.getContextMaxChars());
     for (int i = 0; i < matches.size(); i++) {
       RequirementKnowledgeMatch match = matches.get(i);
       String title =
@@ -290,13 +289,6 @@ public class RequirementKnowledgeService {
       }
       String block =
           "【" + title + "】" + System.lineSeparator() + match.getChunkContent().trim() + "\n\n";
-      if (builder.length() + block.length() > maxChars) {
-        int remain = maxChars - builder.length();
-        if (remain > 0) {
-          builder.append(block, 0, Math.min(remain, block.length()));
-        }
-        break;
-      }
       builder.append(block);
     }
     return builder.toString().trim();
