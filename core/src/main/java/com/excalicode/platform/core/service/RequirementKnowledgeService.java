@@ -103,35 +103,37 @@ public class RequirementKnowledgeService {
 
   /** 根据配置的 chunk 尺寸将文本分段，并尽量在换行处分割，减少语义断裂。 */
   private List<String> splitIntoChunks(String content) {
-    if (!StringUtils.hasText(content)) {
-      return List.of();
-    }
-    String normalized = content.replace("\r", "").trim();
-    int chunkSize = Math.max(200, properties.getChunkSize());
-    int overlap = Math.max(200, properties.getChunkOverlap());
+    if (content == null || content.isBlank()) return List.of();
 
-    List<String> chunks = new ArrayList<>();
+    int chunkSize = properties.getChunkSize();
+    int chunkOverlap = properties.getChunkOverlap();
+    int length = content.length();
+
+    if (length <= chunkSize) return List.of(content);
+
+    if (chunkSize <= 0) {
+      throw new IllegalArgumentException("chunkSize 必须大于 0");
+    }
+    if (chunkOverlap >= chunkSize) {
+      throw new IllegalArgumentException("chunkOverlap 不能大于或等于 chunkSize");
+    }
+
+    // 执行切分 (滑动窗口算法)
+    int step = chunkSize - chunkOverlap;
+    int estimatedChunks = (length / step) + 1;
+    var chunks = new ArrayList<String>(estimatedChunks);
     int start = 0;
-    while (start < normalized.length()) {
-      int end = Math.min(normalized.length(), start + chunkSize);
-      if (end < normalized.length()) {
-        int newline = normalized.lastIndexOf('\n', end);
-        if (newline > start + chunkSize / 2) {
-          end = newline;
-        }
-      }
-      String chunk = normalized.substring(start, end).trim();
-      if (StringUtils.hasText(chunk)) {
-        chunks.add(chunk);
-      }
-      if (end >= normalized.length()) {
+    while (start < length) {
+      int end = Math.min(start + chunkSize, length);
+      var chunk = content.substring(start, end);
+      chunks.add(chunk);
+      if (end == length) {
         break;
       }
-      start = Math.max(0, end - overlap);
-      if (start == end) {
-        start = end + 1;
-      }
+      // 移动窗口指针
+      start += step;
     }
+
     return chunks;
   }
 
