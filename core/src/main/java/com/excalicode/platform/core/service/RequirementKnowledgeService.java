@@ -5,6 +5,7 @@ import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
 import com.google.common.base.Splitter;
+import com.google.common.primitives.Ints;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -183,13 +184,9 @@ public class RequirementKnowledgeService {
     if (!properties.isEnabled() || !StringUtils.hasText(query)) {
       return List.of();
     }
-    int actualTopK =
-        topK != null && topK > 0 ? Math.min(topK, 20) : Math.max(1, properties.getTopK());
-    double threshold =
-        minScore != null
-            ? Math.clamp(0.0d, minScore, 1.0d)
-            : Math.clamp(0.0d, properties.getMinScore(), 1.0d);
-
+    int actualTopK = Ints.constrainToRange(topK != null ? topK : properties.getTopK(), 1, 20);
+    double candidate = (minScore != null) ? minScore : properties.getMinScore();
+    double threshold = Math.clamp(0.0d, candidate, 1.0d);
     SearchRequest request =
         SearchRequest.builder()
             .query(query.trim())
@@ -219,12 +216,8 @@ public class RequirementKnowledgeService {
     Map<String, Object> metadata = document.getMetadata();
     String documentId = (String) metadata.get(METADATA_DOCUMENT_ID);
     String title = (String) metadata.get(METADATA_TITLE);
-
-    // 处理 chunkIndex
     Object rawChunkIndex = metadata.get(METADATA_CHUNK_INDEX);
     int chunkIndex = rawChunkIndex instanceof Number number ? number.intValue() : 0;
-
-    // 处理其他复杂类型
     List<String> tags = readTags(metadata.get(METADATA_TAGS));
 
     return RequirementKnowledgeMatch.builder()
@@ -237,19 +230,12 @@ public class RequirementKnowledgeService {
         .build();
   }
 
-  /** metadata 中的标签字段可能为数组或逗号分隔字符串，需要统一解析 */
   private List<String> readTags(Object raw) {
     if (raw instanceof List<?> list) {
-      List<String> tags = new ArrayList<>();
-      for (Object element : list) {
-        if (element != null) {
-          tags.add(String.valueOf(element));
-        }
-      }
-      return tags;
+      return list.stream().filter(Objects::nonNull).map(Object::toString).toList();
     }
     if (raw instanceof String str) {
-      return new ArrayList<>(TAG_SPLITTER.splitToList(str));
+      return TAG_SPLITTER.splitToList(str);
     }
     return List.of();
   }
@@ -257,45 +243,28 @@ public class RequirementKnowledgeService {
   /** 在相似度检索的基础上调用重排模型，对结果进行语义排序。 */
   private List<RequirementKnowledgeMatch> rerankIfNeeded(
       String query, List<RequirementKnowledgeMatch> matches) {
-    if (CollectionUtils.isEmpty(matches)) {
-      return List.of();
-    }
-    if (!properties.isRerankEnabled()) {
-      return matches;
-    }
-    List<String> contents = new ArrayList<>(matches.size());
-    for (RequirementKnowledgeMatch match : matches) {
-      contents.add(match.getChunkContent());
-    }
-    List<DocumentRerankService.DocumentRerankResult> rerankResults =
-        documentRerankService.rerank(query, contents);
-    if (CollectionUtils.isEmpty(rerankResults)) {
-      return matches;
-    }
-    Map<Integer, RequirementKnowledgeMatch> reranked = new HashMap<>();
-    for (DocumentRerankService.DocumentRerankResult result : rerankResults) {
-      int index = result.index();
-      if (index >= 0 && index < matches.size()) {
-        RequirementKnowledgeMatch rerankedMatch =
-            matches.get(index).toBuilder().rerankScore(result.score()).build();
-        reranked.put(index, rerankedMatch);
-      }
-    }
+    if (CollectionUtils.isEmpty(matches)) return List.of();
+    if (!properties.isRerankEnabled()) return matches;
+    List<String> contents =
+        matches.stream().map(RequirementKnowledgeMatch::getChunkContent).toList();
+    var rerankResults = documentRerankService.rerank(query, contents);
+    if (CollectionUtils.isEmpty(rerankResults)) return matches;
     List<RequirementKnowledgeMatch> ordered = new ArrayList<>();
-    for (DocumentRerankService.DocumentRerankResult result : rerankResults) {
-      RequirementKnowledgeMatch match = reranked.get(result.index());
-      if (match != null) {
-        ordered.add(match);
+    Set<Integer> processedIndices = new HashSet<>();
+    for (var res : rerankResults) {
+      int idx = res.index();
+      if (idx >= 0 && idx < matches.size() && processedIndices.add(idx)) {
+        ordered.add(matches.get(idx).toBuilder().rerankScore(res.score()).build());
       }
     }
     if (ordered.size() < matches.size()) {
       for (int i = 0; i < matches.size(); i++) {
-        if (!reranked.containsKey(i)) {
+        if (!processedIndices.contains(i)) {
           ordered.add(matches.get(i));
         }
       }
     }
-    log.info("RAG 重排完成，query=\"{}\"，原始 {} 条，重排后 Top {} 条", query, matches.size(), ordered.size());
+    log.info("RAG重排完成 | query={} | 原始={} | Top={}", query, matches.size(), ordered.size());
     return ordered;
   }
 
