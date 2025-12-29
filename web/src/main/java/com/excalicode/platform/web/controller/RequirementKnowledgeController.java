@@ -1,6 +1,5 @@
 package com.excalicode.platform.web.controller;
 
-import com.excalicode.platform.core.api.rag.RequirementKnowledgeBatchVectorizeResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryUpdateRequest;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeImportResponse;
@@ -112,10 +111,11 @@ public class RequirementKnowledgeController {
     return ResponseEntity.ok().build();
   }
 
-  /** 一键向量化：将数据库中所有未向量化条目写入向量库 */
+  /** 一键向量化：异步将数据库中所有未向量化条目写入向量库 */
   @PostMapping("/entries/vectorize")
-  public ResponseEntity<RequirementKnowledgeBatchVectorizeResponse> vectorizeAll() {
-    return ResponseEntity.ok(requirementKnowledgeBatchVectorizeService.vectorizeAllUnvectorized());
+  public ResponseEntity<Void> vectorizeAll() {
+    requirementKnowledgeBatchVectorizeService.submitVectorizeAllUnvectorized();
+    return ResponseEntity.accepted().build();
   }
 
   /** 删除向量（保留数据库条目） */

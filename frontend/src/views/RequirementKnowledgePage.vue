@@ -513,31 +513,13 @@ const handleImportChange = async (uploadFile) => {
 const handleVectorizeAll = async () => {
   try {
     await ElMessageBox.confirm(
-      '确认对数据库中所有未向量化的条目执行向量化？该操作可能耗时较久。',
+      '确认对数据库中所有未向量化的条目执行向量化？该操作会在后台异步执行。',
       '一键向量确认',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
     );
     vectorizingAll.value = true;
-    const result = await vectorizeAllKnowledgeEntries();
-    const targetCount = result?.targetCount ?? 0;
-    const successCount = result?.successCount ?? 0;
-    const failedCount = result?.failedCount ?? 0;
-
-    if (targetCount === 0) {
-      ElMessage.info('没有发现未向量化条目');
-    } else if (failedCount > 0) {
-      const messages = (result?.errors ?? [])
-        .slice(0, 3)
-        .map((item) => `${item.documentId || '-'}：${item.message}`)
-        .join('；');
-      ElMessage.warning(
-        `向量化完成：目标${targetCount}条，成功${successCount}条，失败${failedCount}条。${messages}`,
-      );
-    } else {
-      ElMessage.success(`向量化完成：成功${successCount}条`);
-    }
-
-    await fetchEntries();
+    await vectorizeAllKnowledgeEntries();
+    ElMessage.success('已提交后台向量化任务，请稍后点击刷新查看最新状态');
   } catch (error) {
     if (error === 'cancel' || error === 'close') return;
     console.error('一键向量失败', error);
