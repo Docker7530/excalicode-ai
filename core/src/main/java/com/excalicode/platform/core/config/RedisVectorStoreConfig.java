@@ -52,6 +52,13 @@ public class RedisVectorStoreConfig {
     if (StringUtils.hasText(properties.getPrefix())) {
       builder.prefix(properties.getPrefix());
     }
+
+    builder.metadataFields(
+        RedisVectorStore.MetadataField.tag("documentId"),
+        RedisVectorStore.MetadataField.text("title"),
+        RedisVectorStore.MetadataField.tag("tags"),
+        RedisVectorStore.MetadataField.numeric("chunkIndex"));
+
     builder.initializeSchema(properties.isInitializeSchema());
     return builder.build();
   }

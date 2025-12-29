@@ -84,7 +84,7 @@ public class RequirementKnowledgeService {
       metadata.put(METADATA_DOCUMENT_ID, document.getDocumentId());
       putIfText(metadata, METADATA_TITLE, document.getTitle());
       if (!CollectionUtils.isEmpty(document.getSafeTags())) {
-        metadata.put(METADATA_TAGS, document.getSafeTags());
+        metadata.put(METADATA_TAGS, String.join(",", document.getSafeTags()));
       }
       metadata.put(METADATA_CHUNK_INDEX, chunkIndex);
       Document ragDocument =
@@ -216,10 +216,9 @@ public class RequirementKnowledgeService {
       return null;
     }
     Map<String, Object> metadata = document.getMetadata();
-    String documentId = (String) metadata.get(METADATA_DOCUMENT_ID);
-    String title = (String) metadata.get(METADATA_TITLE);
-    Object rawChunkIndex = metadata.get(METADATA_CHUNK_INDEX);
-    int chunkIndex = rawChunkIndex instanceof Number number ? number.intValue() : 0;
+    String documentId = Objects.toString(metadata.get(METADATA_DOCUMENT_ID), null);
+    String title = Objects.toString(metadata.get(METADATA_TITLE), null);
+    int chunkIndex = readChunkIndex(metadata.get(METADATA_CHUNK_INDEX));
     List<String> tags = readTags(metadata.get(METADATA_TAGS));
 
     return RequirementKnowledgeMatch.builder()
@@ -232,12 +231,31 @@ public class RequirementKnowledgeService {
         .build();
   }
 
+  private int readChunkIndex(Object raw) {
+    if (raw instanceof Number number) {
+      return number.intValue();
+    }
+    if (raw instanceof String str) {
+      String trimmed = str.trim();
+      if (!StringUtils.hasText(trimmed)) {
+        return 0;
+      }
+      try {
+        return Integer.parseInt(trimmed);
+      } catch (NumberFormatException ignored) {
+        return 0;
+      }
+    }
+    return 0;
+  }
+
   private List<String> readTags(Object raw) {
     if (raw instanceof List<?> list) {
       return list.stream().filter(Objects::nonNull).map(Object::toString).toList();
     }
     if (raw instanceof String str) {
-      return TAG_SPLITTER.splitToList(str);
+      String trimmed = str.trim();
+      return StringUtils.hasText(trimmed) ? TAG_SPLITTER.splitToList(trimmed) : List.of();
     }
     return List.of();
   }
