@@ -936,7 +936,7 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: $spacing-xl 0 $spacing-2xl;
+  padding: $spacing-xl 0 $spacing-4xl;
 
   @media (max-width: $breakpoint-md) {
     padding: $spacing-xl 0;

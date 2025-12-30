@@ -22,7 +22,7 @@
             :class="{ error: errors.requirementDescription }"
             placeholder="1、支持TOP企业客户的生命周期管理，包括客户信息的查询、导出、列表、详情查看、修改与删除。
 2、支持客户与内部资源（如账户、运营人员）的绑定管理，明确客户归属和服务责任人。"
-            rows="6"
+            rows="10"
             :maxlength="maxLength"
             :disabled="disabled"
             @input="handleInput"
@@ -788,7 +788,11 @@ export default {
   color: $primary-color;
   background: $background-primary;
   resize: vertical;
-  min-height: 120px;
+
+  // 默认给足高度，减少“写两行就得滚动/拖拽”的尴尬
+  min-height: 220px;
+  height: clamp(220px, 36vh, 520px);
+
   transition: all $transition-fast;
   line-height: $line-height-relaxed;
 
