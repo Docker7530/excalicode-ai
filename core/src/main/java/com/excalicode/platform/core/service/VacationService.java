@@ -6,6 +6,7 @@ import com.excalicode.platform.core.api.vacation.VacationDetailRequest;
 import com.excalicode.platform.core.api.vacation.VacationRecordRequest;
 import com.excalicode.platform.core.enums.AiFunctionType;
 import com.excalicode.platform.core.exception.BusinessException;
+import com.google.common.base.Splitter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -38,6 +39,10 @@ public class VacationService {
   private static final Map<String, String> COLUMN_MAPPING =
       Map.of("身份证号码", "idCard", "姓名", "name", "一级部门", "department", "备注", "remark");
   private static final Set<String> FIXED_ONE_DAY_VACATION_TYPES = Set.of("迟到", "迟到早退", "未刷卡");
+  private static final Splitter VACATION_RECORD_SPLITTER =
+      Splitter.onPattern("[；;]").trimResults().omitEmptyStrings();
+  private static final Splitter VACATION_TYPE_SPLITTER =
+      Splitter.onPattern("[、,，/;；\\s]+").trimResults().omitEmptyStrings();
   private static final BigDecimal HOURS_PER_DAY = new BigDecimal("8");
   private static final String[] VACATION_TABLE_HEADERS = {
     "序号", "身份证号码", "姓名", "开始日期", "结束日期", "开始时间", "结束时间", "休假天数", "休假类型", "年休假归属年份", "子女姓名", "备注",
@@ -375,16 +380,8 @@ public class VacationService {
     List<VacationDetailItem> items = new ArrayList<>();
 
     try {
-      // 按分号分割多条记录
-      String[] records = correctedRemark.split("[；;]");
-
-      for (String record : records) {
-        String trimmedRecord = record.trim();
-        if (trimmedRecord.isEmpty()) {
-          continue;
-        }
-
-        VacationDetailItem item = parseVacationRecord(trimmedRecord);
+      for (String record : VACATION_RECORD_SPLITTER.split(correctedRemark)) {
+        VacationDetailItem item = parseVacationRecord(record);
         if (item != null) {
           items.add(item);
         }
@@ -490,18 +487,9 @@ public class VacationService {
       return false;
     }
 
-    String normalizedType = vacationType.trim();
-    if (FIXED_ONE_DAY_VACATION_TYPES.contains(normalizedType)) {
-      return true;
-    }
-
-    String[] parts = normalizedType.split("[、,，/;；\\s]+");
-    if (parts.length > 1) {
-      for (String part : parts) {
-        String candidate = part.trim();
-        if (!candidate.isEmpty() && FIXED_ONE_DAY_VACATION_TYPES.contains(candidate)) {
-          return true;
-        }
+    for (String candidate : VACATION_TYPE_SPLITTER.split(vacationType)) {
+      if (FIXED_ONE_DAY_VACATION_TYPES.contains(candidate)) {
+        return true;
       }
     }
     return false;

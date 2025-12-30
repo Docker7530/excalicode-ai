@@ -1,0 +1,18 @@
+[Unit]
+Description=EXCALICODE AI Platform
+After=network.target
+
+[Service]
+Type=simple
+User=excalicode
+Group=excalicode
+WorkingDirectory=/opt/excalicode-ai/app
+EnvironmentFile=/etc/excalicode-ai/excalicode-ai.env
+ExecStart=/usr/bin/java -Xms256m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai -jar /opt/excalicode-ai/app/excalicode.jar
+Restart=always
+RestartSec=5
+SuccessExitStatus=143
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

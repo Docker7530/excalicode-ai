@@ -1,7 +1,6 @@
 package com.excalicode.platform.core.api.rag;
 
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
-import com.excalicode.platform.core.model.rag.RequirementKnowledgeType;
 import java.util.List;
 import lombok.Builder;
 import lombok.Value;
@@ -13,9 +12,7 @@ public class RequirementKnowledgeMatchResponse {
   String documentId;
   String title;
   String content;
-  String source;
   List<String> tags;
-  RequirementKnowledgeType type;
   int chunkIndex;
   Double similarityScore;
   Double rerankScore;
@@ -31,9 +28,7 @@ public class RequirementKnowledgeMatchResponse {
         .documentId(match.getDocumentId())
         .title(match.getTitle())
         .content(match.getChunkContent())
-        .source(match.getSource())
         .tags(match.getTags())
-        .type(match.getType())
         .chunkIndex(match.getChunkIndex())
         .similarityScore(match.getSimilarityScore())
         .rerankScore(match.getRerankScore())

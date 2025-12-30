@@ -141,8 +141,6 @@ public class CosmicService {
       builder
           .append("# 项目背景资料")
           .append(System.lineSeparator())
-          .append("（请在扩写时严格遵守以下背景中的术语定义、业务边界和技术约束）")
-          .append(System.lineSeparator())
           .append("```text")
           .append(System.lineSeparator())
           .append(ragContext.trim())
@@ -162,7 +160,6 @@ public class CosmicService {
           .append(System.lineSeparator())
           .append("# 期望的功能过程数量")
           .append(System.lineSeparator())
-          .append("请在扩写内容中兼顾后续拆解，目标是约 ")
           .append(expectedProcessCount)
           .append(" 个功能过程。")
           .append(System.lineSeparator());

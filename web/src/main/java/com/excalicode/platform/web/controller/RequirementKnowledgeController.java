@@ -1,27 +1,33 @@
 package com.excalicode.platform.web.controller;
 
-import com.excalicode.platform.core.api.rag.RequirementKnowledgeFolderImportResponse;
+import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryResponse;
+import com.excalicode.platform.core.api.rag.RequirementKnowledgeEntryUpdateRequest;
+import com.excalicode.platform.core.api.rag.RequirementKnowledgeImportResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeMatchResponse;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeSearchRequest;
 import com.excalicode.platform.core.api.rag.RequirementKnowledgeUpsertRequest;
-import com.excalicode.platform.core.exception.BusinessException;
-import com.excalicode.platform.core.model.rag.RequirementKnowledgeFolderFile;
+import com.excalicode.platform.core.entity.RequirementKnowledgeEntry;
+import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeMatch;
+import com.excalicode.platform.core.service.RequirementKnowledgeBatchVectorizeService;
+import com.excalicode.platform.core.service.RequirementKnowledgeImportService;
 import com.excalicode.platform.core.service.RequirementKnowledgeService;
+import com.excalicode.platform.core.service.entity.RequirementKnowledgeEntryService;
 import jakarta.validation.Valid;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,13 +39,107 @@ import org.springframework.web.multipart.MultipartFile;
 public class RequirementKnowledgeController {
 
   private final RequirementKnowledgeService requirementKnowledgeService;
+  private final RequirementKnowledgeEntryService requirementKnowledgeEntryService;
+  private final RequirementKnowledgeImportService requirementKnowledgeImportService;
+  private final RequirementKnowledgeBatchVectorizeService requirementKnowledgeBatchVectorizeService;
 
-  /** 手动入库知识文档 */
+  /**
+   * 提交知识条目（仅保存到数据库，不自动向量化）。
+   *
+   * <p>向量化由列表里的「向量化」按钮显式触发。
+   */
   @PostMapping("/documents")
-  public ResponseEntity<Void> upsertKnowledge(
+  public ResponseEntity<RequirementKnowledgeEntryResponse> upsertKnowledge(
       @RequestBody @Valid RequirementKnowledgeUpsertRequest request) {
-    log.info("手动入库需求知识: title={}, docId={}", request.getTitle(), request.getDocumentId());
-    requirementKnowledgeService.upsertDocument(request.toDocument());
+    RequirementKnowledgeDocument document = request.toDocument().normalized();
+    log.info("保存需求知识草稿: title={}, docId={}", document.getTitle(), document.getDocumentId());
+    RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.saveDraft(document);
+    // 草稿更新后向量必然过期：保证“未向量化”状态不会污染检索结果。
+    requirementKnowledgeService.deleteDocumentVectors(entry.getDocumentId());
+    return ResponseEntity.ok(RequirementKnowledgeEntryResponse.fromEntity(entry));
+  }
+
+  /** 列出所有知识条目（用于知识入库页面的表格展示） */
+  @GetMapping("/entries")
+  public ResponseEntity<List<RequirementKnowledgeEntryResponse>> listEntries() {
+    List<RequirementKnowledgeEntry> entries = requirementKnowledgeEntryService.listForManage();
+    List<RequirementKnowledgeEntryResponse> responses =
+        entries.stream().map(RequirementKnowledgeEntryResponse::fromEntity).toList();
+    return ResponseEntity.ok(responses);
+  }
+
+  /** Excel 批量导入（documentId 自动生成，仅入库到数据库） */
+  @PostMapping("/entries/import")
+  public ResponseEntity<RequirementKnowledgeImportResponse> importEntries(
+      @RequestParam("file") MultipartFile file) {
+    log.info("批量导入需求知识条目: file={}", file != null ? file.getOriginalFilename() : null);
+    return ResponseEntity.ok(requirementKnowledgeImportService.importExcel(file));
+  }
+
+  /** 更新知识条目（只改数据库，不自动向量化） */
+  @PutMapping("/entries/{documentId}")
+  public ResponseEntity<RequirementKnowledgeEntryResponse> updateEntry(
+      @PathVariable String documentId,
+      @RequestBody @Valid RequirementKnowledgeEntryUpdateRequest request) {
+    log.info("更新需求知识草稿: docId={}, title={}", documentId, request.getTitle());
+    RequirementKnowledgeEntry updated =
+        requirementKnowledgeEntryService.updateDraft(
+            documentId, request.getTitle(), request.getContent(), request.getTags());
+    // 草稿更新后向量必然过期：保证“未向量化”状态不会污染检索结果。
+    requirementKnowledgeService.deleteDocumentVectors(documentId);
+    return ResponseEntity.ok(RequirementKnowledgeEntryResponse.fromEntity(updated));
+  }
+
+  /** 将数据库条目向量化写入向量库 */
+  @PostMapping("/entries/{documentId}/vectorize")
+  public ResponseEntity<Void> vectorize(@PathVariable String documentId) {
+    RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.getByDocumentId(documentId);
+    if (entry == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    RequirementKnowledgeDocument document =
+        RequirementKnowledgeDocument.builder()
+            .documentId(entry.getDocumentId())
+            .title(entry.getTitle())
+            .content(entry.getContent())
+            .tags(splitTags(entry.getTags()))
+            .build();
+
+    requirementKnowledgeService.upsertDocument(document);
+    requirementKnowledgeEntryService.updateVectorState(documentId, true);
+    return ResponseEntity.ok().build();
+  }
+
+  /** 一键向量化：异步将数据库中所有未向量化条目写入向量库 */
+  @PostMapping("/entries/vectorize")
+  public ResponseEntity<Void> vectorizeAll() {
+    requirementKnowledgeBatchVectorizeService.submitVectorizeAllUnvectorized();
+    return ResponseEntity.accepted().build();
+  }
+
+  /** 删除向量（保留数据库条目） */
+  @DeleteMapping("/entries/{documentId}/vector")
+  public ResponseEntity<Void> deleteVector(@PathVariable String documentId) {
+    RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.getByDocumentId(documentId);
+    if (entry == null) {
+      return ResponseEntity.notFound().build();
+    }
+    requirementKnowledgeService.deleteDocumentVectors(documentId);
+    requirementKnowledgeEntryService.updateVectorState(documentId, false);
+    return ResponseEntity.ok().build();
+  }
+
+  /** 删除数据库条目（同时尝试删除向量） */
+  @DeleteMapping("/entries/{documentId}")
+  public ResponseEntity<Void> deleteEntry(@PathVariable String documentId) {
+    log.info("删除需求知识条目: docId={}", documentId);
+    RequirementKnowledgeEntry entry = requirementKnowledgeEntryService.getByDocumentId(documentId);
+    if (entry == null) {
+      return ResponseEntity.notFound().build();
+    }
+    requirementKnowledgeService.deleteDocumentVectors(documentId);
+    requirementKnowledgeEntryService.removeByDocumentId(documentId);
     return ResponseEntity.ok().build();
   }
 
@@ -55,59 +155,17 @@ public class RequirementKnowledgeController {
     return ResponseEntity.ok(responses);
   }
 
-  /** 将整个文件夹的文本文件批量写入向量库 */
-  @PostMapping(value = "/folders/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<RequirementKnowledgeFolderImportResponse> importFolder(
-      @RequestPart(value = "folderName", required = false) String folderName,
-      @RequestPart("files") List<MultipartFile> files) {
-    List<RequirementKnowledgeFolderFile> folderFiles = convertFolderFiles(files);
-    log.info("批量导入需求知识: folder={}, files={}", folderName, folderFiles.size());
-    RequirementKnowledgeFolderImportResponse response =
-        requirementKnowledgeService.importFolder(folderName, folderFiles);
-    return ResponseEntity.ok(response);
-  }
-
-  private List<RequirementKnowledgeFolderFile> convertFolderFiles(List<MultipartFile> files) {
-    List<RequirementKnowledgeFolderFile> folderFiles = new ArrayList<>();
-    if (files == null) {
-      return folderFiles;
+  private static List<String> splitTags(String tags) {
+    if (!StringUtils.hasText(tags)) {
+      return List.of();
     }
-    for (MultipartFile multipartFile : files) {
-      if (multipartFile == null || multipartFile.isEmpty()) {
-        continue;
+    String[] parts = tags.split(",");
+    List<String> result = new ArrayList<>();
+    for (String part : parts) {
+      if (StringUtils.hasText(part)) {
+        result.add(part.trim());
       }
-      folderFiles.add(toFolderFile(multipartFile));
     }
-    return folderFiles;
-  }
-
-  private RequirementKnowledgeFolderFile toFolderFile(MultipartFile multipartFile) {
-    try {
-      String originalFilename = multipartFile.getOriginalFilename();
-      String relativePath = resolveRelativePath(originalFilename);
-      String fileName =
-          StringUtils.hasText(originalFilename)
-              ? StringUtils.getFilename(originalFilename)
-              : multipartFile.getName();
-      String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
-      return RequirementKnowledgeFolderFile.builder()
-          .fileName(fileName)
-          .relativePath(relativePath)
-          .content(content)
-          .build();
-    } catch (IOException ex) {
-      throw new BusinessException("读取文件失败: " + multipartFile.getOriginalFilename(), ex);
-    }
-  }
-
-  private String resolveRelativePath(String rawPath) {
-    if (!StringUtils.hasText(rawPath)) {
-      return null;
-    }
-    String cleaned = StringUtils.cleanPath(rawPath).replace('\\', '/');
-    while (cleaned.startsWith("/")) {
-      cleaned = cleaned.substring(1);
-    }
-    return cleaned;
+    return result;
   }
 }

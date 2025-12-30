@@ -1,7 +1,6 @@
 package com.excalicode.platform.core.api.rag;
 
 import com.excalicode.platform.core.model.rag.RequirementKnowledgeDocument;
-import com.excalicode.platform.core.model.rag.RequirementKnowledgeType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -23,10 +22,6 @@ public class RequirementKnowledgeUpsertRequest {
   @NotBlank(message = "知识内容不能为空")
   private String content;
 
-  /** 标记资料来源，便于排查或回溯 */
-  @Size(max = 64, message = "来源长度不能超过 64 字")
-  private String source;
-
   /** 标签集合，可做过滤或提示 */
   private List<String> tags;
 
@@ -36,14 +31,11 @@ public class RequirementKnowledgeUpsertRequest {
    * @return 规范化的知识文档
    */
   public RequirementKnowledgeDocument toDocument() {
-    RequirementKnowledgeType type = RequirementKnowledgeType.MANUAL;
     return RequirementKnowledgeDocument.builder()
         .documentId(documentId)
         .title(title)
         .content(content)
-        .source(source)
         .tags(tags)
-        .type(type)
         .build();
   }
 }

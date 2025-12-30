@@ -56,14 +56,6 @@
                   show-word-limit
                 />
               </ElFormItem>
-              <ElFormItem label="来源" prop="source">
-                <ElInput
-                  v-model.trim="upsertForm.source"
-                  placeholder="例如：需求池/案例库"
-                  maxlength="64"
-                  clearable
-                />
-              </ElFormItem>
               <ElFormItem label="标签" prop="tags">
                 <ElSelect
                   v-model="upsertForm.tags"
@@ -103,93 +95,184 @@
                 重置
               </ElButton>
             </div>
+          </ElCard>
 
-            <ElDivider content-position="center" class="folder-import-divider">
-              <span>或批量导入</span>
-            </ElDivider>
-
-            <section v-loading="folderImporting" class="folder-import">
-              <div class="folder-import-header">
+          <ElCard class="card entries-card">
+            <template #header>
+              <div class="entries-header">
                 <div>
-                  <h4>一键导入知识文件夹</h4>
-                  <p>自动扫描子目录中的 {{ folderAllowedHint }} 文件并向量化</p>
+                  <h3 class="entries-title">已保存条目</h3>
+                  <p class="entries-subtitle">
+                    这里保存的是数据库草稿；需要参与检索请手动点「向量化」或「一键向量」
+                  </p>
                 </div>
-                <div class="folder-import-actions">
-                  <input
-                    ref="folderInputRef"
-                    class="folder-input"
-                    type="file"
-                    multiple
-                    webkitdirectory
-                    accept=".md,.MD,.txt,.TXT,.json,.JSON"
-                    @change="handleFolderChange"
-                  />
-                  <ElButton
-                    type="primary"
-                    plain
-                    :loading="folderImporting"
-                    :icon="FolderOpened"
-                    @click="triggerFolderPicker"
+                <div class="entries-actions">
+                  <ElUpload
+                    :auto-upload="false"
+                    :show-file-list="false"
+                    accept=".xlsx,.xls"
+                    :on-change="handleImportChange"
                   >
-                    选择文件夹
+                    <ElButton
+                      type="primary"
+                      :loading="importingEntries"
+                      :disabled="entriesLoading || vectorizingAll"
+                    >
+                      一键导入
+                    </ElButton>
+                  </ElUpload>
+                  <ElButton
+                    type="success"
+                    :loading="vectorizingAll"
+                    :disabled="entriesLoading || importingEntries"
+                    @click="handleVectorizeAll"
+                  >
+                    一键向量
+                  </ElButton>
+                  <ElButton
+                    :icon="RefreshRight"
+                    :loading="entriesLoading"
+                    @click="fetchEntries"
+                  >
+                    刷新
                   </ElButton>
                 </div>
               </div>
+            </template>
 
-              <ElAlert
-                v-if="folderImportResult"
-                :closable="false"
-                :type="folderImportAlertType"
-                class="folder-import-alert"
-              >
-                {{ folderImportBanner }}
-              </ElAlert>
-
-              <ElDescriptions
-                v-if="folderImportResult"
-                :column="2"
-                border
-                size="small"
-                class="folder-import-stats"
-              >
-                <ElDescriptionsItem label="文件夹">
-                  {{ folderImportResult.folderName }}
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="扫描数">
-                  {{ folderImportResult.totalFiles }} 个
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="可处理">
-                  {{ folderImportResult.eligibleFiles }} 个
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="已入库">
-                  {{ folderImportResult.ingestedFiles }} 个
-                </ElDescriptionsItem>
-              </ElDescriptions>
-
-              <div
-                v-if="folderFailedFiles.length"
-                class="folder-import-results"
-              >
-                <p class="folder-result-title">以下文件未能入库</p>
-                <div class="folder-import-files">
-                  <div
-                    v-for="item in folderFailedFiles"
-                    :key="item.path"
-                    class="folder-file-row error"
-                  >
-                    <span class="folder-file-path">{{ item.path }}</span>
-                    <span class="folder-file-reason">{{
-                      item.reason || '未知错误'
-                    }}</span>
+            <ElTable
+              v-loading="entriesLoading"
+              :data="knowledgeEntries"
+              row-key="documentId"
+              class="entries-table"
+              empty-text="暂无数据"
+            >
+              <ElTableColumn prop="documentId" label="文档ID" width="260" />
+              <ElTableColumn label="标题" min-width="240" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <ElButton link type="primary" @click="openEdit(row)">
+                    {{ row.title }}
+                  </ElButton>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn label="标签" min-width="180">
+                <template #default="{ row }">
+                  <div v-if="row.tags?.length" class="table-tags">
+                    <ElTag
+                      v-for="tag in row.tags"
+                      :key="tag"
+                      size="small"
+                      effect="light"
+                    >
+                      {{ tag }}
+                    </ElTag>
                   </div>
-                </div>
-              </div>
-
-              <p class="folder-tip">
-                小提示：不符合条件的文件会被自动跳过，建议文件名保持语义化便于检索
-              </p>
-            </section>
+                  <span v-else class="table-empty">-</span>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn label="向量" width="90">
+                <template #default="{ row }">
+                  <ElTag
+                    size="small"
+                    :type="row.vectorized === 1 ? 'success' : 'info'"
+                  >
+                    {{ row.vectorized === 1 ? '已向量' : '未向量' }}
+                  </ElTag>
+                </template>
+              </ElTableColumn>
+              <ElTableColumn prop="updatedTime" label="更新时间" width="170" />
+              <ElTableColumn label="操作" width="260" fixed="right">
+                <template #default="{ row }">
+                  <ElButton
+                    size="small"
+                    type="primary"
+                    plain
+                    :loading="vectorizingId === row.documentId"
+                    @click="handleVectorize(row)"
+                  >
+                    向量化
+                  </ElButton>
+                  <ElButton
+                    size="small"
+                    type="warning"
+                    plain
+                    :loading="deletingVectorId === row.documentId"
+                    @click="handleDeleteVector(row)"
+                  >
+                    删除向量
+                  </ElButton>
+                  <ElButton
+                    size="small"
+                    type="danger"
+                    plain
+                    :loading="deletingEntryId === row.documentId"
+                    @click="handleDeleteEntry(row)"
+                  >
+                    删除数据
+                  </ElButton>
+                </template>
+              </ElTableColumn>
+            </ElTable>
           </ElCard>
+
+          <ElDialog
+            v-model="editDialogVisible"
+            title="编辑知识条目"
+            width="760px"
+          >
+            <ElAlert
+              type="warning"
+              :closable="false"
+              class="edit-alert"
+              title="只修改数据库内容，不会自动更新向量；如需检索请重新向量化"
+            />
+            <ElForm
+              ref="editFormRef"
+              :model="editForm"
+              :rules="editRules"
+              label-width="96px"
+            >
+              <ElFormItem label="文档 ID">
+                <ElInput v-model="editForm.documentId" disabled />
+              </ElFormItem>
+              <ElFormItem label="标题" prop="title">
+                <ElInput
+                  v-model.trim="editForm.title"
+                  maxlength="128"
+                  show-word-limit
+                />
+              </ElFormItem>
+              <ElFormItem label="标签">
+                <ElSelect
+                  v-model="editForm.tags"
+                  placeholder="输入后回车新增标签"
+                  clearable
+                  class="tag-select"
+                  multiple
+                  filterable
+                  allow-create
+                  default-first-option
+                />
+              </ElFormItem>
+              <ElFormItem label="正文" prop="content">
+                <ElInput
+                  v-model="editForm.content"
+                  type="textarea"
+                  :rows="10"
+                />
+              </ElFormItem>
+            </ElForm>
+            <template #footer>
+              <ElButton @click="editDialogVisible = false">取消</ElButton>
+              <ElButton
+                type="primary"
+                :loading="savingEdit"
+                @click="handleSaveEdit"
+              >
+                保存
+              </ElButton>
+            </template>
+          </ElDialog>
         </section>
         <section v-else key="search" class="panel-wrapper">
           <ElCard class="card search-card">
@@ -264,18 +347,6 @@
                         item.chunkIndex + 1 }
                       </p>
                     </div>
-                    <div class="meta-tags">
-                      <ElTag size="small" effect="plain">{{
-                        formatType(item.type)
-                      }}</ElTag>
-                      <ElTag
-                        v-if="item.source"
-                        size="small"
-                        type="info"
-                        effect="plain"
-                        >{{ item.source }}</ElTag
-                      >
-                    </div>
                   </header>
                   <div v-if="item.tags?.length" class="tag-group">
                     <ElTag
@@ -317,19 +388,24 @@
 <script setup>
 import AppHeader from '@/components/AppHeader.vue';
 import {
-  importFolderKnowledge,
+  deleteKnowledgeEntry,
+  deleteKnowledgeVector,
+  importKnowledgeEntries,
+  listKnowledgeEntries,
   searchKnowledgeDocuments,
+  updateKnowledgeEntry,
   upsertKnowledgeDocument,
+  vectorizeAllKnowledgeEntries,
+  vectorizeKnowledgeEntry,
 } from '@/api/requirementKnowledge.js';
 import {
   DocumentAdd,
   DocumentCopy,
-  FolderOpened,
   RefreshRight,
   Search,
 } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
-import { computed, reactive, ref } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { computed, onMounted, reactive, ref } from 'vue';
 
 const activePanel = ref('upsert');
 const switchPanel = (panel) => {
@@ -340,7 +416,6 @@ const upsertFormRef = ref(null);
 const upsertForm = reactive({
   documentId: '',
   title: '',
-  source: '',
   tags: [],
   content: '',
 });
@@ -353,7 +428,6 @@ const upserting = ref(false);
 const resetUpsertForm = () => {
   upsertForm.documentId = '';
   upsertForm.title = '';
-  upsertForm.source = '';
   upsertForm.tags = [];
   upsertForm.content = '';
 };
@@ -366,12 +440,12 @@ const handleUpsert = async () => {
     await upsertKnowledgeDocument({
       documentId: upsertForm.documentId || undefined,
       title: upsertForm.title,
-      source: upsertForm.source || undefined,
       tags: upsertForm.tags,
       content: upsertForm.content,
     });
-    ElMessage.success('知识文档已入库');
+    ElMessage.success('已保存到数据库（未向量化）');
     resetUpsertForm();
+    await fetchEntries();
   } catch (error) {
     if (error?.name === 'ElFormError') {
       return;
@@ -385,6 +459,193 @@ const handleUpsert = async () => {
     upserting.value = false;
   }
 };
+
+const entriesLoading = ref(false);
+const knowledgeEntries = ref([]);
+const importingEntries = ref(false);
+const vectorizingAll = ref(false);
+
+const fetchEntries = async () => {
+  entriesLoading.value = true;
+  try {
+    const data = await listKnowledgeEntries();
+    knowledgeEntries.value = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('获取知识条目失败', error);
+    ElMessage.error(error?.message || '获取知识条目失败');
+  } finally {
+    entriesLoading.value = false;
+  }
+};
+
+const handleImportChange = async (uploadFile) => {
+  const raw = uploadFile?.raw ?? uploadFile;
+  if (!raw) return;
+  try {
+    importingEntries.value = true;
+    const result = await importKnowledgeEntries(raw);
+    const successCount = result?.successCount ?? 0;
+    const failedCount = result?.failedCount ?? 0;
+    const skippedCount = result?.skippedCount ?? 0;
+
+    if (failedCount > 0) {
+      const messages = (result?.errors ?? [])
+        .slice(0, 3)
+        .map((item) => `第${item.rowIndex}行：${item.message}`)
+        .join('；');
+      ElMessage.warning(
+        `导入完成：成功${successCount}条，失败${failedCount}条，跳过${skippedCount}行。${messages}`,
+      );
+    } else {
+      ElMessage.success(
+        `导入完成：成功${successCount}条，跳过${skippedCount}行`,
+      );
+    }
+    await fetchEntries();
+  } catch (error) {
+    console.error('导入失败', error);
+    ElMessage.error(error?.message || '导入失败');
+  } finally {
+    importingEntries.value = false;
+  }
+};
+
+const handleVectorizeAll = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确认对数据库中所有未向量化的条目执行向量化？该操作会在后台异步执行。',
+      '一键向量确认',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
+    );
+    vectorizingAll.value = true;
+    await vectorizeAllKnowledgeEntries();
+    ElMessage.success('已提交后台向量化任务，请稍后点击刷新查看最新状态');
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('一键向量失败', error);
+    ElMessage.error(error?.message || '一键向量失败');
+  } finally {
+    vectorizingAll.value = false;
+  }
+};
+
+const vectorizingId = ref('');
+const deletingVectorId = ref('');
+const deletingEntryId = ref('');
+
+const handleVectorize = async (row) => {
+  if (!row?.documentId) return;
+  try {
+    await ElMessageBox.confirm(
+      `确认对文档 ${row.documentId} 执行向量化？`,
+      '向量化确认',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
+    );
+    vectorizingId.value = row.documentId;
+    await vectorizeKnowledgeEntry(row.documentId);
+    ElMessage.success('向量化完成');
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('向量化失败', error);
+    ElMessage.error(error?.message || '向量化失败');
+  } finally {
+    vectorizingId.value = '';
+  }
+};
+
+const handleDeleteVector = async (row) => {
+  if (!row?.documentId) return;
+  try {
+    await ElMessageBox.confirm(
+      `确认删除文档 ${row.documentId} 的向量？数据库条目会保留。`,
+      '删除向量确认',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
+    );
+    deletingVectorId.value = row.documentId;
+    await deleteKnowledgeVector(row.documentId);
+    ElMessage.success('向量已删除');
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('删除向量失败', error);
+    ElMessage.error(error?.message || '删除向量失败');
+  } finally {
+    deletingVectorId.value = '';
+  }
+};
+
+const handleDeleteEntry = async (row) => {
+  if (!row?.documentId) return;
+  try {
+    await ElMessageBox.confirm(
+      `确认删除文档 ${row.documentId}？该操作会同时尝试删除向量。`,
+      '删除数据确认',
+      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' },
+    );
+    deletingEntryId.value = row.documentId;
+    await deleteKnowledgeEntry(row.documentId);
+    ElMessage.success('数据已删除');
+    await fetchEntries();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    console.error('删除数据失败', error);
+    ElMessage.error(error?.message || '删除数据失败');
+  } finally {
+    deletingEntryId.value = '';
+  }
+};
+
+const editDialogVisible = ref(false);
+const editFormRef = ref(null);
+const editForm = reactive({
+  documentId: '',
+  title: '',
+  tags: [],
+  content: '',
+});
+const editRules = {
+  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+  content: [{ required: true, message: '请输入正文内容', trigger: 'blur' }],
+};
+const savingEdit = ref(false);
+
+const openEdit = (row) => {
+  if (!row) return;
+  editForm.documentId = row.documentId;
+  editForm.title = row.title;
+  editForm.tags = Array.isArray(row.tags) ? [...row.tags] : [];
+  editForm.content = row.content;
+  editDialogVisible.value = true;
+};
+
+const handleSaveEdit = async () => {
+  if (!editFormRef.value) return;
+  try {
+    await editFormRef.value.validate();
+    savingEdit.value = true;
+    await updateKnowledgeEntry(editForm.documentId, {
+      title: editForm.title,
+      content: editForm.content,
+      tags: editForm.tags,
+    });
+    ElMessage.success('已保存（未向量化）');
+    editDialogVisible.value = false;
+    await fetchEntries();
+  } catch (error) {
+    if (error?.name === 'ElFormError') {
+      return;
+    }
+    console.error('保存失败', error);
+    ElMessage.error(error?.message || '保存失败');
+  } finally {
+    savingEdit.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchEntries();
+});
 
 const searchForm = reactive({
   query: '',
@@ -405,13 +666,6 @@ const resultBanner = computed(() => {
 const formatTitle = (item, index) => {
   if (item?.title) return item.title;
   return `知识片段 ${index + 1}`;
-};
-
-const formatType = (type) => {
-  if (type === 'ENHANCED_RESULT') return '扩写案例';
-  if (type === 'MANUAL') return '人工录入';
-  if (type === 'FOLDER_IMPORT') return '批量导入';
-  return type || '未标记';
 };
 
 const copyChunk = async (text) => {
@@ -457,163 +711,6 @@ const handleSearch = async () => {
     ElMessage.error(error?.message || '知识检索失败');
   } finally {
     searching.value = false;
-  }
-};
-
-const folderInputRef = ref(null);
-const folderImporting = ref(false);
-const folderImportResult = ref(null);
-const folderAllowedExtensions = ['md', 'txt', 'json'];
-const folderAllowedHint = folderAllowedExtensions
-  .map((ext) => `.${ext}`)
-  .join(' / ');
-const FOLDER_UPLOAD_BATCH_SIZE = 10;
-
-const chunkFiles = (files, chunkSize = FOLDER_UPLOAD_BATCH_SIZE) => {
-  const safeSize = Math.max(1, chunkSize);
-  const chunks = [];
-  for (let i = 0; i < files.length; i += safeSize) {
-    chunks.push(files.slice(i, i + safeSize));
-  }
-  return chunks;
-};
-
-const mergeImportResponses = (current, incoming) => {
-  if (!incoming) {
-    return current;
-  }
-  if (!current) {
-    return {
-      ...incoming,
-      fileResults: Array.isArray(incoming.fileResults)
-        ? [...incoming.fileResults]
-        : [],
-    };
-  }
-  return {
-    folderName: incoming.folderName || current.folderName,
-    totalFiles: (current.totalFiles || 0) + (incoming.totalFiles || 0),
-    eligibleFiles: (current.eligibleFiles || 0) + (incoming.eligibleFiles || 0),
-    ingestedFiles: (current.ingestedFiles || 0) + (incoming.ingestedFiles || 0),
-    skippedFiles: (current.skippedFiles || 0) + (incoming.skippedFiles || 0),
-    fileResults: [
-      ...(current.fileResults || []),
-      ...(incoming.fileResults || []),
-    ],
-  };
-};
-
-const folderFailedFiles = computed(() => {
-  const results = folderImportResult.value?.fileResults || [];
-  return results.filter((item) => item && !item.ingested);
-});
-
-const folderImportBanner = computed(() => {
-  if (!folderImportResult.value) {
-    return '';
-  }
-  const {
-    ingestedFiles = 0,
-    eligibleFiles = 0,
-    skippedFiles = 0,
-  } = folderImportResult.value;
-  return `成功写入 ${ingestedFiles}/${eligibleFiles} 个文件，跳过 ${skippedFiles} 个`;
-});
-
-const folderImportAlertType = computed(() =>
-  folderFailedFiles.value.length ? 'warning' : 'success',
-);
-
-const resolveExtension = (filename = '') => {
-  const lastDot = filename.lastIndexOf('.');
-  if (lastDot < 0) {
-    return '';
-  }
-  return filename.slice(lastDot + 1).toLowerCase();
-};
-
-const deriveFolderName = (file) => {
-  if (!file) {
-    return 'folder-upload';
-  }
-  const relative = file.webkitRelativePath || '';
-  if (relative.includes('/')) {
-    return relative.split('/')[0] || 'folder-upload';
-  }
-  const base = file.name || 'folder-upload';
-  const dotIndex = base.lastIndexOf('.');
-  return dotIndex > 0 ? base.slice(0, dotIndex) : base;
-};
-
-const resetFolderInput = (input) => {
-  if (input) {
-    input.value = '';
-  }
-};
-
-const triggerFolderPicker = () => {
-  folderImportResult.value = null;
-  folderInputRef.value?.click();
-};
-
-const handleFolderChange = async (event) => {
-  const target = event?.target;
-  const files = Array.from(target?.files || []);
-  folderImportResult.value = null;
-  if (!files.length) {
-    return;
-  }
-  const eligibleFiles = files.filter((file) =>
-    folderAllowedExtensions.includes(resolveExtension(file.name)),
-  );
-  if (!eligibleFiles.length) {
-    ElMessage.warning('该文件夹中没有 .md/.txt/.json 文档');
-    resetFolderInput(target);
-    return;
-  }
-
-  const folderName = deriveFolderName(eligibleFiles[0]);
-  const fileChunks = chunkFiles(eligibleFiles, FOLDER_UPLOAD_BATCH_SIZE);
-  folderImporting.value = true;
-  let aggregatedResult = null;
-  let currentBatchIndex = 0;
-
-  try {
-    for (const chunk of fileChunks) {
-      currentBatchIndex += 1;
-      const formData = new FormData();
-      formData.append('folderName', folderName);
-      chunk.forEach((file) => {
-        const relativePath = file.webkitRelativePath || file.name;
-        formData.append('files', file, relativePath);
-      });
-      const result = await importFolderKnowledge(formData);
-      aggregatedResult = mergeImportResponses(aggregatedResult, result);
-    }
-
-    folderImportResult.value = aggregatedResult;
-    const successCount = aggregatedResult?.ingestedFiles ?? 0;
-    const eligibleCount =
-      aggregatedResult?.eligibleFiles ?? eligibleFiles.length;
-    ElMessage.success(
-      `文件夹入库完成：${successCount}/${eligibleCount} 个文件`,
-    );
-  } catch (error) {
-    console.error('文件夹批量导入失败', error);
-    if (aggregatedResult) {
-      folderImportResult.value = aggregatedResult;
-    }
-    const batchMessage =
-      currentBatchIndex > 0 ? `第 ${currentBatchIndex} 批上传失败` : null;
-    const detailMessage =
-      error?.response?.data?.message ||
-      error?.message ||
-      batchMessage ||
-      '文件夹导入失败';
-    ElMessage.error(detailMessage);
-  } finally {
-    folderImporting.value = false;
-    resetFolderInput(target);
   }
 };
 </script>
@@ -735,6 +832,55 @@ const handleFolderChange = async (event) => {
   width: 100%;
 }
 
+.entries-card {
+  margin-top: 20px;
+}
+
+.entries-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.entries-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.entries-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.entries-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.entries-table {
+  width: 100%;
+}
+
+.table-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.table-empty {
+  color: #94a3b8;
+}
+
+.edit-alert {
+  margin-bottom: 12px;
+}
+
 .result-tip {
   margin-top: 16px;
 }
@@ -776,12 +922,6 @@ const handleFolderChange = async (event) => {
   }
 }
 
-.meta-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .tag-group {
   display: flex;
   flex-wrap: wrap;
@@ -810,107 +950,5 @@ const handleFolderChange = async (event) => {
     flex-direction: column;
     align-items: stretch;
   }
-}
-
-.folder-import-divider {
-  margin: 32px 0 16px;
-  color: #94a3b8;
-}
-
-.folder-import {
-  border: 1px dashed #c7d2fe;
-  border-radius: 16px;
-  padding: 20px;
-  background: rgba(79, 70, 229, 0.02);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.folder-import-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-
-  h4 {
-    margin: 0;
-    font-size: 1.05rem;
-    color: #1f2937;
-  }
-
-  p {
-    margin: 4px 0 0;
-    color: #6b7280;
-    font-size: 0.9rem;
-  }
-}
-
-.folder-import-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.folder-input {
-  display: none;
-}
-
-.folder-import-alert {
-  margin-top: 4px;
-}
-
-.folder-import-stats {
-  margin-top: 4px;
-}
-
-.folder-import-results {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 12px 14px;
-  background: #fff;
-}
-
-.folder-result-title {
-  margin: 0 0 8px;
-  font-size: 0.9rem;
-  color: #b45309;
-}
-
-.folder-import-files {
-  max-height: 220px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.folder-file-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: #16a34a;
-}
-
-.folder-file-row.error {
-  color: #dc2626;
-}
-
-.folder-file-path {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.folder-file-reason {
-  flex-shrink: 0;
-}
-
-.folder-tip {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #6b7280;
 }
 </style>

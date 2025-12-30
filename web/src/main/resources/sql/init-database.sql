@@ -176,3 +176,19 @@ CREATE TABLE IF NOT EXISTS cosmic_analysis_task (
     INDEX idx_created_time (created_time),
     CONSTRAINT fk_cosmic_task_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='COSMIC 子过程异步任务';
+
+-- 需求知识库条目表（仅存储，向量化由用户显式触发）
+CREATE TABLE IF NOT EXISTS requirement_knowledge_entry (
+    document_id VARCHAR(64) NOT NULL COMMENT '文档ID（业务主键）',
+    title VARCHAR(128) NOT NULL COMMENT '标题',
+    content LONGTEXT NOT NULL COMMENT '正文内容',
+    tags VARCHAR(1024) NULL COMMENT '标签（逗号分隔）',
+    vectorized TINYINT NOT NULL DEFAULT 0 COMMENT '是否已向量化: 0-否, 1-是',
+    vector_updated_time DATETIME NULL COMMENT '向量更新时间',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (document_id),
+    INDEX idx_deleted (deleted),
+    INDEX idx_updated_time (updated_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='需求知识库条目';

@@ -101,7 +101,17 @@ export const ENDPOINTS = Object.freeze({
   REQUIREMENT_KNOWLEDGE: {
     UPSERT: '/api/requirement/knowledge/documents',
     SEARCH: '/api/requirement/knowledge/search',
-    IMPORT_FOLDER: '/api/requirement/knowledge/folders/import',
+    ENTRIES: '/api/requirement/knowledge/entries',
+    IMPORT: '/api/requirement/knowledge/entries/import',
+    VECTORIZE_ALL: '/api/requirement/knowledge/entries/vectorize',
+    ENTRY_DETAIL: (documentId) =>
+      `/api/requirement/knowledge/entries/${documentId}`,
+    VECTORIZE: (documentId) =>
+      `/api/requirement/knowledge/entries/${documentId}/vectorize`,
+    DELETE_VECTOR: (documentId) =>
+      `/api/requirement/knowledge/entries/${documentId}/vector`,
+    DELETE_ENTRY: (documentId) =>
+      `/api/requirement/knowledge/entries/${documentId}`,
   },
 
   SYS_SETTING: {

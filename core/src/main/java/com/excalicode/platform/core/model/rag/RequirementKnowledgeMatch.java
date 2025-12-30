@@ -17,14 +17,8 @@ public class RequirementKnowledgeMatch {
   /** 命中的内容片段 */
   String chunkContent;
 
-  /** 来源信息（如路径/链接） */
-  String source;
-
   /** 关联标签 */
   List<String> tags;
-
-  /** 知识类型 */
-  RequirementKnowledgeType type;
 
   /** 片段在文档中的序号 */
   int chunkIndex;
