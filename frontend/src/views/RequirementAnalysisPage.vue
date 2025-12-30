@@ -13,45 +13,48 @@
     <div class="page-container">
       <main class="main-content">
         <div class="content-wrapper">
-          <ElSteps
-            class="workflow-steps"
-            :active="activeStepIndex"
-            align-center
-            finish-status="success"
-            process-status="process"
-          >
-            <ElStep
-              v-for="step in stepConfigs"
-              :key="step.key"
-              :status="getStepStatus(step)"
+          <div class="workflow-header">
+            <ElSteps
+              class="workflow-steps"
+              :active="activeStepIndex"
+              align-center
+              finish-status="success"
+              process-status="process"
             >
-              <template #title>
-                <div
-                  class="step-title"
-                  :class="{
-                    active: step.key === currentStepKey,
-                    completed: step.isCompleted && step.key !== currentStepKey,
-                    disabled: !step.isEnabled,
-                  }"
-                  role="button"
-                  :tabindex="step.isEnabled ? 0 : -1"
-                  :aria-disabled="!step.isEnabled"
-                  :aria-current="
-                    step.key === currentStepKey ? 'step' : undefined
-                  "
-                  @click="step.isEnabled && handleStepClick(step.key)"
-                  @keydown.enter.prevent="
-                    step.isEnabled && handleStepClick(step.key)
-                  "
-                  @keydown.space.prevent="
-                    step.isEnabled && handleStepClick(step.key)
-                  "
-                >
-                  <span class="step-title-text">{{ step.label }}</span>
-                </div>
-              </template>
-            </ElStep>
-          </ElSteps>
+              <ElStep
+                v-for="step in stepConfigs"
+                :key="step.key"
+                :status="getStepStatus(step)"
+              >
+                <template #title>
+                  <div
+                    class="step-title"
+                    :class="{
+                      active: step.key === currentStepKey,
+                      completed:
+                        step.isCompleted && step.key !== currentStepKey,
+                      disabled: !step.isEnabled,
+                    }"
+                    role="button"
+                    :tabindex="step.isEnabled ? 0 : -1"
+                    :aria-disabled="!step.isEnabled"
+                    :aria-current="
+                      step.key === currentStepKey ? 'step' : undefined
+                    "
+                    @click="step.isEnabled && handleStepClick(step.key)"
+                    @keydown.enter.prevent="
+                      step.isEnabled && handleStepClick(step.key)
+                    "
+                    @keydown.space.prevent="
+                      step.isEnabled && handleStepClick(step.key)
+                    "
+                  >
+                    <span class="step-title-text">{{ step.label }}</span>
+                  </div>
+                </template>
+              </ElStep>
+            </ElSteps>
+          </div>
 
           <AnalysisForm
             v-if="currentStep === 'requirement'"
@@ -784,6 +787,16 @@ const handleBackToTable = ({ force = false } = {}) => {
   state.currentStep = 'table-editor';
 };
 
+const scrollPageToTop = () => {
+  if (typeof window === 'undefined') return;
+
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth',
+  });
+};
+
 // 悬停状态管理
 const handleStepClick = (target) => {
   if (
@@ -793,6 +806,7 @@ const handleStepClick = (target) => {
     return;
   }
   handleStepNavigate(target);
+  scrollPageToTop();
 };
 
 const handleStepNavigate = (target) => {
@@ -922,7 +936,7 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: $spacing-2xl 0;
+  padding: $spacing-xl 0 $spacing-4xl;
 
   @media (max-width: $breakpoint-md) {
     padding: $spacing-xl 0;
@@ -936,7 +950,7 @@ onUnmounted(() => {
 .main-content {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 0 $spacing-lg;
 
@@ -970,18 +984,27 @@ onUnmounted(() => {
   }
 }
 
+.workflow-header {
+  position: sticky;
+  top: 16px;
+  z-index: 50;
+}
+
 .workflow-steps {
   padding: $spacing-md $spacing-lg;
   border-radius: $border-radius-lg;
   border: none;
   border-bottom: 2px solid rgba(148, 163, 184, 0.15);
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  margin-bottom: $spacing-2xl;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  margin-bottom: $spacing-xl;
   max-width: 100%;
   overflow: visible;
   position: relative;
   transition: all 0.3s ease;
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.06),
+    0 1px 0 rgba(148, 163, 184, 0.08);
 
   &::-webkit-scrollbar {
     height: 0;
@@ -989,6 +1012,18 @@ onUnmounted(() => {
 
   @media (max-width: $breakpoint-md) {
     padding: $spacing-sm $spacing-md;
+  }
+}
+
+@media (min-width: $breakpoint-md) {
+  .workflow-steps {
+    padding-right: calc($spacing-lg + 240px);
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .workflow-header {
+    top: 8px;
   }
 }
 
