@@ -310,6 +310,42 @@ public class CosmicService {
     }
   }
 
+  /**
+   * 锐评大师：导入用户上传的 COSMIC 子过程表，并流式输出锐评结果。
+   *
+   * @param file 用户上传的 Excel 文件
+   * @return SSE 文本片段流，组成锐评结果
+   */
+  public Flux<String> streamCosmicEstimate(MultipartFile file) {
+    AnalysisResponse analysisResponse = importCosmicProcesses(file);
+    String payloadJson = serializeCosmicEstimatePayload(analysisResponse);
+    String userPrompt = buildCosmicEstimateUserPrompt(payloadJson);
+
+    return aiFunctionExecutor
+        .streamText(AiFunctionType.COSMIC_ESTIMATE, userPrompt)
+        .onErrorMap(
+            error -> {
+              if (error instanceof BusinessException) {
+                return error;
+              }
+              return new BusinessException("AI 流式锐评失败: " + error.getMessage(), error);
+            })
+        .switchIfEmpty(Flux.error(new BusinessException("AI 未返回任何可用的锐评内容（流式）")));
+  }
+
+  private String serializeCosmicEstimatePayload(AnalysisResponse response) {
+    try {
+      return objectMapper.writeValueAsString(response);
+    } catch (JsonProcessingException ex) {
+      log.error("序列化 COSMIC 子过程失败", ex);
+      throw new BusinessException("COSMIC 子过程数据序列化失败", ex);
+    }
+  }
+
+  private String buildCosmicEstimateUserPrompt(String analysisJson) {
+    return "# 用户上传的 COSMIC 拆分结果\n" + "```json\n" + analysisJson + "\n```\n";
+  }
+
   private void validateCosmicImportHeader(Row headerRow) {
     String[] expectedHeaders = {"触发事件", "功能过程", "子过程描述", "数据移动类型", "数据组", "数据属性"};
     int[] columns = {
