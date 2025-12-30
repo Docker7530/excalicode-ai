@@ -1,0 +1,101 @@
+name: Deploy (main)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+      DEPLOY_FRONTEND_PATH: ${{ secrets.DEPLOY_FRONTEND_PATH }}
+      DEPLOY_APP_PATH: ${{ secrets.DEPLOY_APP_PATH }}
+      DEPLOY_RESTART_CMD: ${{ secrets.DEPLOY_RESTART_CMD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+          run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Build frontend
+        working-directory: frontend
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Build backend jar
+        shell: bash
+        run: |
+          mvn -B -ntp -DskipTests -pl web -am package
+
+      - name: Install deploy tools
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync openssh-client
+
+      - name: Prepare SSH
+        shell: bash
+        run: |
+          : "${DEPLOY_HOST:?missing DEPLOY_HOST}"
+          : "${DEPLOY_USER:?missing DEPLOY_USER}"
+          : "${DEPLOY_SSH_KEY:?missing DEPLOY_SSH_KEY}"
+
+          mkdir -p ~/.ssh
+          echo "${DEPLOY_SSH_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          if [ -n "${DEPLOY_KNOWN_HOSTS:-}" ]; then
+            echo "${DEPLOY_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${DEPLOY_PORT:-22}" -H "${DEPLOY_HOST}" > ~/.ssh/known_hosts
+          fi
+          chmod 600 ~/.ssh/known_hosts
+      - name: Deploy frontend (rsync)
+        shell: bash
+        run: |
+          : "${DEPLOY_FRONTEND_PATH:?missing DEPLOY_FRONTEND_PATH}"
+          rsync -az --delete -e "ssh -p ${DEPLOY_PORT:-22}" frontend/dist/ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_FRONTEND_PATH}/"
+
+      - name: Deploy jar
+        shell: bash
+        run: |
+          : "${DEPLOY_APP_PATH:?missing DEPLOY_APP_PATH}"
+          : "${DEPLOY_RESTART_CMD:?missing DEPLOY_RESTART_CMD}"
+
+          scp -P "${DEPLOY_PORT:-22}" web/target/excalicode.jar "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_APP_PATH}/excalicode.jar.new"
+          ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; mv -f '${DEPLOY_APP_PATH}/excalicode.jar.new' '${DEPLOY_APP_PATH}/excalicode.jar'; ${DEPLOY_RESTART_CMD}"
