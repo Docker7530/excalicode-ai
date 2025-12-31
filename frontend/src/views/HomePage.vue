@@ -94,18 +94,6 @@
         <!-- 使用技巧 -->
         <section class="tips-section">
           <div class="tips-card">
-            <div class="tips-card-header">
-              <h2 class="tips-title">使用技巧</h2>
-              <button
-                v-if="isAdmin"
-                class="tips-action"
-                type="button"
-                @click="navigateToSystemSettings"
-              >
-                去配置
-              </button>
-            </div>
-
             <div class="tips-card-body">
               <div v-if="tipsLoading" class="tips-loading">加载中...</div>
               <MarkdownPreview
@@ -275,41 +263,6 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
-.tips-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.12),
-    rgba(99, 102, 241, 0.06)
-  );
-}
-
-.tips-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.01em;
-}
-
-.tips-action {
-  border: none;
-  background: transparent;
-  color: #2563eb;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 10px;
-  transition: background 0.2s ease;
-}
-
-.tips-action:hover {
-  background: rgba(37, 99, 235, 0.1);
-}
 
 .tips-card-body {
   padding: 18px 20px;
