@@ -72,23 +72,14 @@
       />
 
       <div class="content-section">
-        <ElTabs v-model="activeTab" class="estimate-tabs">
-          <ElTabPane label="预览" name="preview">
-            <div class="preview-panel">
-              <MarkdownPreview :content="normalizedText" />
-            </div>
-          </ElTabPane>
-          <ElTabPane label="原文" name="raw">
-            <ElInput
-              :model-value="text"
-              type="textarea"
-              rows="22"
-              resize="none"
-              readonly
-              placeholder="上传 Excel 后，锐评结果会在这里流式输出..."
-            />
-          </ElTabPane>
-        </ElTabs>
+        <ElInput
+          :model-value="text"
+          type="textarea"
+          rows="22"
+          resize="none"
+          readonly
+          placeholder="上传 Excel 后，锐评结果会在这里流式输出..."
+        />
       </div>
     </div>
   </div>
@@ -100,7 +91,6 @@
  * 负责文件选择与结果展示，上传与流式逻辑由父组件处理
  */
 
-import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { Close, Delete, DocumentCopy, Upload } from '@element-plus/icons-vue';
 
 const props = defineProps({
@@ -121,14 +111,10 @@ const props = defineProps({
 const emit = defineEmits(['upload', 'cancel', 'clear']);
 
 const fileInputRef = ref(null);
-const activeTab = ref('preview');
 
 const EXCEL_FILE_PATTERN = /\.(xlsx|xls)$/i;
 
-const normalizedText = computed(() =>
-  (props.text || '').replace(/\r\n/g, '\n'),
-);
-const textLength = computed(() => normalizedText.value.trim().length);
+const textLength = computed(() => (props.text || '').length);
 
 const resetInput = () => {
   if (fileInputRef.value) {
@@ -162,7 +148,7 @@ const handleFileChange = (event) => {
 };
 
 const copyText = async () => {
-  const source = normalizedText.value.trim();
+  const source = props.text ?? '';
   if (!source) {
     ElMessage.warning('暂无可复制的锐评内容');
     return;
@@ -283,33 +269,6 @@ const copyText = async () => {
 
   .content-section {
     flex: 1;
-
-    .estimate-tabs {
-      height: 100%;
-
-      :deep(.el-tabs__content) {
-        height: 100%;
-      }
-
-      :deep(.el-tab-pane) {
-        height: 100%;
-      }
-    }
-
-    .preview-panel {
-      min-height: 460px;
-      border: 1px solid $border-medium;
-      border-radius: $border-radius-lg;
-      background: #ffffff;
-      padding: $spacing-lg;
-      overflow: auto;
-    }
-
-    :deep(.markdown-preview) {
-      font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-      font-size: $font-size-base;
-      line-height: $line-height-relaxed;
-    }
 
     :deep(.el-textarea__inner) {
       min-height: 460px;
