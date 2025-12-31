@@ -37,6 +37,12 @@ export const WORKFLOW_CONFIG = {
       label: '系统时序图',
       description: '渲染并复制软件时序图',
     },
+    {
+      key: 'estimate-master',
+      index: 6,
+      label: '锐评大师',
+      description: '上传 COSMIC 拆分并流式锐评',
+    },
   ],
 };
 

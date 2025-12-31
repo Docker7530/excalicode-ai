@@ -90,42 +90,9 @@ class CosmicService {
       throw new Error('当前浏览器不支持流式响应，请更换或升级浏览器');
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
-
-      for (const rawLine of lines) {
-        if (!rawLine) continue;
-
-        if (rawLine.startsWith('data:')) {
-          let data = rawLine.slice(5);
-          if (data.startsWith(' ')) {
-            data = data.slice(1);
-          }
-          if (!data || data === '[DONE]') {
-            continue;
-          }
-          fullText += data;
-          if (typeof onChunk === 'function') {
-            onChunk(data, fullText);
-          }
-        } else if (rawLine.trim()) {
-          fullText += rawLine;
-          if (typeof onChunk === 'function') {
-            onChunk(rawLine, fullText);
-          }
-        }
-      }
-    }
-
-    fullText += decoder.decode();
+    const fullText = await this.consumeTextEventStream(response, {
+      onChunk,
+    });
 
     return {
       success: true,
@@ -289,11 +256,95 @@ class CosmicService {
   }
 
   /**
-   * 基于功能过程生成 Mermaid 时序图
-   * @param {object} payload 功能过程表结构
+   * 基于用户上传的 COSMIC 子过程表格进行锐评（流式）
+   * @param {File} file Excel 文件
+   * @param {object} options 流式回调配置
+   */
+  async estimateCosmicProcesses(file, options = {}) {
+    if (!(file instanceof File)) {
+      throw new Error('请提供待锐评的子过程Excel文件');
+    }
+
+    const { onChunk, signal } = options ?? {};
+    const controller = new AbortController();
+
+    if (signal) {
+      if (signal.aborted) {
+        controller.abort();
+      } else {
+        signal.addEventListener('abort', () => controller.abort(), {
+          once: true,
+        });
+      }
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    let response;
+    const endpoint = `${API_BASE_URL}${ENDPOINTS.REQUIREMENT.COSMIC_ESTIMATE}`;
+    const headers = {
+      Accept: 'text/event-stream',
+    };
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        throw new Error('流式请求已取消');
+      }
+      throw new Error(error?.message || '锐评失败，请稍后重试');
+    }
+
+    if (!response.ok) {
+      const message = await this.parseStreamError(response);
+      throw new Error(message);
+    }
+
+    if (!response.body) {
+      throw new Error('当前浏览器不支持流式响应，请更换或升级浏览器');
+    }
+
+    const fullText = await this.consumeTextEventStream(response, {
+      onChunk,
+    });
+
+    return {
+      success: true,
+      text: fullText.trim(),
+    };
+  }
+
+  /**
+   * 生成 Mermaid 时序图
+   *
+   * 兼容两种输入：
+   * - payload.processes: COSMIC 功能过程表（旧逻辑）
+   * - payload.text: 用户输入的描述文本（新逻辑）
    */
   async generateSequenceDiagram(payload) {
+    const text = (payload?.text || '').trim();
+
+    if (text) {
+      try {
+        return await api.post(ENDPOINTS.REQUIREMENT.SEQUENCE_DIAGRAM, { text });
+      } catch (error) {
+        throw this.handleApiError(error, '时序图生成');
+      }
+    }
+
     this.validateProcessTablePayload(payload);
+
     try {
       return await api.post(ENDPOINTS.REQUIREMENT.SEQUENCE_DIAGRAM, payload);
     } catch (error) {
@@ -323,6 +374,90 @@ class CosmicService {
     } catch (error) {
       throw this.handleApiError(error, '需求文档导出');
     }
+  }
+
+  async consumeTextEventStream(response, options = {}) {
+    const { onChunk } = options ?? {};
+
+    if (!response?.body) {
+      throw new Error('当前浏览器不支持流式响应，请更换或升级浏览器');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = '';
+    let dataLines = [];
+    let fullText = '';
+
+    const flushEvent = () => {
+      if (!dataLines.length) return;
+
+      const data = dataLines.join('\n');
+      dataLines = [];
+
+      if (!data || data === '[DONE]') {
+        return;
+      }
+
+      fullText += data;
+      if (typeof onChunk === 'function') {
+        onChunk(data, fullText);
+      }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      buffer = buffer.replace(/\r\n/g, '\n');
+
+      while (true) {
+        const lineEndIndex = buffer.indexOf('\n');
+        if (lineEndIndex < 0) break;
+
+        const line = buffer.slice(0, lineEndIndex);
+        buffer = buffer.slice(lineEndIndex + 1);
+
+        if (line === '') {
+          flushEvent();
+          continue;
+        }
+
+        if (line.startsWith('data:')) {
+          let data = line.slice(5);
+          if (data.startsWith(' ')) {
+            data = data.slice(1);
+          }
+          dataLines.push(data);
+        }
+      }
+    }
+
+    buffer += decoder.decode();
+    buffer = buffer.replace(/\r\n/g, '\n');
+
+    if (buffer) {
+      const tailLines = buffer.split('\n');
+      for (const line of tailLines) {
+        if (line === '') {
+          flushEvent();
+          continue;
+        }
+        if (line.startsWith('data:')) {
+          let data = line.slice(5);
+          if (data.startsWith(' ')) {
+            data = data.slice(1);
+          }
+          dataLines.push(data);
+        }
+      }
+    }
+
+    flushEvent();
+
+    return fullText;
   }
 
   // ==================== 下载与导出辅助 ====================

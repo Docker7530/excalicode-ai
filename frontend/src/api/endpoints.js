@@ -55,6 +55,7 @@ export const ENDPOINTS = Object.freeze({
     GENERATE_DOCUMENT: '/api/cosmic/documents/preview',
     EXPORT_DOCUMENT: '/api/cosmic/documents/export',
     SEQUENCE_DIAGRAM: '/api/cosmic/sequence-diagram',
+    COSMIC_ESTIMATE: '/api/cosmic/estimate',
   },
 
   PROMPT_TEMPLATE: {

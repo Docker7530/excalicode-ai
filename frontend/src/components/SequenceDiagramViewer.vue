@@ -52,7 +52,7 @@ import { DocumentCopy, PictureFilled } from '@element-plus/icons-vue';
 const props = defineProps({
   diagram: {
     type: String,
-    required: true,
+    default: '',
   },
 });
 

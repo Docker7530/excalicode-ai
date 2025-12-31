@@ -16,6 +16,8 @@ const props = defineProps({
 
 const containerRef = ref(null);
 
+let renderTimer = null;
+
 const render = async () => {
   await nextTick();
   if (!containerRef.value) return;
@@ -26,6 +28,17 @@ const render = async () => {
   });
 };
 
+const scheduleRender = () => {
+  if (renderTimer) {
+    clearTimeout(renderTimer);
+  }
+  // 流式文本更新时避免每个字符都触发渲染
+  renderTimer = setTimeout(() => {
+    renderTimer = null;
+    render();
+  }, 120);
+};
+
 onMounted(() => {
   render();
 });
@@ -33,7 +46,7 @@ onMounted(() => {
 watch(
   () => props.content,
   () => {
-    render();
+    scheduleRender();
   },
 );
 </script>

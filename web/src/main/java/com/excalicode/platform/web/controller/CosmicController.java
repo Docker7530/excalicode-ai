@@ -153,6 +153,15 @@ public class CosmicController {
     return ResponseEntity.ok(diagram);
   }
 
+  /** 锐评大师：上传 COSMIC 子过程表格，流式输出锐评结果 */
+  @PostMapping(
+      value = "/cosmic/estimate",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public Flux<String> streamCosmicEstimate(@RequestParam("file") MultipartFile file) {
+    return cosmicService.streamCosmicEstimate(file);
+  }
+
   /** 导出需求文档为 Word 文件 */
   @PostMapping("/cosmic/documents/export")
   public ResponseEntity<Resource> exportRequirementDocument(
