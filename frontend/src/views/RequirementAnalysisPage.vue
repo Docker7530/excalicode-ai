@@ -124,10 +124,52 @@
             loading-text="AI 正在生成时序图..."
           />
 
-          <SequenceDiagramViewer
+          <div
             v-if="currentStep === 'sequence-viewer'"
-            :diagram="sequenceDiagram"
-          />
+            class="sequence-diagram-stage"
+          >
+            <ElCard shadow="hover" class="sequence-input-card">
+              <template #header>
+                <div class="sequence-input-header">
+                  <span>系统时序图</span>
+                  <ElTag type="info" effect="plain">支持文本生成</ElTag>
+                </div>
+              </template>
+
+              <ElAlert
+                class="sequence-input-hint"
+                type="info"
+                :closable="false"
+                title="可输入描述文本生成；可粘贴 Mermaid sequenceDiagram 语法直接渲染；也可留空使用已确认的功能过程表生成。"
+              />
+
+              <ElInput
+                v-model="state.sequenceDiagramInput"
+                type="textarea"
+                :rows="6"
+                resize="vertical"
+                placeholder="示例：下单流程 用户提交订单 系统校验库存 系统创建订单 系统返回下单结果"
+              />
+
+              <div class="sequence-input-actions">
+                <ElButton
+                  type="primary"
+                  :loading="isSequenceGenerating"
+                  @click="handleGenerateSequenceDiagramFromText"
+                >
+                  根据文本生成
+                </ElButton>
+                <ElButton
+                  :loading="isSequenceGenerating"
+                  @click="handleGenerateSequenceDiagram"
+                >
+                  使用表格生成
+                </ElButton>
+              </div>
+            </ElCard>
+
+            <SequenceDiagramViewer :diagram="sequenceDiagram" />
+          </div>
 
           <CosmicEstimateMaster
             v-if="currentStep === 'estimate-viewer'"
@@ -174,6 +216,7 @@ const state = reactive({
   isSequenceGenerating: false,
   sequenceProgress: 0,
   sequenceDiagram: '',
+  sequenceDiagramInput: '',
   isEstimating: false,
   estimateText: '',
   estimateFileName: '',
@@ -284,9 +327,7 @@ const stepConfigs = computed(() => {
       case 'sequence-diagram':
         return {
           ...base,
-          isEnabled:
-            !!state.sequenceDiagram ||
-            ['sequence-loading', 'sequence-viewer'].includes(state.currentStep),
+          isEnabled: true,
           isCompleted: !!state.sequenceDiagram,
         };
       case 'estimate-master':
@@ -751,6 +792,52 @@ const handleGenerateSequenceDiagram = async () => {
   }
 };
 
+/** 基于用户文本生成时序图 */
+const handleGenerateSequenceDiagramFromText = async () => {
+  const text = (state.sequenceDiagramInput || '').trim();
+  if (!text) {
+    ElMessage.warning('请先输入描述文本');
+    return;
+  }
+
+  const isMermaid = text.toLowerCase().includes('sequencediagram');
+  if (isMermaid) {
+    state.sequenceDiagram = text;
+    ElMessage.success('已检测到 Mermaid 语法，直接渲染');
+    return;
+  }
+
+  stopSequenceProgressSimulation();
+  state.isSequenceGenerating = true;
+  state.currentStep = 'sequence-loading';
+  state.sequenceProgress = 0;
+  startSequenceProgressSimulation();
+
+  try {
+    const diagram =
+      (await cosmicService.generateSequenceDiagram({ text }))?.trim() || '';
+    if (!diagram) {
+      throw new Error('AI 未返回有效的时序图内容');
+    }
+
+    state.sequenceDiagram = diagram;
+    state.sequenceProgress = 100;
+
+    setTimeout(() => {
+      state.isSequenceGenerating = false;
+      state.currentStep = 'sequence-viewer';
+      stopSequenceProgressSimulation();
+    }, 600);
+
+    ElMessage.success('时序图已生成，可复制使用');
+  } catch (error) {
+    stopSequenceProgressSimulation();
+    state.isSequenceGenerating = false;
+    state.currentStep = 'sequence-viewer';
+    ElMessage.error(error.message || '时序图生成失败，请稍后重试');
+  }
+};
+
 /**
  * 锐评大师：上传 COSMIC 子过程表格并流式输出锐评结果
  */
@@ -923,7 +1010,6 @@ const handleStepNavigate = (target) => {
       state.currentStep = 'document-editor';
       break;
     case 'sequence-diagram':
-      if (!state.sequenceDiagram) return;
       state.currentStep = 'sequence-viewer';
       break;
 
@@ -1238,5 +1324,34 @@ onUnmounted(() => {
   letter-spacing: 0.02em;
   transition: inherit;
   white-space: nowrap;
+}
+
+.sequence-diagram-stage {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.sequence-input-card {
+  border-radius: $border-radius-2xl;
+  border: 1px solid $border-light;
+  box-shadow: $shadow-lg;
+}
+
+.sequence-input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sequence-input-hint {
+  margin-bottom: $spacing-md;
+}
+
+.sequence-input-actions {
+  margin-top: $spacing-md;
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
 }
 </style>

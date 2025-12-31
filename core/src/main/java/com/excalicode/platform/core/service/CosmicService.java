@@ -620,7 +620,25 @@ public class CosmicService {
    * @return Mermaid sequenceDiagram 文本
    */
   public String generateSequenceDiagram(SequenceDiagramRequest request) {
+    if (request == null) {
+      throw new BusinessException("请求参数不能为空");
+    }
+
     List<CosmicProcess> processes = request.getProcesses();
+    if (!CollectionUtils.isEmpty(processes)) {
+      return generateSequenceDiagramFromProcesses(processes);
+    }
+
+    String text = trimToEmpty(request.getText());
+    if (!StringUtils.hasText(text)) {
+      throw new BusinessException("COSMIC过程列表不能为空");
+    }
+
+    String diagram = aiFunctionExecutor.executeText(AiFunctionType.COSMIC_SEQUENCE_DIAGRAM, text);
+    return normalizeMermaidDiagram(diagram);
+  }
+
+  private String generateSequenceDiagramFromProcesses(List<CosmicProcess> processes) {
     if (CollectionUtils.isEmpty(processes)) {
       throw new BusinessException("COSMIC过程列表不能为空");
     }

@@ -326,11 +326,25 @@ class CosmicService {
   }
 
   /**
-   * 基于功能过程生成 Mermaid 时序图
-   * @param {object} payload 功能过程表结构
+   * 生成 Mermaid 时序图
+   *
+   * 兼容两种输入：
+   * - payload.processes: COSMIC 功能过程表（旧逻辑）
+   * - payload.text: 用户输入的描述文本（新逻辑）
    */
   async generateSequenceDiagram(payload) {
+    const text = (payload?.text || '').trim();
+
+    if (text) {
+      try {
+        return await api.post(ENDPOINTS.REQUIREMENT.SEQUENCE_DIAGRAM, { text });
+      } catch (error) {
+        throw this.handleApiError(error, '时序图生成');
+      }
+    }
+
     this.validateProcessTablePayload(payload);
+
     try {
       return await api.post(ENDPOINTS.REQUIREMENT.SEQUENCE_DIAGRAM, payload);
     } catch (error) {

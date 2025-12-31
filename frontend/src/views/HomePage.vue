@@ -263,7 +263,6 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
-
 .tips-card-body {
   padding: 18px 20px;
   color: #334155;
