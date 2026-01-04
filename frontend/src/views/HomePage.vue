@@ -26,6 +26,12 @@
             </div>
           </div>
 
+          <div class="feature-card" @click="navigateToChatBi">
+            <div class="card-content">
+              <h3 class="card-title">ChatBI</h3>
+            </div>
+          </div>
+
           <div class="feature-card" @click="navigateToVacation">
             <div class="card-content">
               <h3 class="card-title">休假转换</h3>
@@ -128,6 +134,10 @@ const usageTipsMarkdown = ref('');
 
 const navigateToRequirement = () => {
   router.push('/requirement-analysis');
+};
+
+const navigateToChatBi = () => {
+  router.push('/chatbi');
 };
 
 const navigateToVacation = () => {

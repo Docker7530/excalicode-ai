@@ -36,6 +36,7 @@
         <dotenv.version>3.0.2</dotenv.version>
         <jjwt.version>0.12.6</jjwt.version>
         <guava.version>33.5.0-jre</guava.version>
+        <jsqlparser.version>5.3</jsqlparser.version>
     </properties>
 
     <dependencyManagement>
@@ -105,6 +106,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.jsqlparser</groupId>
+                <artifactId>jsqlparser</artifactId>
+                <version>${jsqlparser.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -118,6 +118,15 @@ const routes = [
     },
   },
   {
+    path: '/chatbi',
+    name: 'ChatBI',
+    component: () => import('@/views/ChatBiPage.vue'),
+    meta: {
+      title: 'ChatBI - EXCALICODE AI',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/system-settings',
     name: 'SystemSettings',
     component: () => import('@/views/SystemSettingManagePage.vue'),
