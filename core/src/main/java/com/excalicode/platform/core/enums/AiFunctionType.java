@@ -19,7 +19,9 @@ public enum AiFunctionType {
   COSMIC_SEQUENCE_DIAGRAM("COSMIC_SEQUENCE_DIAGRAM", "时序图生成"),
   COSMIC_ESTIMATE("COSMIC_ESTIMATE", "锐评大师"),
 
-  QINSHI_ATTENDANCE("QINSHI_ATTENDANCE", "勤时考勤数据处理");
+  QINSHI_ATTENDANCE("QINSHI_ATTENDANCE", "勤时考勤数据处理"),
+
+  CHAT_BI("CHAT_BI", "ChatBI");
 
   private final String code;
   private final String description;

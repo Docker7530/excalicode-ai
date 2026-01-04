@@ -156,6 +156,43 @@ CREATE TABLE IF NOT EXISTS project_task (
     CONSTRAINT fk_task_creator FOREIGN KEY (created_by) REFERENCES sys_user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务分派表';
 
+-- ChatBI 会话表（审计与追溯用）
+CREATE TABLE IF NOT EXISTS chat_bi_session (
+    id BIGINT AUTO_INCREMENT COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '所属用户ID',
+    title VARCHAR(200) NOT NULL COMMENT '会话标题',
+    last_active_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '最后活跃时间',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_last_active (last_active_time),
+    INDEX idx_deleted (deleted),
+    CONSTRAINT fk_chat_bi_session_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ChatBI 会话表';
+
+-- ChatBI 消息表（审计：用户输入、计划、SQL、结果）
+CREATE TABLE IF NOT EXISTS chat_bi_message (
+    id BIGINT AUTO_INCREMENT COMMENT '主键ID',
+    session_id BIGINT NOT NULL COMMENT '会话ID',
+    role VARCHAR(20) NOT NULL COMMENT '消息角色: USER, ASSISTANT, SYSTEM',
+    content LONGTEXT NOT NULL COMMENT '消息内容',
+    plan_json LONGTEXT NULL COMMENT '查询计划(JSON)',
+    executed_sql TEXT NULL COMMENT '执行SQL用于留痕',
+    result_json LONGTEXT NULL COMMENT '查询结果(JSON)',
+    error_message TEXT NULL COMMENT '失败原因',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (id),
+    INDEX idx_session_id (session_id),
+    INDEX idx_role (role),
+    INDEX idx_created_time (created_time),
+    INDEX idx_deleted (deleted),
+    CONSTRAINT fk_chat_bi_message_session FOREIGN KEY (session_id) REFERENCES chat_bi_session(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ChatBI 消息表';
+
 -- COSMIC 子过程异步任务表
 CREATE TABLE IF NOT EXISTS cosmic_analysis_task (
     id BIGINT AUTO_INCREMENT COMMENT '主键ID',
