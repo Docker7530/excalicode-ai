@@ -4,7 +4,7 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.ai.vectorstore.redis.autoconfigure.RedisVectorStoreProperties;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ import redis.clients.jedis.JedisPooled;
 public class RedisVectorStoreConfig {
 
   @Bean
-  JedisPooled jedisPooled(RedisProperties redisProperties) {
+  JedisPooled jedisPooled(DataRedisProperties redisProperties) {
     HostAndPort hostAndPort = new HostAndPort(redisProperties.getHost(), redisProperties.getPort());
 
     boolean sslEnabled =
