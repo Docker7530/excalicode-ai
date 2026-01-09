@@ -11,8 +11,8 @@ import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.mapper.CosmicAnalysisTaskMapper;
 import com.excalicode.platform.core.model.cosmic.CosmicAnalysisTaskStatus;
 import com.excalicode.platform.core.model.cosmic.CosmicProcess;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -231,7 +231,7 @@ public class CosmicAnalysisTaskService {
   private String serializePayload(CosmicAnalysisRequest request) {
     try {
       return objectMapper.writeValueAsString(request);
-    } catch (JsonProcessingException ex) {
+    } catch (JacksonException ex) {
       log.error("子过程任务入参序列化失败", ex);
       throw new BusinessException("子过程任务序列化失败: " + ex.getMessage());
     }
@@ -240,7 +240,7 @@ public class CosmicAnalysisTaskService {
   private String serializeResult(AnalysisResponse response) {
     try {
       return objectMapper.writeValueAsString(response);
-    } catch (JsonProcessingException ex) {
+    } catch (JacksonException ex) {
       log.error("子过程任务结果序列化失败", ex);
       throw new BusinessException("子过程结果序列化失败: " + ex.getMessage());
     }
@@ -271,7 +271,7 @@ public class CosmicAnalysisTaskService {
     return sanitized;
   }
 
-  private CosmicAnalysisRequest deserializeRequest(String payload) throws JsonProcessingException {
+  private CosmicAnalysisRequest deserializeRequest(String payload) throws JacksonException {
     return objectMapper.readValue(payload, CosmicAnalysisRequest.class);
   }
 

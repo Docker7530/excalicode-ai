@@ -17,8 +17,8 @@ import com.excalicode.platform.core.enums.AiFunctionType;
 import com.excalicode.platform.core.exception.BusinessException;
 import com.excalicode.platform.core.model.cosmic.CosmicProcess;
 import com.excalicode.platform.core.model.cosmic.CosmicProcessStep;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -336,7 +336,7 @@ public class CosmicService {
   private String serializeCosmicEstimatePayload(AnalysisResponse response) {
     try {
       return objectMapper.writeValueAsString(response);
-    } catch (JsonProcessingException ex) {
+    } catch (JacksonException ex) {
       log.error("序列化 COSMIC 子过程失败", ex);
       throw new BusinessException("COSMIC 子过程数据序列化失败", ex);
     }
@@ -663,7 +663,7 @@ public class CosmicService {
   private String serializeSequenceDiagramPayload(List<CosmicProcess> processes) {
     try {
       return objectMapper.writeValueAsString(processes);
-    } catch (JsonProcessingException ex) {
+    } catch (JacksonException ex) {
       log.error("序列化 COSMIC 子过程失败", ex);
       throw new BusinessException("COSMIC 子过程数据序列化失败", ex);
     }
