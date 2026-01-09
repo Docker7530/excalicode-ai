@@ -43,6 +43,15 @@ export function updateTaskAssignee(batchId, taskId, assigneeId) {
 }
 
 /**
+ * 更新子任务描述
+ */
+export function updateTaskDescription(batchId, taskId, description) {
+  return api.put(ENDPOINTS.TASK.ADMIN_UPDATE_DESCRIPTION(batchId, taskId), {
+    description,
+  });
+}
+
+/**
  * 获取可分配用户列表
  */
 export function fetchAssignableUsers() {

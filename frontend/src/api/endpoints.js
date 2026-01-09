@@ -93,6 +93,8 @@ export const ENDPOINTS = Object.freeze({
     ADMIN_BATCH_DETAIL: (batchId) => `/api/admin/task-batches/${batchId}`,
     ADMIN_UPDATE_ASSIGNEE: (batchId, taskId) =>
       `/api/admin/task-batches/${batchId}/tasks/${taskId}/assignee`,
+    ADMIN_UPDATE_DESCRIPTION: (batchId, taskId) =>
+      `/api/admin/task-batches/${batchId}/tasks/${taskId}/description`,
     ADMIN_ASSIGNEES: '/api/admin/task-assignees',
     MY_BATCHES: '/api/tasks/my',
     MY_BATCH_DETAIL: (batchId) => `/api/tasks/my/${batchId}`,

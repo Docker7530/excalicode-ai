@@ -263,12 +263,21 @@
             </ElTableColumn>
             <ElTableColumn prop="description" label="任务描述" min-width="240">
               <template #default="{ row }">
-                <TaskDescriptionPopover
-                  class="description-cell"
-                  :text="row.description"
-                  :width="420"
-                  :max-preview-lines="2"
-                />
+                <div class="description-actions">
+                  <TaskDescriptionPopover
+                    class="description-cell"
+                    :text="row.description"
+                    :width="420"
+                    :max-preview-lines="2"
+                  />
+                  <ElButton
+                    link
+                    type="primary"
+                    size="small"
+                    @click="openEditDescription(row)"
+                    >编辑</ElButton
+                  >
+                </div>
               </template>
             </ElTableColumn>
             <ElTableColumn
@@ -311,6 +320,31 @@
         <ElEmpty v-else description="暂无数据" />
       </template>
     </ElDrawer>
+
+    <ElDialog
+      v-model="descriptionDialogVisible"
+      title="修改任务描述"
+      width="640px"
+      :close-on-click-modal="false"
+    >
+      <ElInput
+        v-model="descriptionDraft"
+        type="textarea"
+        :rows="6"
+        placeholder="请输入任务描述"
+        maxlength="2000"
+        show-word-limit
+      />
+      <template #footer>
+        <ElButton @click="descriptionDialogVisible = false">取消</ElButton>
+        <ElButton
+          type="primary"
+          :loading="savingDescription"
+          @click="saveDescription"
+          >保存</ElButton
+        >
+      </template>
+    </ElDialog>
   </div>
 </template>
 
@@ -323,6 +357,7 @@ import {
   fetchTaskBatches,
   fetchTaskBatchDetail,
   updateTaskAssignee,
+  updateTaskDescription,
   fetchAssignableUsers,
 } from '@/api/task.js';
 import AppHeader from '@/components/AppHeader.vue';
@@ -341,6 +376,11 @@ const batchList = ref([]);
 const loadingBatches = ref(false);
 const activeBatch = ref(null);
 const detailVisible = ref(false);
+
+const descriptionDialogVisible = ref(false);
+const editingDescriptionTask = ref(null);
+const descriptionDraft = ref('');
+const savingDescription = ref(false);
 
 const switchPanel = (panel) => {
   activePanel.value = panel;
@@ -461,6 +501,46 @@ const handleDetailAssigneeChange = async (task, newAssigneeId) => {
   } catch (error) {
     task.assigneeId = previous;
     ElMessage.error(error?.message ?? '执行人更新失败');
+  }
+};
+
+const openEditDescription = (task) => {
+  editingDescriptionTask.value = task;
+  descriptionDraft.value = task?.description ?? '';
+  descriptionDialogVisible.value = true;
+};
+
+const saveDescription = async () => {
+  const task = editingDescriptionTask.value;
+  if (!task) {
+    descriptionDialogVisible.value = false;
+    return;
+  }
+  const nextDescription = (descriptionDraft.value ?? '').trim();
+  if (!nextDescription) {
+    ElMessage.warning('任务描述不能为空');
+    return;
+  }
+
+  const previous = task.description;
+  try {
+    savingDescription.value = true;
+    const updated = await updateTaskDescription(
+      task.batchId,
+      task.id,
+      nextDescription,
+    );
+    task.description = updated?.description ?? nextDescription;
+    if (updated?.updatedTime) {
+      task.updatedTime = formatDate(updated.updatedTime);
+    }
+    ElMessage.success('任务描述已更新');
+    descriptionDialogVisible.value = false;
+  } catch (error) {
+    task.description = previous;
+    ElMessage.error(error?.message ?? '任务描述更新失败');
+  } finally {
+    savingDescription.value = false;
   }
 };
 
@@ -631,6 +711,12 @@ onMounted(async () => {
 
 .description-cell {
   display: block;
+}
+
+.description-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .batch-title {

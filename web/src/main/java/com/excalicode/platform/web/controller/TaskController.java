@@ -4,6 +4,7 @@ import com.excalicode.platform.core.api.task.TaskAssigneeResponse;
 import com.excalicode.platform.core.api.task.TaskAssignmentRequest;
 import com.excalicode.platform.core.api.task.TaskBatchDetailResponse;
 import com.excalicode.platform.core.api.task.TaskBatchSummaryResponse;
+import com.excalicode.platform.core.api.task.TaskDescriptionUpdateRequest;
 import com.excalicode.platform.core.api.task.TaskDraftResponse;
 import com.excalicode.platform.core.api.task.TaskPublishRequest;
 import com.excalicode.platform.core.api.task.TaskResponse;
@@ -82,6 +83,21 @@ public class TaskController {
       @RequestBody @Valid TaskAssignmentRequest request) {
     TaskResponse response =
         taskManagementService.updateTaskAssignee(taskId, request.getAssigneeId());
+    if (!batchId.equals(response.getBatchId())) {
+      throw new BusinessException("任务批次信息不匹配");
+    }
+    return ResponseEntity.ok(response);
+  }
+
+  /** 更新子任务描述 */
+  @PutMapping("/admin/task-batches/{batchId}/tasks/{taskId}/description")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<TaskResponse> updateTaskDescription(
+      @PathVariable Long batchId,
+      @PathVariable Long taskId,
+      @RequestBody @Valid TaskDescriptionUpdateRequest request) {
+    TaskResponse response =
+        taskManagementService.updateTaskDescription(taskId, request.getDescription());
     if (!batchId.equals(response.getBatchId())) {
       throw new BusinessException("任务批次信息不匹配");
     }

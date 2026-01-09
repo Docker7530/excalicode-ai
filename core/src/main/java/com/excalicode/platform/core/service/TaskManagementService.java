@@ -290,6 +290,28 @@ public class TaskManagementService {
     return mapTaskResponse(task, userMap);
   }
 
+  /** 更新任务描述 */
+  @Transactional(rollbackFor = Exception.class)
+  public TaskResponse updateTaskDescription(Long taskId, String description) {
+    ProjectTask task = projectTaskService.getById(taskId);
+    if (task == null) {
+      throw new BusinessException("任务不存在");
+    }
+    if (!StringUtils.hasText(description)) {
+      throw new BusinessException("任务描述不能为空");
+    }
+    String trimmed = description.trim();
+    if (!StringUtils.hasText(trimmed)) {
+      throw new BusinessException("任务描述不能为空");
+    }
+    task.setDescription(trimmed);
+    projectTaskService.updateById(task);
+
+    Map<Long, SysUser> userMap =
+        loadUsers(resolveUserIdsFromTasks(List.of(task), task.getCreatedBy()));
+    return mapTaskResponse(task, userMap);
+  }
+
   /** 更新任务状态 */
   @Transactional(rollbackFor = Exception.class)
   public TaskResponse updateTaskStatus(
