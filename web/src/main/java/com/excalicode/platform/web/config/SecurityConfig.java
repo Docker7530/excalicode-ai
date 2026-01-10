@@ -37,7 +37,7 @@ public class SecurityConfig {
 
   /** Spring Security 的过滤器链。 */
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http) {
     http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
@@ -82,7 +82,7 @@ public class SecurityConfig {
 
   /** 提供全局认证管理器。 */
   @Bean
-  AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+  AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
     return config.getAuthenticationManager();
   }
 }
