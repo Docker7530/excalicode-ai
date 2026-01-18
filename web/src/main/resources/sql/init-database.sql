@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS sys_setting (
 INSERT INTO sys_setting (config_key, config_value)
 VALUES (
   'home.usageTips',
-  '## 使用技巧\n\n### 模型与提示词\n\n部分功能已适配 deepseek-chat（DeepSeek-V3.2-Exp 非思考模式），可在【首页后台管理/功能配置】查看相关配置。\n\n📚 参考文档：[提示词教程](https://www.kdocs.cn/l/cdxVmC4hTihU)\n\n### 写需求的最小结构\n\n- 范围：做什么/不做什么\n- 边界：异常、权限、并发、数据量\n- 验收：给出可验证的结果\n'
+  '首页文档, 可在后台系统设置中修改此内容。'
 ) ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), deleted = 0;
 
 -- 提示词模板表
