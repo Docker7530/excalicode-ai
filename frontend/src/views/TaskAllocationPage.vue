@@ -1,31 +1,6 @@
 <template>
   <div class="task-allocation-page">
     <div class="page-shell">
-      <div class="view-switch">
-        <button
-          class="switch-card"
-          :class="{ active: activePanel === 'import' }"
-          type="button"
-          @click="switchPanel('import')"
-        >
-          <ElIcon><UploadFilled /></ElIcon>
-          <div class="switch-text">
-            <h3>导入任务模板</h3>
-          </div>
-        </button>
-        <button
-          class="switch-card"
-          :class="{ active: activePanel === 'overview' }"
-          type="button"
-          @click="switchPanel('overview')"
-        >
-          <ElIcon><List /></ElIcon>
-          <div class="switch-text">
-            <h3>任务批次总览</h3>
-          </div>
-        </button>
-      </div>
-
       <Transition name="fade-slide" mode="out-in">
         <section
           v-if="activePanel === 'import'"
@@ -348,8 +323,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useMenuBar } from '@/composables/useMenuBar';
 import {
   importTaskDrafts,
   publishTaskBatch,
@@ -360,7 +336,7 @@ import {
   fetchAssignableUsers,
 } from '@/api/task.js';
 import TaskDescriptionPopover from '@/components/TaskDescriptionPopover.vue';
-import { List, UploadFilled } from '@element-plus/icons-vue';
+import { UploadFilled } from '@element-plus/icons-vue';
 
 const drafts = ref([]);
 const activePanel = ref('import');
@@ -383,6 +359,31 @@ const savingDescription = ref(false);
 const switchPanel = (panel) => {
   activePanel.value = panel;
 };
+
+// ==================== 顶部公共导航栏（模块功能区）接入 ====================
+const menuBar = useMenuBar();
+
+menuBar.setMenuItems([
+  {
+    id: 'import',
+    label: '导入任务模板',
+    onSelect: () => switchPanel('import'),
+  },
+  {
+    id: 'overview',
+    label: '任务批次总览',
+    onSelect: () => switchPanel('overview'),
+  },
+]);
+
+watch(
+  activePanel,
+  (panel) => {
+    menuBar.setActiveMenuId(panel);
+  },
+  { immediate: true },
+);
+
 
 const resetDrafts = () => {
   drafts.value = [];
@@ -589,48 +590,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
-}
-
-.view-switch {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.switch-card {
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-  padding: 16px 20px;
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  transition: all 0.25s ease;
-  cursor: pointer;
-  color: #0f172a;
-}
-
-.switch-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(79, 70, 229, 0.15);
-}
-
-.switch-card.active {
-  border-color: transparent;
-  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
-  color: #ffffff;
-  box-shadow: 0 14px 36px rgba(64, 158, 255, 0.25);
-}
-
-.switch-card.active .switch-text h3 {
-  color: inherit;
-}
-
-.switch-text h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #0f172a;
 }
 
 .panel-wrapper {
