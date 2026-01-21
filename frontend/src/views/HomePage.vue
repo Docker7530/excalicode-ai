@@ -84,6 +84,12 @@
                 <h3 class="card-title">系统设置</h3>
               </div>
             </div>
+
+            <div class="feature-card" @click="navigateToUserManage">
+              <div class="card-content">
+                <h3 class="card-title">人员管理</h3>
+              </div>
+            </div>
           </template>
 
           <div
@@ -166,6 +172,10 @@ const navigateToCacheManage = () => {
 
 const navigateToSystemSettings = () => {
   router.push('/system-settings');
+};
+
+const navigateToUserManage = () => {
+  router.push('/user-manage');
 };
 
 const navigateToTaskAllocation = () => {

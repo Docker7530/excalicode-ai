@@ -63,13 +63,7 @@
         </div>
         <template #dropdown>
           <ElDropdownMenu>
-            <ElDropdownItem v-if="isAdmin" command="user-manage">
-              <ElIcon class="dropdown-item-icon">
-                <Setting />
-              </ElIcon>
-              <span>人员管理</span>
-            </ElDropdownItem>
-            <ElDropdownItem divided command="logout">
+            <ElDropdownItem command="logout">
               <ElIcon class="dropdown-item-icon">
                 <SwitchButton />
               </ElIcon>
@@ -83,13 +77,7 @@
 </template>
 
 <script setup>
-import {
-  ArrowDown,
-  House,
-  Setting,
-  SwitchButton,
-  User,
-} from '@element-plus/icons-vue';
+import { ArrowDown, House, SwitchButton, User } from '@element-plus/icons-vue';
 import { PROJECT_LINKS } from '@/constants';
 
 const props = defineProps({
@@ -110,7 +98,6 @@ const username = ref('');
 const role = ref('');
 const isHomeExpanded = ref(false);
 const userPanelRef = ref(null);
-const isAdmin = computed(() => role.value === 'ADMIN');
 const githubRepoUrl = PROJECT_LINKS.GITHUB_REPO;
 
 let introOpenTimer = null;
@@ -204,12 +191,6 @@ const goHome = () => {
 };
 
 const handleUserCommand = async (command) => {
-  if (command === 'user-manage') {
-    collapseHome(true);
-    router.push('/user-manage');
-    return;
-  }
-
   if (command !== 'logout') return;
 
   try {
