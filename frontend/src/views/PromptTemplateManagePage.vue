@@ -360,14 +360,14 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .prompt-template-manage-page {
   min-height: 100vh;
-  padding: 120px 24px 40px;
+  padding: 96px 24px 40px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   background: linear-gradient(135deg, #f8fbff 0%, #eef2ff 60%, #e0e7ff 100%);
 
   @media (max-width: 768px) {
-    padding: 100px 16px 32px;
+    padding: 84px 16px 32px;
   }
 
   // 主容器
@@ -377,8 +377,12 @@ onBeforeUnmount(() => {
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    height: calc(100vh - 220px);
+    height: calc(100vh - 176px);
     position: relative;
+
+    @media (max-width: 768px) {
+      height: calc(100vh - 148px);
+    }
   }
 
   // 左侧列表

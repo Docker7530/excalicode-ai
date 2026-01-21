@@ -321,10 +321,10 @@ onMounted(() => {
 .user-manage-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #eef2ff 100%);
-  padding: 120px 24px 48px;
+  padding: 96px 24px 48px;
 
   @media (max-width: 768px) {
-    padding: 100px 16px 32px;
+    padding: 84px 16px 32px;
   }
 }
 

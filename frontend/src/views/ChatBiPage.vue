@@ -255,11 +255,20 @@ onMounted(async () => {
 .chatbi-page {
   min-height: 100vh;
   background: #f6f7fb;
+  padding-top: 96px;
+
+  @media (max-width: 768px) {
+    padding-top: 84px;
+  }
 }
 
 .chatbi-container {
   display: flex;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 96px);
+
+  @media (max-width: 768px) {
+    height: calc(100vh - 84px);
+  }
 }
 
 .left-panel {

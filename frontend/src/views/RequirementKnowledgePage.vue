@@ -719,12 +719,12 @@ const handleSearch = async () => {
 .knowledge-page {
   min-height: 100vh;
   background: #ffffff;
-  padding: 80px 24px 40px;
+  padding: 96px 24px 40px;
 }
 
 @media (max-width: 768px) {
   .knowledge-page {
-    padding: 64px 16px 32px;
+    padding: 84px 16px 32px;
   }
 }
 

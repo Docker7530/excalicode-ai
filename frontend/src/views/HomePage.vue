@@ -12,12 +12,6 @@
     <!-- Hero 区域 -->
     <div class="hero-section">
       <div class="hero-container">
-        <!-- 标题与简介 -->
-        <div class="hero-header">
-          <h1 class="hero-title">EXCALICODE AI</h1>
-          <p class="hero-subtitle">智能化软件需求分析与AI助手平台</p>
-        </div>
-
         <!-- 功能卡片 -->
         <div class="features-grid">
           <div class="feature-card" @click="navigateToRequirement">
@@ -221,10 +215,10 @@ onBeforeUnmount(() => {
 }
 
 .hero-section {
-  padding: 80px 0 120px;
+  padding: 96px 0 120px;
 
   @media (max-width: 768px) {
-    padding: 60px 0 80px;
+    padding: 84px 0 80px;
   }
 }
 
@@ -232,42 +226,6 @@ onBeforeUnmount(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
-}
-
-.hero-header {
-  text-align: center;
-  margin-bottom: 80px;
-
-  @media (max-width: 768px) {
-    margin-bottom: 60px;
-  }
-}
-
-.hero-title {
-  font-size: 4rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 16px 0;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #409eff, #67c23a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
-  @media (max-width: 768px) {
-    font-size: 2.5rem;
-  }
-}
-
-.hero-subtitle {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #475569;
-  margin: 0 0 24px 0;
-
-  @media (max-width: 768px) {
-    font-size: 1.25rem;
-  }
 }
 
 .tips-section {
@@ -304,12 +262,12 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 32px;
-  margin-top: 80px;
+  margin-top: 12px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 24px;
-    margin-top: 60px;
+    margin-top: 8px;
   }
 }
 

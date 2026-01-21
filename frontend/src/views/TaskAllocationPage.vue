@@ -576,9 +576,13 @@ onMounted(async () => {
 .task-allocation-page {
   min-height: 100vh;
   background: #ffffff;
-  padding: 80px 24px 40px;
+  padding: 96px 24px 40px;
   position: relative;
   z-index: 0;
+
+  @media (max-width: 768px) {
+    padding: 84px 16px 32px;
+  }
 }
 
 .page-shell {

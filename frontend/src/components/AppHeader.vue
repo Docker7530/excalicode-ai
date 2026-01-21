@@ -1,83 +1,73 @@
 <template>
-  <div class="app-header">
-    <div
-      ref="userPanelRef"
-      class="user-panel"
-      :class="{
-        'with-home': showHomeButton,
-        'home-visible': showHomeButton && isHomeExpanded,
-      }"
-      @mouseenter="handlePanelMouseEnter"
-      @mouseleave="handlePanelMouseLeave"
-      @focusin="handlePanelFocusIn"
-      @focusout="handlePanelFocusOut"
-    >
-      <button
-        v-if="showHomeButton"
-        class="home-pill"
-        type="button"
-        @click="goHome"
-      >
-        <ElIcon class="pill-icon">
-          <House />
-        </ElIcon>
-        <span class="pill-text">返回首页</span>
-      </button>
-
-      <a
-        v-if="showGithubButton"
-        class="github-button"
-        :href="githubRepoUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="打开 GitHub 仓库"
-        title="GitHub"
-      >
-        <svg
-          class="github-icon"
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          aria-hidden="true"
-          focusable="false"
+  <header class="app-header" role="banner">
+    <div class="header-inner">
+      <div class="left">
+        <button
+          v-if="showHomeButton"
+          class="brand"
+          type="button"
+          :disabled="isHome"
+          :aria-disabled="isHome"
+          @click="goHome"
         >
-          <path
-            fill="currentColor"
-            d="M12 .5C5.7.5.6 5.6.6 11.9c0 5 3.3 9.3 7.9 10.8.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 .1 1.5.7 1.8 1.2.2.5.8.7 1.3.5.1-.7.4-1.2.7-1.4-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.3.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4C17.1 5 18.1 5.3 18.1 5.3c.6 1.6.2 2.8.1 3.1.8.9 1.2 2 1.2 3.3 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2v3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.8C23.4 5.6 18.3.5 12 .5z"
-          />
-        </svg>
-      </a>
+          <span class="brand-mark" aria-hidden="true">EX</span>
+          <span class="brand-name">EXCALICODE AI</span>
 
-      <ElDropdown trigger="click" @command="handleUserCommand">
-        <div class="user-trigger">
-          <ElIcon class="user-icon">
-            <User />
-          </ElIcon>
-          <div class="user-info">
-            <span class="username">{{ username }}</span>
-            <span class="role">{{ roleLabel }}</span>
-          </div>
-          <ElIcon class="dropdown-indicator">
-            <ArrowDown />
-          </ElIcon>
+          <span v-if="!isHome" class="back-chip">
+            <ElIcon class="back-chip-icon"><House /></ElIcon>
+            <span class="back-chip-text">首页</span>
+          </span>
+        </button>
+
+        <div v-else class="brand brand--static" aria-label="EXCALICODE AI">
+          <span class="brand-mark" aria-hidden="true">EX</span>
+          <span class="brand-name">EXCALICODE AI</span>
         </div>
-        <template #dropdown>
-          <ElDropdownMenu>
-            <ElDropdownItem command="logout">
-              <ElIcon class="dropdown-item-icon">
-                <SwitchButton />
-              </ElIcon>
-              <span>退出登录</span>
-            </ElDropdownItem>
-          </ElDropdownMenu>
-        </template>
-      </ElDropdown>
+      </div>
+
+      <div class="right" aria-label="Header actions">
+        <a
+          v-if="showGithubButton && githubRepoUrl"
+          class="icon-btn"
+          :href="githubRepoUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="打开 GitHub 仓库"
+          title="GitHub"
+        >
+          <svg
+            class="github-icon"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              fill="currentColor"
+              d="M12 .5C5.7.5.6 5.6.6 11.9c0 5 3.3 9.3 7.9 10.8.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 .1 1.5.7 1.8 1.2.2.5.8.7 1.3.5.1-.7.4-1.2.7-1.4-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.3.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4C17.1 5 18.1 5.3 18.1 5.3c.6 1.6.2 2.8.1 3.1.8.9 1.2 2 1.2 3.3 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2v3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.8C23.4 5.6 18.3.5 12 .5z"
+            />
+          </svg>
+        </a>
+
+        <button
+          class="user-action"
+          type="button"
+          :aria-label="isLoggedIn ? '退出登录' : '去登录'"
+          @click="handleUserAction"
+        >
+          <span class="user-action__default" :title="displayName">
+            {{ displayName }}
+          </span>
+          <span class="user-action__hover">{{ hoverLabel }}</span>
+        </button>
+      </div>
     </div>
-  </div>
+  </header>
 </template>
 
 <script setup>
-import { ArrowDown, House, SwitchButton, User } from '@element-plus/icons-vue';
+import { House } from '@element-plus/icons-vue';
 import { PROJECT_LINKS } from '@/constants';
 
 const props = defineProps({
@@ -87,324 +77,368 @@ const props = defineProps({
   },
   showGithubButton: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 });
 
 const { showHomeButton, showGithubButton } = toRefs(props);
 
 const router = useRouter();
+const route = useRoute();
+
 const username = ref('');
-const role = ref('');
-const isHomeExpanded = ref(false);
-const userPanelRef = ref(null);
 const githubRepoUrl = PROJECT_LINKS.GITHUB_REPO;
 
-let introOpenTimer = null;
-let introCloseTimer = null;
-
 const refreshUserInfo = () => {
-  username.value = localStorage.getItem('username') || '未登录';
-  role.value = localStorage.getItem('role') || 'USER';
-};
-
-const clearIntroTimers = () => {
-  if (introOpenTimer) {
-    window.clearTimeout(introOpenTimer);
-    introOpenTimer = null;
-  }
-  if (introCloseTimer) {
-    window.clearTimeout(introCloseTimer);
-    introCloseTimer = null;
-  }
-};
-
-const expandHome = () => {
-  if (!showHomeButton.value) return;
-  clearIntroTimers();
-  isHomeExpanded.value = true;
-};
-
-const collapseHome = (force = false) => {
-  if (!showHomeButton.value) return;
-  if (!force) {
-    const activeElement = document.activeElement;
-    if (activeElement && userPanelRef.value?.contains(activeElement)) {
-      return;
-    }
-  }
-  isHomeExpanded.value = false;
-};
-
-const handlePanelMouseEnter = () => {
-  expandHome();
-};
-
-const handlePanelMouseLeave = () => {
-  collapseHome();
-};
-
-const handlePanelFocusIn = () => {
-  expandHome();
-};
-
-const handlePanelFocusOut = (event) => {
-  if (
-    !showHomeButton.value ||
-    !userPanelRef.value ||
-    userPanelRef.value.contains(event?.relatedTarget)
-  ) {
-    return;
-  }
-  collapseHome();
-};
-
-const scheduleIntroPeek = () => {
-  if (!showHomeButton.value) return;
-  clearIntroTimers();
-  introOpenTimer = window.setTimeout(() => {
-    expandHome();
-    introCloseTimer = window.setTimeout(() => {
-      collapseHome(true);
-      introCloseTimer = null;
-    }, 1600);
-  }, 300);
+  username.value = localStorage.getItem('username') || '';
 };
 
 onMounted(() => {
   refreshUserInfo();
   window.addEventListener('storage', refreshUserInfo);
-  scheduleIntroPeek();
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('storage', refreshUserInfo);
-  clearIntroTimers();
 });
 
-const roleLabel = computed(() =>
-  role.value === 'ADMIN' ? '管理员' : '普通用户',
-);
+const isHome = computed(() => route.path === '/');
+
+const isLoggedIn = computed(() => Boolean(localStorage.getItem('token')));
+
+const displayName = computed(() => username.value || '登录');
+
+const hoverLabel = computed(() => (isLoggedIn.value ? '退出' : '登录'));
 
 const goHome = () => {
+  if (isHome.value) return;
   router.push('/');
 };
 
-const handleUserCommand = async (command) => {
-  if (command !== 'logout') return;
-
-  try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      type: 'warning',
-    });
-
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-
-    refreshUserInfo();
-    ElMessage.success('已退出登录');
-
+const handleUserAction = () => {
+  if (!isLoggedIn.value) {
     router.push('/login');
-  } catch {
-    // 用户取消
-  } finally {
-    collapseHome(true);
+    return;
   }
+
+  localStorage.removeItem('token');
+  localStorage.removeItem('username');
+  localStorage.removeItem('role');
+
+  refreshUserInfo();
+  ElMessage.success('已退出登录');
+
+  router.push('/login');
 };
 </script>
 
 <style scoped lang="scss">
 .app-header {
+  --hdr-h: 64px;
+  --hdr-max: 1240px;
+  --hdr-pad-x: 22px;
+
   position: fixed;
-  top: 24px;
-  left: 24px;
-  right: 24px;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
+  top: 16px;
+  left: 16px;
+  right: 16px;
   z-index: 1200;
+  pointer-events: none;
 
   @media (max-width: 768px) {
-    top: 16px;
-    left: 16px;
-    right: 16px;
+    top: 12px;
+    left: 12px;
+    right: 12px;
   }
 }
 
-.user-panel {
+.header-inner {
   pointer-events: auto;
-  margin-left: auto;
+  position: relative;
+  height: var(--hdr-h);
   display: flex;
   align-items: center;
-  gap: 12px;
-  position: relative;
+  justify-content: space-between;
+  max-width: var(--hdr-max);
+  margin: 0 auto;
+  padding: 0 var(--hdr-pad-x);
+
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(18px) saturate(1.4);
+  overflow: hidden;
+
+  @supports not (backdrop-filter: blur(1px)) {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        620px 180px at 20% 0%,
+        rgba(56, 189, 248, 0.22),
+        transparent 60%
+      ),
+      radial-gradient(
+        540px 180px at 80% 0%,
+        rgba(34, 197, 94, 0.14),
+        transparent 55%
+      );
+    opacity: 0.9;
+  }
 }
 
-.user-panel.with-home {
-  gap: 0;
+.left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
-.user-panel.with-home .github-button {
-  margin-right: 12px;
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #0f172a;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'PingFang SC',
+    'Microsoft YaHei',
+    sans-serif;
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    cursor: default;
+    box-shadow: none;
+    transform: none;
+    background: transparent;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+  }
 }
 
-.github-button {
+.brand--static {
+  cursor: default;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.96);
+  background: linear-gradient(135deg, #0ea5e9, #22c55e);
+  box-shadow:
+    0 10px 18px rgba(14, 165, 233, 0.18),
+    0 10px 18px rgba(34, 197, 94, 0.12);
+}
+
+.brand-name {
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+
+.back-chip {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+  font-weight: 650;
+  font-size: 0.88rem;
   color: #0f172a;
+}
+
+.back-chip-icon {
+  color: #0ea5e9;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
-}
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background-color 0.16s ease;
 
-.github-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
-  border-color: rgba(99, 102, 241, 0.35);
-  color: #111827;
-}
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.76);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+    border-color: rgba(14, 165, 233, 0.24);
+  }
 
-.github-button:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+  }
 }
 
 .github-icon {
   display: block;
 }
 
-.home-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  color: #1e293b;
-  font-weight: 600;
-  font-size: 0.95rem;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+.user-action {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
   cursor: pointer;
-  transition:
-    max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.2s ease,
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    margin-right 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.28s ease;
-  max-width: 0;
-  opacity: 0;
-  margin-right: 0;
-  pointer-events: none;
+  position: relative;
   overflow: hidden;
-  transform: translateX(12px);
-  white-space: nowrap;
-}
 
-.home-pill:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-}
-
-.user-panel.home-visible .home-pill {
-  max-width: 160px;
-  opacity: 1;
-  margin-right: 12px;
-  pointer-events: auto;
-  transform: translateX(0);
-}
-
-.pill-icon {
-  color: #6366f1;
-}
-
-.user-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-  cursor: pointer;
+  justify-content: center;
+
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background-color 0.16s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
-    border-color: rgba(99, 102, 241, 0.35);
+    background: rgba(255, 255, 255, 0.76);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+    border-color: rgba(244, 63, 94, 0.22);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
   }
 }
 
-.user-icon {
-  color: #6366f1;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.username {
-  font-weight: 600;
+.user-action__default,
+.user-action__hover {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
   font-size: 0.95rem;
-  color: #1e293b;
+  letter-spacing: -0.01em;
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease;
 }
 
-.role {
-  font-size: 0.75rem;
-  color: #64748b;
+.user-action__default {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(15, 23, 42, 0.92);
 }
 
-.dropdown-indicator {
-  color: #94a3b8;
+.user-action__hover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(190, 18, 60, 0.95);
+  opacity: 0;
+  transform: translateY(6px);
 }
 
-.dropdown-item-icon {
-  margin-right: 6px;
+.user-action:hover .user-action__default {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
-@media (max-width: 576px) {
-  .home-pill,
-  .user-trigger {
-    padding: 8px 14px;
-    gap: 8px;
+.user-action:hover .user-action__hover {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    --hdr-pad-x: 14px;
   }
 
-  .github-button {
-    width: 40px;
-    height: 40px;
-  }
-
-  .user-info {
+  .brand-name {
     display: none;
   }
 
-  .home-pill {
-    max-width: 40px;
-    justify-content: center;
+  .back-chip {
+    margin-left: 6px;
+  }
+
+  .user-name {
+    max-width: 120px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-pill {
+  .brand,
+  .user-action,
+  .icon-btn {
     transition: none;
   }
 }

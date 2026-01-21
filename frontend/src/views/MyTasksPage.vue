@@ -254,9 +254,13 @@ onMounted(() => {
 .my-tasks-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #f1f5f9 0%, #ffffff 100%);
-  padding: 80px 24px 40px;
+  padding: 96px 24px 40px;
   position: relative;
   z-index: 0;
+
+  @media (max-width: 768px) {
+    padding: 84px 16px 32px;
+  }
 }
 
 .page-container {

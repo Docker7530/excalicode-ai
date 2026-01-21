@@ -5,6 +5,7 @@
 
 <template>
   <div class="vacation-split-page">
+    <AppHeader />
     <div class="page-container">
       <div class="page-header">
         <h1 class="page-title">员工休假记录拆分</h1>
@@ -90,6 +91,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import AppHeader from '@/components/AppHeader.vue';
 import { api } from '@/api';
 import { Document, Upload, UploadFilled } from '@element-plus/icons-vue';
 import { ElMessage, genFileId } from 'element-plus';
@@ -206,7 +208,11 @@ const extractFilename = (response) => {
 .vacation-split-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
-  padding: 40px 0;
+  padding: 96px 0 64px;
+
+  @media (max-width: 768px) {
+    padding: 84px 0 48px;
+  }
 }
 
 .page-container {

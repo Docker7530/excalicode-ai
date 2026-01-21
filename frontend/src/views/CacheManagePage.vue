@@ -651,7 +651,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .page-body {
-    padding: 80px 16px 32px;
+    padding: 84px 16px 32px;
   }
 
   .page-heading {

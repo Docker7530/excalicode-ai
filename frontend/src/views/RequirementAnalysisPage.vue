@@ -1122,14 +1122,14 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: $spacing-xl 0 $spacing-4xl;
+  padding: $spacing-4xl 0 $spacing-4xl;
 
   @media (max-width: $breakpoint-md) {
-    padding: $spacing-xl 0;
+    padding: 5.25rem 0 $spacing-3xl;
   }
 
   @media (max-width: $breakpoint-sm) {
-    padding: $spacing-lg 0;
+    padding: 5.25rem 0 $spacing-3xl;
   }
 }
 
@@ -1172,8 +1172,12 @@ onUnmounted(() => {
 
 .workflow-header {
   position: sticky;
-  top: 16px;
+  top: 96px;
   z-index: 50;
+
+  @media (max-width: $breakpoint-md) {
+    top: 84px;
+  }
 }
 
 .workflow-steps {

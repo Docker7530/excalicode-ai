@@ -258,7 +258,11 @@ onMounted(() => {
 .page-body {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 110px 24px 64px;
+  padding: 96px 24px 64px;
+
+  @media (max-width: 768px) {
+    padding: 84px 16px 48px;
+  }
 }
 
 .page-heading {

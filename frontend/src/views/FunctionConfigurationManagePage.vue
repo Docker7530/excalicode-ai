@@ -370,7 +370,11 @@ onMounted(() => {
 .function-config-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
-  padding: 120px 0 60px;
+  padding: 96px 0 60px;
+
+  @media (max-width: 768px) {
+    padding: 84px 0 48px;
+  }
 }
 
 .stats-section {
