@@ -6,13 +6,6 @@
 <template>
   <div class="vacation-split-page">
     <div class="page-container">
-      <div class="page-header">
-        <h1 class="page-title">员工休假记录拆分</h1>
-        <p class="page-description">
-          上传考勤Excel后，系统会自动筛选备注、AI修正并生成休假数据表Excel直接供下载
-        </p>
-      </div>
-
       <div class="upload-section">
         <ElCard shadow="hover">
           <template #header>
@@ -219,27 +212,6 @@ const extractFilename = (response) => {
   padding: 0 24px;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 16px;
-  background: linear-gradient(135deg, #409eff, #67c23a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.page-description {
-  font-size: 1.125rem;
-  color: #64748b;
-  margin: 0;
-}
 
 .upload-section {
   margin-bottom: 24px;
