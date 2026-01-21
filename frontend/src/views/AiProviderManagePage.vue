@@ -1,7 +1,5 @@
 <template>
   <div class="ai-provider-page">
-    <AppHeader />
-
     <!-- 统计卡片 -->
     <div class="stats-section">
       <div class="stats-container">
@@ -293,7 +291,6 @@
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue';
 import {
   createModel,
   createProvider,

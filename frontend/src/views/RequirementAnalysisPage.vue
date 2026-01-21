@@ -8,54 +8,9 @@
 
 <template>
   <div class="requirement-analysis-page">
-    <AppHeader />
-
     <div class="page-container">
       <main class="main-content">
         <div class="content-wrapper">
-          <div class="workflow-header">
-            <ElSteps
-              class="workflow-steps"
-              :active="activeStepIndex"
-              align-center
-              finish-status="success"
-              process-status="process"
-            >
-              <ElStep
-                v-for="step in stepConfigs"
-                :key="step.key"
-                :status="getStepStatus(step)"
-              >
-                <template #title>
-                  <div
-                    class="step-title"
-                    :class="{
-                      active: step.key === currentStepKey,
-                      completed:
-                        step.isCompleted && step.key !== currentStepKey,
-                      disabled: !step.isEnabled,
-                    }"
-                    role="button"
-                    :tabindex="step.isEnabled ? 0 : -1"
-                    :aria-disabled="!step.isEnabled"
-                    :aria-current="
-                      step.key === currentStepKey ? 'step' : undefined
-                    "
-                    @click="step.isEnabled && handleStepClick(step.key)"
-                    @keydown.enter.prevent="
-                      step.isEnabled && handleStepClick(step.key)
-                    "
-                    @keydown.space.prevent="
-                      step.isEnabled && handleStepClick(step.key)
-                    "
-                  >
-                    <span class="step-title-text">{{ step.label }}</span>
-                  </div>
-                </template>
-              </ElStep>
-            </ElSteps>
-          </div>
-
           <AnalysisForm
             v-if="currentStep === 'requirement'"
             :loading="isBreakingDown || isEnhancing"
@@ -193,8 +148,8 @@
  */
 
 import { cosmicService } from '@/api';
-import AppHeader from '@/components/AppHeader.vue';
 import CosmicEstimateMaster from '@/components/CosmicEstimateMaster.vue';
+import { useMenuBar } from '@/composables/useMenuBar';
 import { MESSAGES, WORKFLOW_CONFIG } from '@/constants';
 import { validateRequirementName } from '@/utils';
 
@@ -345,20 +300,6 @@ const stepConfigs = computed(() => {
     }
   });
 });
-
-// 当前步骤序号，驱动步骤条高亮
-const activeStepIndex = computed(() => {
-  const index = stepConfigs.value.findIndex(
-    (step) => step.key === currentStepKey.value,
-  );
-  return index >= 0 ? index : 0;
-});
-
-const getStepStatus = (step) => {
-  if (step.key === currentStepKey.value) return 'process';
-  if (step.isCompleted) return 'finish';
-  return 'wait';
-};
 
 // ==================== 进度模拟：保持加载过程的细腻体验 ====================
 const stopBreakdownProgressSimulation = () => {
@@ -986,6 +927,32 @@ const handleStepClick = (target) => {
   scrollPageToTop();
 };
 
+// ==================== 顶部公共导航栏（模块功能区）接入 ====================
+const menuBar = useMenuBar();
+
+watch(
+  stepConfigs,
+  (steps) => {
+    menuBar.setMenuItems(
+      steps.map((step) => ({
+        id: step.key,
+        label: step.label,
+        disabled: !step.isEnabled,
+        onSelect: () => handleStepClick(step.key),
+      })),
+    );
+  },
+  { immediate: true },
+);
+
+watch(
+  currentStepKey,
+  (key) => {
+    menuBar.setActiveMenuId(key);
+  },
+  { immediate: true },
+);
+
 const handleStepNavigate = (target) => {
   if (target === currentStepKey.value) {
     return;
@@ -1168,166 +1135,6 @@ onUnmounted(() => {
   .content-wrapper {
     max-width: 100%;
   }
-}
-
-.workflow-header {
-  position: sticky;
-  top: 96px;
-  z-index: 50;
-
-  @media (max-width: $breakpoint-md) {
-    top: 84px;
-  }
-}
-
-.workflow-steps {
-  padding: $spacing-md $spacing-lg;
-  border-radius: $border-radius-lg;
-  border: none;
-  border-bottom: 2px solid rgba(148, 163, 184, 0.15);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(10px);
-  margin-bottom: $spacing-xl;
-  max-width: 100%;
-  overflow: visible;
-  position: relative;
-  transition: all 0.3s ease;
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.06),
-    0 1px 0 rgba(148, 163, 184, 0.08);
-
-  &::-webkit-scrollbar {
-    height: 0;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-sm $spacing-md;
-  }
-}
-
-@media (min-width: $breakpoint-md) {
-  .workflow-steps {
-    padding-right: calc($spacing-lg + 240px);
-  }
-}
-
-@media (max-width: $breakpoint-sm) {
-  .workflow-header {
-    top: 8px;
-  }
-}
-
-// 步骤容器
-.workflow-steps :deep(.el-steps__item) {
-  flex: 1 1 0;
-  min-width: 120px;
-  position: relative;
-  padding: 0 2px;
-}
-
-// 隐藏节点图标
-.workflow-steps :deep(.el-step__icon) {
-  display: none;
-}
-
-// 隐藏连接线
-.workflow-steps :deep(.el-step__line) {
-  display: none;
-}
-
-// 标题样式 - 主要视觉元素
-.workflow-steps :deep(.el-step__title) {
-  font-weight: $font-weight-medium;
-  color: rgba(100, 116, 139, 0.9);
-  font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0;
-  margin: 0;
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-// 等待状态
-.workflow-steps :deep(.el-step__title.is-wait) {
-  color: rgba(100, 116, 139, 0.65);
-}
-
-// 进行中状态 - 蓝色文字 + 底部指示器
-.workflow-steps :deep(.el-step__title.is-process) {
-  font-weight: $font-weight-bold;
-  color: #2563eb;
-  transform: scale(1.05);
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70%;
-    height: 3px;
-    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-    border-radius: 3px 3px 0 0;
-    box-shadow: 0 -2px 12px rgba(37, 99, 235, 0.4);
-    animation: slideIndicator 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-@keyframes slideIndicator {
-  from {
-    width: 0;
-    opacity: 0;
-  }
-  to {
-    width: 70%;
-    opacity: 1;
-  }
-}
-
-// 完成状态 - 绿色文字
-.workflow-steps :deep(.el-step__title.is-finish) {
-  color: #16a34a;
-  font-weight: $font-weight-semibold;
-}
-
-// 步骤标题交互 - 扩大可点击区域
-.step-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
-  padding: $spacing-md $spacing-lg;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  border-radius: $border-radius-md;
-
-  &.disabled {
-    cursor: not-allowed;
-    opacity: 0.4;
-  }
-
-  &:not(.disabled) {
-    cursor: pointer;
-
-    &:hover {
-      background: rgba(37, 99, 235, 0.06);
-      transform: translateY(-2px);
-    }
-
-    &:active {
-      transform: translateY(0);
-      background: rgba(37, 99, 235, 0.08);
-    }
-  }
-}
-
-.step-title-text {
-  font-weight: inherit;
-  letter-spacing: 0.02em;
-  transition: inherit;
-  white-space: nowrap;
 }
 
 .sequence-diagram-stage {

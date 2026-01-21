@@ -1,6 +1,5 @@
 <template>
   <div class="my-tasks-page">
-    <AppHeader />
     <div class="page-container">
       <ElCard class="card">
         <template #header>
@@ -161,7 +160,6 @@ import {
   fetchMyTaskBatchDetail,
   updateTaskStatus,
 } from '@/api/task.js';
-import AppHeader from '@/components/AppHeader.vue';
 import TaskDescriptionPopover from '@/components/TaskDescriptionPopover.vue';
 import { Memo } from '@element-plus/icons-vue';
 

@@ -1,6 +1,5 @@
 <template>
   <div class="task-allocation-page">
-    <AppHeader />
     <div class="page-shell">
       <div class="view-switch">
         <button
@@ -360,7 +359,6 @@ import {
   updateTaskDescription,
   fetchAssignableUsers,
 } from '@/api/task.js';
-import AppHeader from '@/components/AppHeader.vue';
 import TaskDescriptionPopover from '@/components/TaskDescriptionPopover.vue';
 import { List, UploadFilled } from '@element-plus/icons-vue';
 

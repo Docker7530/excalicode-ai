@@ -1,7 +1,5 @@
 <template>
   <div class="user-manage-page">
-    <AppHeader />
-
     <section class="hero-section">
       <div class="hero-content">
         <h1 class="page-title">
@@ -145,7 +143,6 @@
 
 <script setup>
 import { createUser, fetchUsers, removeUser, updateUser } from '@/api/user';
-import AppHeader from '@/components/AppHeader.vue';
 import { Delete, Edit, Plus, User } from '@element-plus/icons-vue';
 
 const users = ref([]);

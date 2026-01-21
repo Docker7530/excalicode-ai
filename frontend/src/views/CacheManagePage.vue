@@ -1,7 +1,5 @@
 <template>
   <div class="cache-manage-page">
-    <AppHeader />
-
     <section class="page-body">
       <header class="page-heading">
         <span class="heading-meta">
@@ -238,7 +236,6 @@
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue';
 import {
   clearCache,
   evictCacheKey,

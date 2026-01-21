@@ -1,7 +1,5 @@
 <template>
   <div class="chatbi-page">
-    <AppHeader />
-
     <div class="chatbi-container">
       <div class="left-panel">
         <div class="panel-header">
@@ -98,7 +96,6 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
 import {
   askChatBi,
   getChatBiSessionDetail,

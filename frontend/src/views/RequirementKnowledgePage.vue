@@ -1,6 +1,5 @@
 <template>
   <div class="knowledge-page">
-    <AppHeader />
     <div class="page-shell">
       <div class="view-switch">
         <button
@@ -386,7 +385,6 @@
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue';
 import {
   deleteKnowledgeEntry,
   deleteKnowledgeVector,

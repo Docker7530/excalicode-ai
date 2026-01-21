@@ -1,7 +1,5 @@
 <template>
   <div class="prompt-template-manage-page">
-    <AppHeader />
-
     <ElContainer class="main-container">
       <!-- 左侧：提示词列表 -->
       <ElAside width="350px" class="prompt-list-aside">
@@ -127,7 +125,6 @@
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue';
 import { Delete, Plus, Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import Vditor from 'vditor';

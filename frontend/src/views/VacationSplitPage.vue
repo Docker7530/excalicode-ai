@@ -5,7 +5,6 @@
 
 <template>
   <div class="vacation-split-page">
-    <AppHeader />
     <div class="page-container">
       <div class="page-header">
         <h1 class="page-title">员工休假记录拆分</h1>
@@ -91,7 +90,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
 import { api } from '@/api';
 import { Document, Upload, UploadFilled } from '@element-plus/icons-vue';
 import { ElMessage, genFileId } from 'element-plus';

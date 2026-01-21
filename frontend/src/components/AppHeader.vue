@@ -25,6 +25,30 @@
         </div>
       </div>
 
+      <nav v-if="menuItems?.length" class="module-bar" aria-label="模块功能">
+        <div
+          ref="moduleScrollRef"
+          class="module-bar__scroll"
+          @wheel="handleModuleWheel"
+          @pointerdown="handleModulePointerDown"
+        >
+          <button
+            v-for="item in menuItems"
+            :key="item.id"
+            class="module-item"
+            :class="{
+              active: item.id === activeMenuId,
+              disabled: item.disabled,
+            }"
+            type="button"
+            :disabled="item.disabled"
+            @click="handleModuleItemClick(item, $event)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+      </nav>
+
       <div class="right" aria-label="Header actions">
         <a
           v-if="showGithubButton && githubRepoUrl"
@@ -79,9 +103,18 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  menuItems: {
+    type: Array,
+    default: () => [],
+  },
+  activeMenuId: {
+    type: String,
+    default: '',
+  },
 });
 
-const { showHomeButton, showGithubButton } = toRefs(props);
+const { showHomeButton, showGithubButton, menuItems } = toRefs(props);
+const activeMenuId = computed(() => props.activeMenuId);
 
 const router = useRouter();
 const route = useRoute();
@@ -113,6 +146,106 @@ const hoverLabel = computed(() => (isLoggedIn.value ? '退出' : '登录'));
 const goHome = () => {
   if (isHome.value) return;
   router.push('/');
+};
+
+const moduleScrollRef = ref(null);
+
+let modulePointerState = null;
+
+const handleModuleWheel = (event) => {
+  const el = moduleScrollRef.value;
+  if (!el) return;
+
+  if (el.scrollWidth > el.clientWidth) {
+    event.preventDefault();
+  }
+
+  // 纵向滚轮映射为横向滚动（触控板/鼠标都更顺手）
+  if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+    el.scrollLeft += event.deltaY;
+  } else {
+    el.scrollLeft += event.deltaX;
+  }
+};
+
+const handleModulePointerDown = (event) => {
+  const el = moduleScrollRef.value;
+  if (!el) return;
+
+  // 点击菜单项时不要进入拖拽逻辑（避免吞掉 click）
+  if (event.target?.closest?.('.module-item')) return;
+
+  // 左键/触摸/触控笔支持拖拽横向滑动
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+  modulePointerState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startScrollLeft: el.scrollLeft,
+  };
+
+  el.setPointerCapture(event.pointerId);
+  el.classList.add('is-dragging');
+
+  const onMove = (moveEvent) => {
+    if (
+      !modulePointerState ||
+      moveEvent.pointerId !== modulePointerState.pointerId
+    )
+      return;
+    const dx = moveEvent.clientX - modulePointerState.startX;
+    el.scrollLeft = modulePointerState.startScrollLeft - dx;
+  };
+
+  const onUp = (upEvent) => {
+    if (
+      !modulePointerState ||
+      upEvent.pointerId !== modulePointerState.pointerId
+    )
+      return;
+
+    modulePointerState = null;
+    el.classList.remove('is-dragging');
+
+    try {
+      el.releasePointerCapture(upEvent.pointerId);
+    } catch {
+      // ignore
+    }
+
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onUp);
+  };
+
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+};
+
+const centerModuleItem = (targetEl) => {
+  const el = moduleScrollRef.value;
+  if (!el || !targetEl) return;
+
+  const containerRect = el.getBoundingClientRect();
+  const itemRect = targetEl.getBoundingClientRect();
+  const current = el.scrollLeft;
+
+  const itemCenter =
+    itemRect.left - containerRect.left + itemRect.width / 2 + current;
+  const next = itemCenter - containerRect.width / 2;
+
+  el.scrollTo({ left: next, behavior: 'smooth' });
+};
+
+const handleModuleItemClick = (item, event) => {
+  if (!item || item.disabled) return;
+
+  // 轻量：点击后把当前项滚到可视区域偏中间
+  const btn = event?.currentTarget;
+  centerModuleItem(btn);
+
+  item.onSelect?.();
 };
 
 const handleUserAction = () => {
@@ -291,6 +424,78 @@ const handleUserAction = () => {
 
 .back-chip-icon {
   color: #0ea5e9;
+}
+
+.module-bar {
+  flex: 1;
+  min-width: 0;
+  margin: 0 12px;
+}
+
+.module-bar__scroll {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 12px;
+  user-select: none;
+  touch-action: pan-x;
+  background: transparent;
+}
+
+.module-bar__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.module-bar__scroll.is-dragging {
+  cursor: grabbing;
+}
+
+.module-item {
+  height: 34px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(15, 23, 42, 0.76);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.14s ease;
+}
+
+.module-item:hover {
+  color: rgba(15, 23, 42, 0.92);
+}
+
+.module-item.active {
+  color: rgba(2, 132, 199, 0.98);
+}
+
+.module-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(2, 132, 199, 0.9);
+}
+
+.module-item.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.module-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
 }
 
 .right {

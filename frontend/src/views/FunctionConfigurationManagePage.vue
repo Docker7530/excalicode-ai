@@ -1,7 +1,5 @@
 <template>
   <div class="function-config-page">
-    <AppHeader />
-
     <div class="stats-section">
       <div class="stats-container">
         <div class="stat-card">
@@ -188,7 +186,6 @@
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue';
 import {
   deleteFunctionModelMapping,
   deleteFunctionPromptMapping,

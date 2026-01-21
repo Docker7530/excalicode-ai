@@ -8,7 +8,6 @@
 
 <template>
   <div class="home-page">
-    <AppHeader :show-home-button="false" show-github-button />
     <!-- Hero 区域 -->
     <div class="hero-section">
       <div class="hero-container">
@@ -119,7 +118,6 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
 import MarkdownPreview from '@/components/MarkdownPreview.vue';
 import { getSettingByKey } from '@/api/sysSetting.js';
 

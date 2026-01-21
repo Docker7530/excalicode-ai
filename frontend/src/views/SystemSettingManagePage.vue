@@ -1,7 +1,5 @@
 <template>
   <div class="system-setting-manage-page">
-    <AppHeader />
-
     <section class="page-body">
       <header class="page-heading">
         <div class="heading-left">
@@ -129,7 +127,6 @@
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue';
 import {
   deleteAdminSetting,
   listAdminSettings,
