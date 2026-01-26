@@ -1,26 +1,5 @@
 <template>
   <div class="user-manage-page">
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1 class="page-title">
-          <ElIcon class="title-icon"><User /></ElIcon>
-          人员管理
-        </h1>
-        <p class="page-desc">
-          管理系统登录账号，支持创建、更新、删除管理员与普通用户
-        </p>
-      </div>
-      <ElButton
-        type="primary"
-        size="large"
-        :icon="Plus"
-        class="create-button"
-        @click="openCreateDialog"
-      >
-        新增人员
-      </ElButton>
-    </section>
-
     <section v-loading="loading" class="table-section">
       <ElTable
         :data="users"
@@ -143,13 +122,17 @@
 
 <script setup>
 import { createUser, fetchUsers, removeUser, updateUser } from '@/api/user';
-import { Delete, Edit, Plus, User } from '@element-plus/icons-vue';
+import { useMenuBar } from '@/composables/useMenuBar';
+import { Delete, Edit } from '@element-plus/icons-vue';
 
 const users = ref([]);
 const loading = ref(false);
 const submitLoading = ref(false);
 const dialogVisible = ref(false);
 const dialogMode = ref('create');
+
+// ==================== 顶部公共导航栏（模块功能区）接入 ====================
+const menuBar = useMenuBar();
 
 const roleLabelMap = {
   ADMIN: '管理员',
@@ -310,6 +293,15 @@ watchEffect(() => {
 });
 
 onMounted(() => {
+  menuBar.setMenuItems([
+    {
+      id: 'create-user',
+      label: '新增人员',
+      onSelect: () => openCreateDialog(),
+    },
+  ]);
+  menuBar.setActiveMenuId('');
+
   loadUsers();
 });
 </script>
@@ -317,7 +309,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .user-manage-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #eef2ff 100%);
+  background: #f5f6f7;
   padding: 96px 24px 48px;
 
   @media (max-width: 768px) {
@@ -325,73 +317,12 @@ onMounted(() => {
   }
 }
 
-.hero-section {
-  max-width: 960px;
-  margin: 0 auto 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 24px;
-  padding: 32px 40px;
-  box-shadow: 0 24px 60px rgba(79, 70, 229, 0.12);
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 24px;
-  }
-}
-
-.hero-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.page-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e1b4b;
-  margin: 0;
-}
-
-.title-icon {
-  padding: 12px;
-  border-radius: 16px;
-  background: rgba(79, 70, 229, 0.12);
-  color: #4f46e5;
-  font-size: 24px;
-}
-
-.page-desc {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #4c566a;
-}
-
-.create-button {
-  border-radius: 999px;
-  padding: 0 28px;
-  height: 48px;
-  font-weight: 600;
-  box-shadow: 0 18px 30px rgba(79, 70, 229, 0.18);
-
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-}
-
 .table-section {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.98);
+  background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
   padding: 24px;
 
   @media (max-width: 768px) {
