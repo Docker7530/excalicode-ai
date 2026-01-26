@@ -212,7 +212,6 @@ const extractFilename = (response) => {
   padding: 0 24px;
 }
 
-
 .upload-section {
   margin-bottom: 24px;
 }

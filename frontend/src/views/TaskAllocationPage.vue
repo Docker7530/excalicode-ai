@@ -384,7 +384,6 @@ watch(
   { immediate: true },
 );
 
-
 const resetDrafts = () => {
   drafts.value = [];
   batchForm.title = '';
