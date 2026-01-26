@@ -1,34 +1,6 @@
 <template>
   <div class="system-setting-manage-page">
     <section class="page-body">
-      <header class="page-heading">
-        <div class="heading-left">
-          <h2 class="page-title">系统设置</h2>
-          <ElText type="info" size="small">仅维护配置 key / value</ElText>
-        </div>
-        <div class="heading-actions">
-          <ElButton
-            plain
-            :icon="RefreshRight"
-            :loading="loading"
-            @click="loadSettings"
-          >
-            刷新
-          </ElButton>
-          <ElButton type="primary" :icon="Plus" @click="openCreateDialog">
-            新增
-          </ElButton>
-        </div>
-      </header>
-
-      <ElAlert
-        type="info"
-        :closable="false"
-        class="quick-hint"
-        show-icon
-        title="首页『使用技巧』内容可用 key=home.usageTips 配置"
-      />
-
       <ElCard shadow="never" class="list-card">
         <div class="list-toolbar">
           <ElInput
@@ -132,13 +104,8 @@ import {
   listAdminSettings,
   upsertAdminSetting,
 } from '@/api/sysSetting.js';
-import {
-  Delete,
-  Edit,
-  Plus,
-  RefreshRight,
-  Search,
-} from '@element-plus/icons-vue';
+import { useMenuBar } from '@/composables/useMenuBar';
+import { Delete, Edit, Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { computed, onMounted, reactive, ref } from 'vue';
 
@@ -146,6 +113,9 @@ const loading = ref(false);
 const saving = ref(false);
 const keyword = ref('');
 const settings = ref([]);
+
+// ==================== 顶部公共导航栏（模块功能区）接入 ====================
+const menuBar = useMenuBar();
 
 const dialogVisible = ref(false);
 const isEditing = ref(false);
@@ -242,6 +212,21 @@ const handleDelete = async (row) => {
 };
 
 onMounted(() => {
+  menuBar.setMenuItems([
+    {
+      id: 'sys-setting-refresh',
+      label: '刷新',
+      disabled: loading.value,
+      onSelect: () => loadSettings(),
+    },
+    {
+      id: 'sys-setting-create',
+      label: '新增',
+      onSelect: () => openCreateDialog(),
+    },
+  ]);
+  menuBar.setActiveMenuId('');
+
   loadSettings();
 });
 </script>
@@ -249,7 +234,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .system-setting-manage-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
+  background: #f5f6f7;
 }
 
 .page-body {
@@ -260,37 +245,6 @@ onMounted(() => {
   @media (max-width: 768px) {
     padding: 84px 16px 48px;
   }
-}
-
-.page-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.heading-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.6rem;
-  color: #0f172a;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.heading-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.quick-hint {
-  margin-bottom: 14px;
 }
 
 .list-card {
